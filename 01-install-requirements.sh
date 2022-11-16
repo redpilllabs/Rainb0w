@@ -9,15 +9,15 @@ if [[ $DISTRO =~ "Ubuntu" || $DISTRO =~ "Debian" ]]; then
     sudo apt upgrade -y
 
     # Install required packages
-    echo "${BGreen}### Installing required packages...\n  ${Color_Off}"
+    echo -e "${BGreen}### Installing required packages...\n  ${Color_Off}"
     sudo apt install -y ufw uuid openssl iptables fail2ban zram-tools linux-modules-extra-$(uname -r)
 
-    echo "${BGreen}### Enabling zram swap to optimize memory usage... \n  ${Color_Off}"
-    echo "ALGO=zstd" | sudo tee -a /etc/default/zramswap
-    echo "PERCENT=50" | sudo tee -a /etc/default/zramswap
+    echo -e "${BGreen}### Enabling zram swap to optimize memory usage... \n  ${Color_Off}"
+    echo -e "ALGO=zstd" | sudo tee -a /etc/default/zramswap
+    echo -e "PERCENT=50" | sudo tee -a /etc/default/zramswap
     sudo systemctl restart zramswap.service
 
-    echo "${BGreen}### Setting up ufw firewall... \n  ${Color_Off}"
+    echo -e "${BGreen}### Setting up ufw firewall... \n  ${Color_Off}"
     sudo ufw default deny incoming
     sudo ufw default allow outgoing
     sudo ufw allow ssh
@@ -30,7 +30,7 @@ if [[ $DISTRO =~ "Ubuntu" || $DISTRO =~ "Debian" ]]; then
     sudo ufw enable
     sudo ufw status verbose
 
-    echo "${BGreen}*** Finished! *** \n ${Color_Off}"
+    echo -e "${BGreen}*** Finished! *** \n ${Color_Off}"
 else
-    echo "This installer only supports Debian and Ubuntu OS!"
+    echo -e "${BRed}This installer only supports Debian and Ubuntu OS!${Color_Off}"
 fi
