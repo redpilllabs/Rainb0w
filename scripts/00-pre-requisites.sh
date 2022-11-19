@@ -12,8 +12,8 @@ fn_check_package_installed() {
 if [[ $DISTRO =~ "Ubuntu" || $DISTRO =~ "Debian" ]]; then
     fn_check_package_installed jq
     fn_check_package_installed libfribidi-bin
-    if [[ ! -f /usr/bin/yq ]]; then
-        sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&
-            sudo chmod +x /usr/bin/yq
-    fi
+    # if [[ ! -f /usr/bin/yq ]]; then
+    #     sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&
+    #         sudo chmod +x /usr/bin/yq
+    # fi
 fi
