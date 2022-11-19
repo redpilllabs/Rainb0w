@@ -24,6 +24,8 @@ function fn_install_requirements() {
         sudo ufw allow http
         sudo ufw allow https
         sudo ufw allow domain-s
+        sudo ufw allow 3478/tcp
+        sudo ufw allow 3478/udp
 
         echo -e "${On_IYellow}${BBlack}Enter ${BRed}'y'${On_IYellow}${BBlack} below to activate the firewall ↴ ${RESET}"
         sudo ufw enable
