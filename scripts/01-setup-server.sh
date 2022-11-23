@@ -77,7 +77,7 @@ function fn_install_requirements() {
         sudo docker run hello-world
 
         echo -e "${B_GREEN}*** Docker is now installed! *** \n ${RESET}"
-        newgrp docker
+        # newgrp docker
     else
         echo -e "${BRed}This installer only supports Debian and Ubuntu OS!${RESET}"
     fi
