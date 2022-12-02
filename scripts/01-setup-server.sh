@@ -20,12 +20,9 @@ function fn_install_requirements() {
         sudo ufw default deny incoming
         sudo ufw default allow outgoing
         sudo ufw allow ssh
-        sudo ufw allow 53
         sudo ufw allow http
         sudo ufw allow https
-        sudo ufw allow domain-s
-        sudo ufw allow 3478/tcp
-        sudo ufw allow 3478/udp
+        sudo ufw allow 554
 
         echo -e "${On_IYellow}${BBlack}Enter ${BRed}'y'${On_IYellow}${BBlack} below to activate the firewall ↴ ${RESET}"
         sudo ufw enable
