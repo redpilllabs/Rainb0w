@@ -28,12 +28,26 @@ function fn_install_requirements() {
         sudo ufw enable
         sudo ufw status verbose
 
-        echo -e "${B_GREEN}*** Preparing Docker Installation ***\n ${RESET}"
+        echo -e "${B_GREEN}### Hardening SSH against brute-force \n  ${RESET}"
+        sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+        fail2ban_contents="[sshd]
+            enabled = true
+            port = ssh
+            filter = sshd
+            logpath = /var/log/auth.log
+            maxretry = 5
+            findtime = 300
+            bantime = 3600
+            ignoreip = 127.0.0.1"
+        fail2ban_contents="${fail2ban_contents// /}"
+        echo -e "${fail2ban_contents}" | sudo tee /etc/fail2ban/jail.local >/dev/null
+        sudo systemctl restart fail2ban.service
 
-        echo -e "${B_GREEN}Removing any previous installations \n ${RESET}"
+        echo -e "${B_GREEN}*** Preparing Docker Installation ***\n ${RESET}"
+        echo -e "${GREEN}Removing any previous installations \n ${RESET}"
         sudo apt-get remove docker docker-engine docker.io containerd runc
 
-        echo -e "${B_GREEN}Installing Pre-requisites \n ${RESET}"
+        echo -e "${GREEN}Installing Pre-requisites \n ${RESET}"
         sudo apt-get update
         sudo apt-get install -y \
             ca-certificates \
@@ -43,7 +57,7 @@ function fn_install_requirements() {
             uidmap
 
         if [[ $DISTRO =~ "Ubuntu" ]]; then
-            echo -e "${B_GREEN}Setting up Docker repositories \n ${RESET}"
+            echo -e "${GREEN}Setting up Docker repositories \n ${RESET}"
             sudo mkdir -p /etc/apt/keyrings
             curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
             sudo chmod a+r /etc/apt/keyrings/docker.gpg
@@ -60,11 +74,11 @@ function fn_install_requirements() {
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
         fi
 
-        echo -e "${B_GREEN}Installing Docker from official repository \n ${RESET}"
+        echo -e "${GREEN}Installing Docker from official repository \n ${RESET}"
         sudo apt-get update
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-        echo -e "${B_GREEN}Enabling Rootless Docker Execution \n ${RESET}"
+        echo -e "${GREEN}Enabling Rootless Docker Execution \n ${RESET}"
         sudo usermod -aG docker $USER
         sudo systemctl daemon-reload
         sudo systemctl enable --now docker
