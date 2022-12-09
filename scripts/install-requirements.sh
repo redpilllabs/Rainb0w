@@ -9,7 +9,7 @@ function fn_install_requirements() {
 
         # Install required packages
         echo -e "${B_GREEN}### Installing required packages...\n  ${RESET}"
-        sudo apt install -y ufw uuid openssl iptables fail2ban zram-tools linux-modules-extra-$(uname -r)
+        sudo apt install -y ufw uuid openssl zip iptables fail2ban zram-tools linux-modules-extra-$(uname -r)
 
         echo -e "${B_GREEN}### Enabling zram swap to optimize memory usage... \n  ${RESET}"
         echo -e "ALGO=zstd" | sudo tee -a /etc/default/zramswap
