@@ -40,7 +40,7 @@ function fn_setup_firewall() {
     sudo ufw allow https
     sudo ufw allow 554
 
-    echo -e "${On_IYellow}${BBlack}Enter ${BRed}'y'${On_IYellow}${BBlack} below to activate the firewall ↴ ${RESET}"
+    echo -e "${IBG_YELLOW}${B_BLACK}Enter ${B_RED}'y'${IBG_YELLOW}${B_BLACK} below to activate the firewall ↴ ${RESET}"
     sudo ufw enable
     sudo ufw status verbose
 }
