@@ -1,38 +1,27 @@
 #!/bin/bash
 
-function fn_install_required_packages() {
+function fn_upgrade_os() {
     # Update OS
-    echo -e " ${B_GREEN} ### Updating the repository cache... \n ${RESET}"
+    echo -e " ${B_GREEN} ### Updating the operating system \n ${RESET}"
     sudo apt update
     sudo apt upgrade -y
-
-    # Install required packages
-    echo -e "${B_GREEN}### Installing required packages...\n  ${RESET}"
-    sudo apt install -y \
-        ufw \
-        uuid \
-        openssl \
-        zip \
-        iptables \
-        fail2ban \
-        zram-tools \
-        linux-modules-extra-$(uname -r) \
-        ca-certificates \
-        curl \
-        gnupg \
-        lsb-release \
-        uidmap
 }
 
 function fn_setup_zram() {
-    echo -e "${B_GREEN}### Enabling zram swap to optimize memory usage... \n  ${RESET}"
-    echo -e "ALGO=zstd" | sudo tee -a /etc/default/zramswap
-    echo -e "PERCENT=50" | sudo tee -a /etc/default/zramswap
+    echo -e "${B_GREEN}### Installing required packages for ZRam swap \n  ${RESET}"
+    sudo apt install -y zram-tools linux-modules-extra-$(uname -r)
+
+    echo -e "${B_GREEN}### Enabling zram swap to optimize memory usage \n  ${RESET}"
+    echo "ALGO=zstd" | sudo tee -a /etc/default/zramswap
+    echo "PERCENT=50" | sudo tee -a /etc/default/zramswap
     sudo systemctl restart zramswap.service
 }
 
 function fn_setup_firewall() {
-    echo -e "${B_GREEN}### Setting up ufw firewall... \n  ${RESET}"
+    echo -e "${B_GREEN}### Installing ufw firewall \n  ${RESET}"
+    sudo apt install -y ufw
+
+    echo -e "${B_GREEN}### Setting up ufw firewall \n  ${RESET}"
     sudo ufw default deny incoming
     sudo ufw default allow outgoing
     sudo ufw allow ssh
@@ -45,7 +34,57 @@ function fn_setup_firewall() {
     sudo ufw status verbose
 }
 
+function fn_block_outbound_connections_to_iran() {
+    echo -e "${B_GREEN}### Installing required packages for GeoIP blocking \n  ${RESET}"
+    sudo apt install -y \
+        xtables-addons-dkms \
+        xtables-addons-common \
+        libtext-csv-xs-perl \
+        libmoosex-types-netaddr-ip-perl \
+        pkg-config \
+        iptables-persistent \
+        lsb-release \
+        gzip \
+        wget
+
+    # Download the latest GeoIP database
+    MON=$(date +"%m")
+    YR=$(date +"%Y")
+    sudo mkdir /usr/share/xt_geoip
+    sudo wget "https://download.db-ip.com/free/dbip-country-lite-${YR}-${MON}.csv.gz" -O /usr/share/xt_geoip/dbip-country-lite.csv.gz
+    sudo gunzip /usr/share/xt_geoip/dbip-country-lite.csv.gz
+
+    # Convert CSV database to binary format for xt_geoip
+    DISTRO_VERSION=$(lsb_release -sr)
+    if [[ "$DISTRO" =~ "Ubuntu" ]]; then
+        if (($(echo "$DISTRO_VERSION == 20.04" | bc -l))); then
+            sudo /usr/lib/xtables-addons/xt_geoip_build -D /usr/share/xt_geoip/ -S /usr/share/xt_geoip/
+        elif (($(echo "$DISTRO_VERSION == 22.04" | bc -l))); then
+            sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite.csv.gz
+        fi
+    elif [[ "$DISTRO" =~ "Debian" ]]; then
+        if (($(echo "$DISTRO_VERSION == 11" | bc -l))); then
+            sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite.csv.gz
+        fi
+    fi
+
+    # Load xt_geoip kernel module
+    modprobe xt_geoip
+    lsmod | grep ^xt_geoip
+
+    # Block outgoing connections to Iran
+    sudo iptables -A OUTPUT -m geoip --dst-cc IR -j DROP
+
+    # Save and cleanup
+    sudo iptables-save | sudo tee /etc/iptables/rules.v4
+    sudo ip6tables-save | sudo tee /etc/iptables/rules.v6
+    sudo rm /usr/share/xt_geoip/dbip-country-lite.csv
+}
+
 function fn_harden_ssh_security() {
+    echo -e "${B_GREEN}### Installing fail2ban \n  ${RESET}"
+    sudo apt install -y fail2ban
+
     echo -e "${B_GREEN}### Hardening SSH against brute-force \n  ${RESET}"
     sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
     fail2ban_contents="[sshd]
@@ -63,6 +102,19 @@ function fn_harden_ssh_security() {
 }
 
 function fn_install_docker() {
+    # Update OS
+    echo -e " ${B_GREEN} ### Updating the repository cache \n ${RESET}"
+    sudo apt update
+    sudo apt upgrade -y
+
+    echo -e "${B_GREEN}### Installing required packages for Docker \n  ${RESET}"
+    sudo apt install -y \
+        openssl \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release
+
     if [[ $DISTRO =~ "Ubuntu" ]]; then
         echo -e "${GREEN}Setting up Docker repositories \n ${RESET}"
         sudo mkdir -p /etc/apt/keyrings
