@@ -3,6 +3,7 @@
 VERSION="1.0"
 # Platform
 DISTRO="$(awk -F= '/^NAME/{print $2}' /etc/os-release)"
+DISTRO_VERSION=$(echo "$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)" | tr -d '"')
 
 # Path
 DOCKER_DST_DIR=$HOME/Docker
@@ -10,6 +11,7 @@ DOCKER_SRC_DIR=/tmp/0xLem0nade/Docker
 
 ### Server ###
 DOMAIN=""
+#TODO: Remove the need for email for privacy reasons!
 EFF_EMAIL=""
 SNI_ARR=()
 # Xray proxies
