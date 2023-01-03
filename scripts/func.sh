@@ -524,9 +524,12 @@ function fn_configure_xray() {
     fi
 }
 
+function fn_configure_mtproto_users() {
+    sed -i -e "s/\<TG_SECRET\>/$TG_SECRET/" $1
+}
+
 function fn_configure_mtproto() {
     # This is a TOML file so we revert to sed
-    sed -i -e "s/\<TG_SECRET\>/$TG_SECRET/" $1
     sed -i -e "s/\<MTPROTO_SUBDOMAIN\>/$MTPROTO_SUBDOMAIN/g" $1
     # Edit Caddy config.json
     caddy_entry="{
