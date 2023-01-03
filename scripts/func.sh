@@ -278,7 +278,7 @@ function fn_xray_add_trojan_h2() {
             \"streamSettings\": {
                 \"network\": \"http\",
                 \"httpSettings\": {
-                    \"path\": \"/cloudfront\",
+                    \"path\": \"/${TROJAN_H2_PATH}\",
                     \"host\": [
                         \"${TROJAN_H2_SUBDOMAIN}\"
                     ]
@@ -400,7 +400,10 @@ function fn_xray_add_trojan_ws() {
             \"streamSettings\": {
                 \"network\": \"ws\",
                 \"wsSettings\": {
-                    \"path\": \"/${TROJAN_WS_PATH}\"
+                    \"path\": \"/${TROJAN_WS_PATH}\",
+                    \"host\": [
+                        \"${TROJAN_WS_SUBDOMAIN}\"
+                    ]
                 },
                 \"security\": \"tls\",
                 \"tlsSettings\": {
@@ -461,7 +464,10 @@ function fn_xray_add_vmess_ws() {
             \"streamSettings\": {
                 \"network\": \"ws\",
                 \"wsSettings\": {
-                    \"path\": \"/${VMESS_WS_PATH}\"
+                    \"path\": \"/${VMESS_WS_PATH}\",
+                    \"host\": [
+                        \"${VMESS_WS_SUBDOMAIN}\"
+                    ]
                 },
                 \"security\": \"tls\",
                 \"tlsSettings\": {
