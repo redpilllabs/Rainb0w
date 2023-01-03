@@ -27,7 +27,7 @@ function fn_setup_firewall() {
     sudo ufw allow ssh
     sudo ufw allow http
     sudo ufw allow https
-    sudo ufw allow 554
+    sudo ufw allow 554/udp
 
     echo -e "${IBG_YELLOW}${B_BLACK}Enter ${B_RED}'y'${IBG_YELLOW}${B_BLACK} below to activate the firewall ↴ ${RESET}"
     sudo ufw enable
