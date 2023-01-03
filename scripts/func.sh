@@ -624,14 +624,11 @@ function fn_start_proxies() {
     if [ $? -eq 0 ]; then
         if [ -v "${DOMAIN}" ]; then
             fn_cleanup_source_dir
-            fn_configure_xray "${DOCKER_SRC_DIR}/xray/etc/xray.json"
-            for file in $DOCKER_SRC_DIR/xray/client/*; do
-                fn_configure_xray "$file"
-            done
+            fn_configure_xray "${DOCKER_SRC_DIR}/xray/etc/xray.json" "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
+            fn_configure_mtproto "${DOCKER_SRC_DIR}/mtproto/config/config.toml" "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
+            fn_configure_mtproto_users "${DOCKER_SRC_DIR}/mtproto/config/users.toml"
             fn_configure_hysteria "${DOCKER_SRC_DIR}/hysteria/etc/hysteria.json"
             fn_configure_hysteria "${DOCKER_SRC_DIR}/hysteria/client/hysteria.json"
-            fn_configure_mtproto "${DOCKER_SRC_DIR}/mtproto/config/config.toml"
-            fn_configure_mtproto "${DOCKER_SRC_DIR}/mtproto/config/users.toml"
             fn_configure_caddy "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
             fn_cleanup_destination_dir
             fn_setup_docker
