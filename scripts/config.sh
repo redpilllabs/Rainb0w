@@ -9,10 +9,8 @@ DISTRO_VERSION=$(echo "$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)" | t
 DOCKER_DST_DIR=$HOME/Docker
 DOCKER_SRC_DIR=/tmp/0xLem0nade/Docker
 
-### Server ###
+### Domains ###
 DOMAIN=""
-#TODO: Remove the need for email for privacy reasons!
-EFF_EMAIL=""
 SNI_ARR=()
 # Xray proxies
 XTLS_UUID=$(uuid)

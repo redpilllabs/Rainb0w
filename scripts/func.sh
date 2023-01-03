@@ -179,23 +179,6 @@ function fn_prompt_domain() {
     done
 }
 
-function fn_prompt_email() {
-    echo ""
-    while true; do
-        TLS_EMAIL=""
-        while [[ $TLS_EMAIL = "" ]]; do
-            read -r -p "Enter an email address for TLS certificate's account registration: " TLS_EMAIL
-        done
-        read -p "$(echo -e "Do you confirm ${YELLOW}\"${TLS_EMAIL}\"${RESET}? (Y/n): ")" confirm
-        if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
-            break
-        else
-            echo -e "Okay! Let's try that again..."
-            continue
-        fi
-    done
-}
-
 function fn_prompt_subdomain() {
     echo ""
     local -n input=$2 # Pass var by reference
@@ -586,8 +569,7 @@ function fn_configure_caddy() {
     tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${DOMAIN}\"]" $1)
     tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${DOMAIN}\"]" <<<"$tmp_caddy")
     tmp_caddy=$(jq ".apps.http.servers.web.routes[0].match[0].host += [\"${DOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${DOMAIN}\"]" <<<"$tmp_caddy")
-    jq "( .apps.tls.automation.policies[0].issuers[]).email |= \"${EFF_EMAIL}\"" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $1
+    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${DOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
 function fn_setup_docker() {

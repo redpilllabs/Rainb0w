@@ -48,7 +48,6 @@ Entries with * are required!
 ${IBG_YELLOW}${BI_BLACK}BLANK ENTRIES WILL BE IGNORED.${RESET}
 
 ${GREEN}1)*${RESET} Main domain:        ${CYAN}${DOMAIN}${RESET}
-${GREEN}2)*${RESET} EFF certs email:    ${CYAN}${EFF_EMAIL}${RESET}
 ${GREEN}3)${RESET} VLESS XTLS:          ${CYAN}${XTLS_SUBDOMAIN}${RESET}
 ${GREEN}4)${RESET} Trojan HTTP2:        ${CYAN}${TROJAN_H2_SUBDOMAIN}${RESET}
 ${GREEN}5)${RESET} Trojan gRPC:         ${CYAN}${TROJAN_GRPC_SUBDOMAIN}${RESET}
