@@ -62,7 +62,7 @@ function fn_block_outbound_connections_to_iran() {
         elif (($(echo "$DISTRO_VERSION == 22.04" | bc -l))); then
             sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite.csv.gz
         fi
-    elif [[ "$DISTRO" =~ "Debian" ]]; then
+    elif [[ "$DISTRO" =~ "Debian GNU/Linux" ]]; then
         if (($(echo "$DISTRO_VERSION == 11" | bc -l))); then
             sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite.csv.gz
         fi
@@ -125,7 +125,7 @@ function fn_install_docker() {
         echo -e \
             "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-    elif [[ $DISTRO =~ "Debian" ]]; then
+    elif [[ $DISTRO =~ "Debian GNU/Linux" ]]; then
         sudo mkdir -p /etc/apt/keyrings
         curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
         echo -e \
