@@ -652,13 +652,30 @@ function fn_start_proxies() {
 
 function fn_get_client_configs() {
     if [ -v "${DOMAIN}" ]; then
-        mkdir -p /tmp/clients/xray
-        mkdir /tmp/clients/hysteria
-        mkdir /tmp/clients/mtproto
-        cp -r $DOCKER_SRC_DIR/xray/client/* /tmp/clients/xray/
-        cp $DOCKER_SRC_DIR/hysteria/client/hysteria.json /tmp/clients/hysteria/hysteria.json
-        cp $DOCKER_SRC_DIR/mtproto/client/share_urls.txt /tmp/clients/mtproto/share_urls.txt
-        zip -r $HOME/proxy-clients.zip /tmp/clients/*
+        mkdir -p $DOCKER_DST_DIR/xray/client
+        touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        if [ -v "${XTLS_SUBDOMAIN}" ]; then
+            echo -e "vless://${XTLS_UUID}@${XTLS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=${XTLS_SUBDOMAIN}#0xLem0nade+XTLS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        fi
+        if [ -v "${TROJAN_H2_SUBDOMAIN}" ]; then
+            echo -e "trojan://${TROJAN_H2_PASSWORD}@${TROJAN_H2_SUBDOMAIN}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_H2_SUBDOMAIN}&type=http&sni=${TROJAN_H2_SUBDOMAIN}#0xLem0nade+Trojan+H2" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        fi
+        if [ -v "${TROJAN_GRPC_SUBDOMAIN}" ]; then
+            echo -e "trojan://${TROJAN_GRPC_PASSWORD}@${TROJAN_GRPC_SUBDOMAIN}:443?mode=gun&security=tls&alpn=h2,http/1.1&type=grpc&serviceName=${TROJAN_GRPC_SERVICENAME}&sni=${TROJAN_GRPC_SUBDOMAIN}#0xLem0nade+Trojan+gRPC" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        fi
+        if [ -v "${TROJAN_WS_SUBDOMAIN}" ]; then
+            echo -e "trojan://${TROJAN_WS_PASSWORD}@${TROJAN_WS_SUBDOMAIN}:443?path=${TROJAN_WS_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_WS_SUBDOMAIN}&type=ws&sni=${TROJAN_WS_SUBDOMAIN}#0xLem0nade+Trojan+WS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        fi
+        if [ -v "${VMESS_WS_SUBDOMAIN}" ]; then
+            vmess_config="{\"add\":\"${VMESS_WS_SUBDOMAIN}\",\"aid\":\"0\",\"alpn\":\"h2,http/1.1\",\"host\":\"${VMESS_WS_SUBDOMAIN}\",\"id\":\"${VMESS_WS_UUID}\",\"net\":\"ws\",\"path\":\"${VMESS_WS_PATH}\",\"port\":\"443\",\"ps\":\"Vmess\",\"scy\":\"none\",\"sni\":\"${VMESS_WS_SUBDOMAIN}\",\"tls\":\"tls\",\"type\":\"\",\"v\":\"2\"}"
+            vmess_config=$(echo $vmess_config | base64 | tr -d '\n')
+            echo -e "vmess://${vmess_config}" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        fi
+        mkdir -p $DOCKER_DST_DIR/clients
+        cp $DOCKER_DST_DIR/xray/client/xray_share_urls.txt $DOCKER_DST_DIR/clients/xray_share_urls.txt
+        cp $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/clients/hysteria.json
+        cp $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/clients/telegram_share_urls.txt
+        zip -r $HOME/proxy-clients.zip $DOCKER_DST_DIR/clients/*
         echo -e "${GREEN}Finished! You can now download client config files 'proxy-clients.zip' inside HOME directory. ${RESET}"
     else
         echo -e "${B_RED}ERROR: You have to first configure the proxy settings (option 2 in the menu)!${RESET}"
