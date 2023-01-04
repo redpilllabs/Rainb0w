@@ -697,12 +697,28 @@ function fn_get_client_configs() {
             vmess_config=$(echo $vmess_config | base64 | tr -d '\n')
             echo -e "vmess://${vmess_config}" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         fi
+        # Print share URLs
+        echo -e "${GREEN}########################################"
+        echo -e "#           Xray/v2ray Proxies         #"
+        echo -e "########################################${RESET}"
+        cat $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "${GREEN}########################################"
+        echo -e "#           Telegram Proxies           #"
+        echo -e "########################################${RESET}"
+        cat $DOCKER_DST_DIR/mtproto/client/share_urls.txt
+        echo -e "${GREEN}########################################"
+        echo -e "#           Hysteria config            #"
+        echo -e "########################################${RESET}"
+        cat $DOCKER_DST_DIR/hysteria/client/hysteria.json
+        # Create and notify about HOME/proxy-clients.zip
         mkdir -p $DOCKER_DST_DIR/clients
         cp $DOCKER_DST_DIR/xray/client/xray_share_urls.txt $DOCKER_DST_DIR/clients/xray_share_urls.txt
         cp $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/clients/hysteria.json
         cp $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/clients/telegram_share_urls.txt
         zip -r $HOME/proxy-clients.zip $DOCKER_DST_DIR/clients/*
-        echo -e "${GREEN}Finished! You can now download client config files 'proxy-clients.zip' inside HOME directory. ${RESET}"
+        echo -e "${GREEN}You can also find these urls and configs inside HOME/proxy-clients.zip ${RESET}"
+        echo -e "${GREEN}To download, run this command: ${RESET}"
+        echo -e "scp ${USER}@${PUBLIC_IP}:~/proxy-clients.zip ~/Downloads/proxy-clients.zip"
     else
         echo -e "${B_RED}ERROR: You have to first configure the proxy settings (option 2 in the menu)!${RESET}"
     fi
