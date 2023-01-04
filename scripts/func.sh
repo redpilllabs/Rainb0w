@@ -642,13 +642,13 @@ function fn_cleanup_destination_dir() {
     if [ -d $DOCKER_DST_DIR ]; then
         rm -rf $DOCKER_DST_DIR
         mkdir -p $DOCKER_DST_DIR
-        cp -r $DOCKER_SRC_DIR/* $DOCKER_SRC_DIR
+        cp -r $DOCKER_SRC_DIR/* $DOCKER_DST_DIR
         if [ $DNS_FILTERING = false ]; then
             rm -rf $DOCKER_DST_DIR/blocky
         fi
     else
         mkdir -p $DOCKER_DST_DIR
-        cp -r $DOCKER_SRC_DIR/* $DOCKER_SRC_DIR
+        cp -r $DOCKER_SRC_DIR/* $DOCKER_DST_DIR
         if [ $DNS_FILTERING = false ]; then
             rm -rf $DOCKER_DST_DIR/blocky
         fi
