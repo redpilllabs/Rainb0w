@@ -90,6 +90,17 @@ function fn_block_outbound_connections_to_iran() {
     sudo iptables-save | sudo tee /etc/iptables/rules.v4
     sudo ip6tables-save | sudo tee /etc/iptables/rules.v6
     sudo rm /usr/share/xt_geoip/dbip-country-lite.csv
+
+    echo -e "${B_GREEN}### Disabling local DNSStubListener \n  ${RESET}"
+    sudo mkdir -p /etc/systemd/resolved.conf.d
+    sudo touch /etc/systemd/resolved.conf.d/nostublistener.conf
+    nostublistener="[Resolve]\n
+    DNS=127.0.0.1\n
+    DNSStubListener=no"
+    nostublistener="${nostublistener// /}"
+    echo -e $nostublistener | awk '{$1=$1};1' | sudo tee /etc/systemd/resolved.conf.d/nostublistener.conf >/dev/null
+    sudo systemctl reload-or-restart systemd-resolved
+    DNS_FILTERING=true
 }
 
 function fn_harden_ssh_security() {
@@ -601,8 +612,14 @@ function fn_spinup_docker_containers() {
     echo -e "${CYAN}Waiting 10 seconds for TLS certificates to fully download..."
     sleep 10
     echo -e "${GREEN}Spinning up proxy Docker container${RESET}"
+    if [ $DNS_FILTERING = true ]; then
+        sudo docker compose -f $DOCKER_DST_DIR/blocky/docker-compose.yml up -d
+        sleep 1
+    fi
     sudo docker compose -f $DOCKER_DST_DIR/xray/docker-compose.yml up -d
+    sleep 1
     sudo docker compose -f $DOCKER_DST_DIR/hysteria/docker-compose.yml up -d
+    sleep 1
     sudo docker compose -f $DOCKER_DST_DIR/mtproto/docker-compose.yml up -d
 }
 
@@ -628,9 +645,15 @@ function fn_cleanup_destination_dir() {
         rm -rf $DOCKER_DST_DIR
         mkdir -p $DOCKER_DST_DIR
         cp -r $DOCKER_SRC_DIR/* $DOCKER_SRC_DIR
+        if [ $DNS_FILTERING = false ]; then
+            rm -rf $DOCKER_DST_DIR/blocky
+        fi
     else
         mkdir -p $DOCKER_DST_DIR
         cp -r $DOCKER_SRC_DIR/* $DOCKER_SRC_DIR
+        if [ $DNS_FILTERING = false ]; then
+            rm -rf $DOCKER_DST_DIR/blocky
+        fi
     fi
 }
 

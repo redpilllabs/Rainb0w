@@ -33,3 +33,5 @@ HYSTERIA_SUBDOMAIN=""
 # Telegram proxy
 TG_SECRET=$(head -c 16 /dev/urandom | xxd -ps)
 MTPROTO_SUBDOMAIN=""
+# DNS filtering
+DNS_FILTERING=false
