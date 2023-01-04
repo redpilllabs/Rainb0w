@@ -19,7 +19,7 @@ else
             echo "Your version of Ubuntu is not supported! Minimum required version is 20.04"
             exit 0
         fi
-    elif [[ "$DISTRO" =~ "Debian" ]]; then
+    elif [[ "$DISTRO" =~ "Debian GNU/Linux" ]]; then
         if (($(echo "$DISTRO_VERSION < 11" | bc -l))); then
             echo "Your version of Debian is not supported! Minimum required version is 11"
             exit 0
