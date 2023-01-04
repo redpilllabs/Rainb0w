@@ -658,7 +658,6 @@ function fn_start_proxies() {
 
 function fn_get_client_configs() {
     if [ -v "${DOMAIN}" ]; then
-        mkdir -p $DOCKER_DST_DIR/xray/client
         touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         if [ -v "${XTLS_SUBDOMAIN}" ]; then
             echo -e "vless://${XTLS_UUID}@${XTLS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=${XTLS_SUBDOMAIN}#0xLem0nade+XTLS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
