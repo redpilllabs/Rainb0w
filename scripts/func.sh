@@ -574,6 +574,12 @@ function fn_configure_hysteria() {
     jq ".key = \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${HYSTERIA_SUBDOMAIN}/${HYSTERIA_SUBDOMAIN}.key\"" <<<"$tmp_hysteria" >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
+function fn_configure_hysteria_client() {
+    tmp_hysteria=$(jq ".obfs = \"${HYSTERIA_PASSWORD}\"" $1)
+    tmp_hysteria=$(jq ".server = \"${HYSTERIA_SUBDOMAIN}:554\"" <<<"$tmp_hysteria")
+    jq ".server_name = \"${HYSTERIA_SUBDOMAIN}\"" <<<"$tmp_hysteria" >/tmp/tmp.json && mv /tmp/tmp.json $1
+}
+
 function fn_configure_caddy() {
     tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${DOMAIN}\"]" $1)
     tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${DOMAIN}\"]" <<<"$tmp_caddy")
@@ -637,7 +643,7 @@ function fn_start_proxies() {
             fn_configure_mtproto "${DOCKER_SRC_DIR}/mtproto/config/config.toml" "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
             fn_configure_mtproto_users "${DOCKER_SRC_DIR}/mtproto/config/users.toml"
             fn_configure_hysteria "${DOCKER_SRC_DIR}/hysteria/etc/hysteria.json"
-            fn_configure_hysteria "${DOCKER_SRC_DIR}/hysteria/client/hysteria.json"
+            fn_configure_hysteria_client "${DOCKER_SRC_DIR}/hysteria/client/hysteria.json"
             fn_configure_caddy "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
             fn_cleanup_destination_dir
             fn_setup_docker
