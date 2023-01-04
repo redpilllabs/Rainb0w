@@ -9,10 +9,10 @@ function fn_upgrade_os() {
 
 function fn_tune_system() {
     echo -e "${B_GREEN}### Tuning system network stack for best performance${RESET}"
-    echo "net.core.rmem_max=4000000" | tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
-    echo "net.ipv4.tcp_congestion_control=bbr" | tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
-    echo "net.core.default_qdisc=fq" | tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
-    echo "net.ipv4.tcp_slow_start_after_idle=0" | tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
+    echo "net.core.rmem_max=4000000" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
+    echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
+    echo "net.core.default_qdisc=fq" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
+    echo "net.ipv4.tcp_slow_start_after_idle=0" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
     sudo sysctl -p /etc/sysctl.d/99-sysctl.conf
     echo -e "${B_GREEN}Done!${RESET}"
     sleep 1
