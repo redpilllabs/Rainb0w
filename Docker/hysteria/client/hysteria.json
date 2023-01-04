@@ -1,0 +1,18 @@
+{
+    "server": "HYSTERIA_SUBDOMAIN:554",
+    "server_name": "HYSTERIA_SUBDOMAIN.gq",
+    "protocol": "udp",
+    "obfs": "HYSTERIA_PASSWORD",
+    "up_mbps": 1,
+    "down_mbps": 16,
+    "retry": 10,
+    "retry_interval": 5,
+    "idle_timeout": 10,
+    "alpn": "h3",
+    "socks5": {
+        "listen": "127.0.0.1:1080"
+    },
+    "http": {
+        "listen": "127.0.0.1:3128"
+    }
+}

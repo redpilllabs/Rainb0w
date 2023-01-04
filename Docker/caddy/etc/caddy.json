@@ -1,0 +1,115 @@
+{
+    "logging": {
+        "logs": {
+            "default": {
+                "writer": {
+                    "filename": "/var/log/caddy.log",
+                    "output": "file",
+                    "roll_keep_days": 3,
+                    "roll_size_mb": 10
+                },
+                "level": "DEBUG"
+            }
+        }
+    },
+    "apps": {
+        "layer4": {
+            "servers": {
+                "tls_proxy": {
+                    "listen": [
+                        ":443"
+                    ],
+                    "routes": []
+                }
+            }
+        },
+        "http": {
+            "servers": {
+                "web": {
+                    "listen": [
+                        ":443"
+                    ],
+                    "routes": [
+                        {
+                            "match": [
+                                {
+                                    "host": []
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "subroute",
+                                    "routes": [
+                                        {
+                                            "handle": [
+                                                {
+                                                    "handler": "subroute",
+                                                    "routes": [
+                                                        {
+                                                            "match": [
+                                                                {
+                                                                    "path": [
+                                                                        "/"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "handle": [
+                                                                {
+                                                                    "handler": "file_server",
+                                                                    "hide": [
+                                                                        "./Caddyfile"
+                                                                    ],
+                                                                    "root": "/srv"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "terminal": true
+                        }
+                    ],
+                    "tls_connection_policies": [
+                        {
+                            "match": {
+                                "sni": []
+                            },
+                            "cipher_suites": [
+                                "TLS_CHACHA20_POLY1305_SHA256",
+                                "TLS_AES_128_GCM_SHA256",
+                                "TLS_AES_256_GCM_SHA384"
+                            ],
+                            "protocol_min": "tls1.3"
+                        }
+                    ]
+                }
+            }
+        },
+        "tls": {
+            "certificates": {
+                "automate": []
+            },
+            "automation": {
+                "policies": [
+                    {
+                        "subjects": [],
+                        "issuers": [
+                            {
+                                "module": "acme"
+                            },
+                            {
+                                "module": "zerossl"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  caddy:
+    image: 0xlem0nade/caddy:latest
+    restart: always
+    container_name: caddy
+    cap_add:
+      - CAP_NET_BIND_SERVICE
+    networks:
+      - caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - $HOME/Docker/caddy/www:/srv
+      - /var/log:/var/log
+      - data:/data
+      - config:/config
+      - sockets:/dev/shm
+      - $HOME/Docker/caddy/etc/caddy.json:/etc/caddy/config.json
+    command: caddy run --config /etc/caddy/config.json
+
+volumes:
+  data:
+  config:
+  sockets:
+    external: true
+
+networks:
+  caddy:
+    external: true

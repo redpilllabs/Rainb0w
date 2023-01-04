@@ -1,0 +1,20 @@
+[[users]]
+# name -> secret (32 hex chars)
+name = "tg"
+secret = "TG_SECRET"
+### Advanced options, comment out if not needed!
+# User tcp connection limits, the mapping from name to the integer limit,
+# one client can create many tcp connections, up to 8
+#max_tcp_conns = 0
+# Expiration date for users in format of day/month/year
+#expiration_date = "30/5/2023"
+# Total data quota (send+receive) for each user in bytes
+#data_quota = 1073741824 # 1GB
+
+# Another user
+# [[users]]
+# name = "family"
+# secret = "00000000000000000000000000000001"
+# max_tcp_conns = 8
+# expiration_date = "30/5/2023"
+# data_quota = 1073741824 # 1GB

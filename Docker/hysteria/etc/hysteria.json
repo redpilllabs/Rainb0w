@@ -1,0 +1,8 @@
+{
+    "listen": ":554",
+    "protocol": "udp",
+    "cert": "PATH/TO/CERT.CERT",
+    "key": "PATH/TO/KEY.KEY",
+    "obfs": "HYSTERIA_PASSWORD",
+    "alpn": "h3"
+}
