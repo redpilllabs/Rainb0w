@@ -10,7 +10,7 @@ DOCKER_DST_DIR=$HOME/Docker
 DOCKER_SRC_DIR=/tmp/0xLem0nade/Docker
 
 ### Domains ###
-PUBLIC_IP=$(curl icanhazip.com)
+PUBLIC_IP=$(curl -s icanhazip.com)
 DOMAIN=""
 SNI_ARR=()
 # Xray proxies
