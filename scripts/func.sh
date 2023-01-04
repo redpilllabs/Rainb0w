@@ -600,8 +600,6 @@ function fn_configure_caddy() {
 
 function fn_setup_docker() {
     echo -e "${GREEN}Creating Docker volumes and networks ${RESET}"
-    sudo docker volume create caddy_data
-    sudo docker volume create caddy_config
     sudo docker volume create sockets
     sudo docker network create caddy
 }
