@@ -660,7 +660,7 @@ function fn_get_client_configs() {
     if [ -v "${DOMAIN}" ]; then
         touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         if [ -v "${XTLS_SUBDOMAIN}" ]; then
-            echo -e "vless://${XTLS_UUID}@${XTLS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=${XTLS_SUBDOMAIN}#0xLem0nade+XTLS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+            echo -e "vless://${XTLS_UUID}@${XTLS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${XTLS_SUBDOMAIN}#0xLem0nade+XTLS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         fi
         if [ -v "${TROJAN_H2_SUBDOMAIN}" ]; then
             echo -e "trojan://${TROJAN_H2_PASSWORD}@${TROJAN_H2_SUBDOMAIN}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_H2_SUBDOMAIN}&type=http&sni=${TROJAN_H2_SUBDOMAIN}#0xLem0nade+Trojan+H2" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
