@@ -132,6 +132,8 @@ Choose an option: "
 
 function fn_setup_server_submenu() {
     echo -ne "
+Choose from options below to proceed:
+
 ${GREEN}1)${RESET} Update packages
 ${GREEN}2)${RESET} Install Docker
 ${GREEN}3)${RESET} Setup Firewall           ${MAGENTA}[Security]${RESET}
@@ -192,6 +194,8 @@ Choose an option: "
 
 function mainmenu() {
     echo -ne "
+Choose from options below to proceed:
+
 ${GREEN}1)${RESET} Setup Server
 ${GREEN}2)${RESET} Configure Proxies
 ${GREEN}3)${RESET} Start Proxies
