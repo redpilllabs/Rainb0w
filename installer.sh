@@ -27,11 +27,25 @@ else
     fi
 fi
 
-echo -e "${B_RED}\n*** Make sure you have gone through the README over the GitHub repo before proceeding! ***${RESET}"
-echo -e "NOTE: You will need the following requirements before proceeding:"
-echo -e "1) A free Cloudflare account"
-echo -e "2) A free/paid domain name added to your Cloudflare account"
-echo -e "3) Subdomains created for each proxy destination"
+# Header
+echo -e "####################################################################"
+echo -e "#                                                                  #"
+echo -e "#                                                                  #"
+echo -e "#                Dockerized Proxy Installer                        #"
+echo -e "#                      Version: ${VERSION}                                #"
+echo -e "#                      Author: 0xLem0nade                          #"
+echo -e "#                  Twitter: twitter.com/0xLem0nade                 #"
+echo -e "#                  Telegram Channel: t.me/Lem0net                  #"
+echo -e "#               Telegram Group: t.me/Lem0netDiscussion             #"
+echo -e "#                                                                  #"
+echo -e "#                                                                  #"
+echo -e "####################################################################"
+echo ""
+echo -e "${B_RED}\n*** Make sure you have gone through the README over the GitHub repo before proceeding! ***\n${RESET}"
+echo -e "${YELLOW}NOTE: You will need the following requirements before proceeding:${RESET}"
+echo -e "${CYAN}- A free Cloudflare account"
+echo -e "- A free/paid domain name added to your Cloudflare account"
+echo -e "- Subdomains created for each proxy destination \n${RESET}"
 
 function fn_exit() {
     echo "Quitting!"
