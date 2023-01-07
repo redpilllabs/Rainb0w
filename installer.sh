@@ -61,7 +61,7 @@ Choose any option to add or edit the entry,
 Entries with * are required!
 ${IBG_YELLOW}${BI_BLACK}BLANK ENTRIES WILL BE IGNORED.${RESET}
 
-${GREEN}1)*${RESET} Main domain:        ${CYAN}${DOMAIN}${RESET}
+${GREEN}1)*${RESET} Website/Blog domain:        ${CYAN}${DOMAIN}${RESET}
 ${GREEN}3)${RESET} VLESS XTLS:          ${CYAN}${XTLS_SUBDOMAIN}${RESET}
 ${GREEN}4)${RESET} Trojan HTTP2:        ${CYAN}${TROJAN_H2_SUBDOMAIN}${RESET}
 ${GREEN}5)${RESET} Trojan gRPC:         ${CYAN}${TROJAN_GRPC_SUBDOMAIN}${RESET}
@@ -136,8 +136,8 @@ Choose from options below to proceed:
 
 ${GREEN}1)${RESET} Update packages
 ${GREEN}2)${RESET} Install Docker
-${GREEN}3)${RESET} Setup Firewall           ${MAGENTA}[Security]${RESET}
-${GREEN}4)${RESET} Block outbound to Iran   ${MAGENTA}[Security]${RESET}
+${GREEN}3)${RESET} Setup Firewall           ${MAGENTA}[Security]${RESET} (Optional)
+${GREEN}4)${RESET} Block outbound to Iran   ${MAGENTA}[Security]${RESET} (Optional)
 ${GREEN}5)${RESET} Harden SSH Logins        ${MAGENTA}[Security]${RESET} (Optional)
 ${GREEN}6)${RESET} Install ZRAM             ${CYAN}[Performance]${RESET} (Optional)
 ${GREEN}7)${RESET} Tune Network Stack       ${CYAN}[Performance]${RESET} (Optional)
