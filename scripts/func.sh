@@ -9,6 +9,8 @@ function fn_upgrade_os() {
 
 function fn_tune_system() {
     echo -e "${B_GREEN}### Tuning system network stack for best performance${RESET}"
+    sudo mkdir -p /etc/sysctl.d/
+    sudo touch /etc/sysctl.d/99-sysctl.conf
     echo "net.core.rmem_max=4000000" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
     echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
     echo "net.core.default_qdisc=fq" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
