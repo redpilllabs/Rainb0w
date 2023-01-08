@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.2
+
+- Moved PUBLIC_IP detection to the dependent function for faster start time
+- Improved README
+
 ## Version 1.1
 
 - Added a cronjob to keep xt_geoip updated
