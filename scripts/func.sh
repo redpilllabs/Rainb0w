@@ -736,6 +736,7 @@ function fn_get_client_configs() {
         cp $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/clients/hysteria.json
         cp $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/clients/telegram_share_urls.txt
         zip -r $HOME/proxy-clients.zip $DOCKER_DST_DIR/clients/*
+        PUBLIC_IP=$(curl -s icanhazip.com)
         echo -e "${GREEN}You can also find these urls and configs inside HOME/proxy-clients.zip ${RESET}"
         echo -e "${GREEN}To download, run this command: ${RESET}"
         echo -e "scp ${USER}@${PUBLIC_IP}:~/proxy-clients.zip ~/Downloads/proxy-clients.zip"
