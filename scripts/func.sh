@@ -54,7 +54,6 @@ function fn_block_outbound_connections_to_iran() {
         libmoosex-types-netaddr-ip-perl \
         pkg-config \
         iptables-persistent \
-        lsb-release \
         gzip \
         wget
 
@@ -66,7 +65,6 @@ function fn_block_outbound_connections_to_iran() {
     sudo gunzip /usr/share/xt_geoip/dbip-country-lite.csv.gz
 
     # Convert CSV database to binary format for xt_geoip
-    DISTRO_VERSION=$(lsb_release -sr)
     if [[ "$DISTRO" =~ "Ubuntu" ]]; then
         if (($(echo "$DISTRO_VERSION == 20.04" | bc -l))); then
             sudo /usr/lib/xtables-addons/xt_geoip_build -D /usr/share/xt_geoip/ -S /usr/share/xt_geoip/
