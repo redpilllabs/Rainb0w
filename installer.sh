@@ -163,6 +163,7 @@ Choose an option: "
     4)
         clear
         fn_block_outbound_connections_to_iran
+        fn_enable_xtgeoip_cronjob
         fn_setup_server_submenu
         ;;
     3)

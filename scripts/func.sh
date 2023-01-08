@@ -57,7 +57,8 @@ function fn_block_outbound_connections_to_iran() {
         pkg-config \
         iptables-persistent \
         gzip \
-        wget
+        wget \
+        cron
 
     # Download the latest GeoIP database
     MON=$(date +"%m")
@@ -101,6 +102,25 @@ function fn_block_outbound_connections_to_iran() {
     echo -e $nostublistener | awk '{$1=$1};1' | sudo tee /etc/systemd/resolved.conf.d/nostublistener.conf >/dev/null
     sudo systemctl reload-or-restart systemd-resolved
     DNS_FILTERING=true
+}
+
+function fn_enable_xtgeoip_cronjob() {
+    if [ "$(lsmod | grep ^xt_geoip)" ]; then
+        # Enable cronjobs service for future automatic updates
+        sudo systemctl enable cron
+        if [ ! "$(cat /etc/crontab | grep ^xt_geoip_update)" ]; then
+            echo -e "${B_GREEN}### Adding cronjob to update xt_goip database \n  ${RESET}"
+            sudo cp ./xt_geoip_update.sh /usr/share/xt_geoip/xt_geoip_update.sh
+            sudo chmod +x /usr/share/xt_geoip/xt_geoip_update.sh
+            sudo touch /etc/crontab
+            # Run on the second day of each month
+            echo "0 0 2 * * root bash /usr/share/xt_geoip/xt_geoip_update.sh >/tmp/xt_geoip_update.log" | sudo tee -a /etc/crontab >/dev/null
+        else
+            echo -e "${YELLOW}### Cronjob already exists! \n  ${RESET}"
+        fi
+    else
+        echo -e "${B_RED}### xt_geoip Kernel module is not loaded! \n  ${RESET}"
+    fi
 }
 
 function fn_harden_ssh_security() {
