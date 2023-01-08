@@ -144,52 +144,52 @@ function fn_harden_ssh_security() {
 }
 
 function fn_install_docker() {
-    # Update OS
-    echo -e " ${B_GREEN}### Updating the repository cache \n ${RESET}"
-    sudo apt update
-    sudo apt upgrade -y
+    dpkg --status docker-ce &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Docker is already installed! ${RESET}"
+    else
+        echo -e "${B_GREEN}### Installing required packages for Docker \n  ${RESET}"
+        sudo apt install -y \
+            openssl \
+            ca-certificates \
+            curl \
+            gnupg \
+            lsb-release
 
-    echo -e "${B_GREEN}### Installing required packages for Docker \n  ${RESET}"
-    sudo apt install -y \
-        openssl \
-        ca-certificates \
-        curl \
-        gnupg \
-        lsb-release
-
-    if [[ $DISTRO =~ "Ubuntu" ]]; then
+        # Preparations
+        sudo mkdir -p /etc/apt/keyrings
         echo -e "${GREEN}Setting up Docker repositories \n ${RESET}"
-        sudo mkdir -p /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        if [[ $DISTRO =~ "Ubuntu" ]]; then
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            echo -e \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+        elif [[ $DISTRO =~ "Debian GNU/Linux" ]]; then
+            curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            echo -e \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+        fi
+
+        # Fix permissions
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+        echo -e "${GREEN}Installing Docker from official repository \n ${RESET}"
         sudo apt-get update
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-        echo -e \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-    elif [[ $DISTRO =~ "Debian GNU/Linux" ]]; then
-        sudo mkdir -p /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        echo -e \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+        echo -e "${GREEN}Enabling Rootless Docker Execution \n ${RESET}"
+        sudo usermod -aG docker $USER
+        sudo systemctl daemon-reload
+        sudo systemctl enable --now docker
+        sudo systemctl enable --now containerd
+
+        # Test installation
+        sudo docker run hello-world
+
+        echo -e "${B_GREEN}*** Docker is now installed! *** \n ${RESET}"
+        # newgrp docker
     fi
-
-    echo -e "${GREEN}Installing Docker from official repository \n ${RESET}"
-    sudo apt-get update
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-    echo -e "${GREEN}Enabling Rootless Docker Execution \n ${RESET}"
-    sudo usermod -aG docker $USER
-    sudo systemctl daemon-reload
-    sudo systemctl enable --now docker
-    sudo systemctl enable --now containerd
-
-    # Test installation
-    sudo docker run hello-world
-
-    echo -e "${B_GREEN}*** Docker is now installed! *** \n ${RESET}"
-    # newgrp docker
 }
 
 # Functions
