@@ -114,7 +114,7 @@ function fn_enable_xtgeoip_cronjob() {
         sudo systemctl enable cron
         if [ ! "$(cat /etc/crontab | grep ^xt_geoip_update)" ]; then
             echo -e "${B_GREEN}### Adding cronjob to update xt_goip database \n  ${RESET}"
-            sudo cp $DOCKER_DST_DIR/scripts/xt_geoip_update.sh /usr/share/xt_geoip/xt_geoip_update.sh
+            sudo cp $PWD/scripts/xt_geoip_update.sh /usr/share/xt_geoip/xt_geoip_update.sh
             sudo chmod +x /usr/share/xt_geoip/xt_geoip_update.sh
             sudo touch /etc/crontab
             # Run on the second day of each month
