@@ -69,13 +69,13 @@ function fn_block_outbound_connections_to_iran() {
 
     # Convert CSV database to binary format for xt_geoip
     if [[ "$DISTRO" =~ "Ubuntu" ]]; then
-        if (($(echo "$DISTRO_VERSION == 20.04" | bc -l))); then
+        if [ "$DISTRO_VERSION" == "20.04" ]; then
             sudo /usr/lib/xtables-addons/xt_geoip_build -D /usr/share/xt_geoip/ -S /usr/share/xt_geoip/
-        elif (($(echo "$DISTRO_VERSION == 22.04" | bc -l))); then
+        elif [ "$DISTRO_VERSION" == "22.04" ]; then
             sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite.csv.gz
         fi
     elif [[ "$DISTRO" =~ "Debian GNU/Linux" ]]; then
-        if (($(echo "$DISTRO_VERSION == 11" | bc -l))); then
+        if [ "$DISTRO_VERSION" == "11" ]; then
             sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite.csv.gz
         fi
     fi
