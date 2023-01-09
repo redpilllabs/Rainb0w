@@ -4,9 +4,6 @@ source scripts/colors.sh
 source scripts/config.sh
 source scripts/func.sh
 
-# Exit immediately if a pipeline fails
-set -e
-
 # OS check
 if ! [[ "$DISTRO" =~ "Ubuntu" || "$DISTRO" =~ "Debian" ]]; then
     echo "$DISTRO"
