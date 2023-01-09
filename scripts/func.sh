@@ -50,6 +50,10 @@ function fn_setup_firewall() {
 }
 
 function fn_block_outbound_connections_to_iran() {
+    if [ "$DISTRO_VERSION" == "20.04" ]; then
+        echo -e "${RED}xt_geoip module on Ubuntu 20.04 needs MaxMind database which is no longer available without a license! You need to upgrade to 22.04!"
+        return 1
+    fi
     echo -e "${B_GREEN}### Installing required packages for GeoIP blocking \n  ${RESET}"
     sudo apt install -y \
         xtables-addons-dkms \
@@ -69,21 +73,11 @@ function fn_block_outbound_connections_to_iran() {
         sudo mkdir /usr/share/xt_geoip
     fi
 
-    sudo curl -s "https://download.db-ip.com/free/dbip-country-lite-${YR}-${MON}.csv.gz" >/usr/share/xt_geoip/dbip-country-lite.csv.gz
-    sudo gunzip /usr/share/xt_geoip/dbip-country-lite.csv.gz
+    sudo curl -s "https://download.db-ip.com/free/dbip-country-lite-${YR}-${MON}.csv.gz" >/usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv.gz
+    sudo gunzip /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv.gz
 
     # Convert CSV database to binary format for xt_geoip
-    if [[ "$DISTRO" =~ "Ubuntu" ]]; then
-        if [ "$DISTRO_VERSION" == "20.04" ]; then
-            sudo /usr/lib/xtables-addons/xt_geoip_build -D /usr/share/xt_geoip/ -S /usr/share/xt_geoip/
-        elif [ "$DISTRO_VERSION" == "22.04" ]; then
-            sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite.csv.gz
-        fi
-    elif [[ "$DISTRO" =~ "Debian GNU/Linux" ]]; then
-        if [ "$DISTRO_VERSION" == "11" ]; then
-            sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite.csv.gz
-        fi
-    fi
+    sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv
 
     # Load xt_geoip kernel module
     modprobe xt_geoip
@@ -95,7 +89,7 @@ function fn_block_outbound_connections_to_iran() {
     # Save and cleanup
     sudo iptables-save | sudo tee /etc/iptables/rules.v4
     sudo ip6tables-save | sudo tee /etc/iptables/rules.v6
-    sudo rm /usr/share/xt_geoip/dbip-country-lite.csv
+    sudo rm /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv
 
     echo -e "${B_GREEN}### Disabling local DNSStubListener \n  ${RESET}"
     if [ ! -d "/etc/systemd/resolved.conf.d" ]; then
