@@ -9,7 +9,9 @@ function fn_upgrade_os() {
 
 function fn_tune_system() {
     echo -e "${B_GREEN}### Tuning system network stack for best performance${RESET}"
-    sudo mkdir -p /etc/sysctl.d/
+    if [ ! -d "/etc/sysctl.d" ]; then
+        sudo mkdir -p /etc/sysctl.d
+    fi
     sudo touch /etc/sysctl.d/99-sysctl.conf
     echo "net.core.rmem_max=4000000" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
     echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
@@ -63,8 +65,11 @@ function fn_block_outbound_connections_to_iran() {
     # Download the latest GeoIP database
     MON=$(date +"%m")
     YR=$(date +"%Y")
-    sudo mkdir /usr/share/xt_geoip
-    sudo wget "https://download.db-ip.com/free/dbip-country-lite-${YR}-${MON}.csv.gz" -O /usr/share/xt_geoip/dbip-country-lite.csv.gz
+    if [ ! -d "/usr/share/xt_geoip" ]; then
+        sudo mkdir /usr/share/xt_geoip
+    fi
+
+    sudo curl -s "https://download.db-ip.com/free/dbip-country-lite-${YR}-${MON}.csv.gz" >/usr/share/xt_geoip/dbip-country-lite.csv.gz
     sudo gunzip /usr/share/xt_geoip/dbip-country-lite.csv.gz
 
     # Convert CSV database to binary format for xt_geoip
@@ -93,14 +98,19 @@ function fn_block_outbound_connections_to_iran() {
     sudo rm /usr/share/xt_geoip/dbip-country-lite.csv
 
     echo -e "${B_GREEN}### Disabling local DNSStubListener \n  ${RESET}"
-    sudo mkdir -p /etc/systemd/resolved.conf.d
-    sudo touch /etc/systemd/resolved.conf.d/nostublistener.conf
-    nostublistener="[Resolve]\n
-    DNS=127.0.0.1\n
-    DNSStubListener=no"
-    nostublistener="${nostublistener// /}"
-    echo -e $nostublistener | awk '{$1=$1};1' | sudo tee /etc/systemd/resolved.conf.d/nostublistener.conf >/dev/null
-    sudo systemctl reload-or-restart systemd-resolved
+    if [ ! -d "/etc/systemd/resolved.conf.d" ]; then
+        sudo mkdir -p /etc/systemd/resolved.conf.d
+    fi
+
+    if [ ! -f "/etc/systemd/resolved.conf.d/nostublistener.conf" ]; then
+        sudo touch /etc/systemd/resolved.conf.d/nostublistener.conf
+        nostublistener="[Resolve]\n
+        DNS=127.0.0.1\nDNSStubListener=no"
+        nostublistener="${nostublistener// /}"
+        echo -e $nostublistener | awk '{$1=$1};1' | sudo tee /etc/systemd/resolved.conf.d/nostublistener.conf >/dev/null
+        sudo systemctl reload-or-restart systemd-resolved
+    fi
+
     DNS_FILTERING=true
 }
 
@@ -157,7 +167,10 @@ function fn_install_docker() {
             lsb-release
 
         # Preparations
-        sudo mkdir -p /etc/apt/keyrings
+        if [ ! -d "/etc/apt/keyrings" ]; then
+            sudo mkdir -p /etc/apt/keyrings
+        fi
+
         echo -e "${GREEN}Setting up Docker repositories \n ${RESET}"
         if [[ $DISTRO =~ "Ubuntu" ]]; then
             curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -731,7 +744,9 @@ function fn_get_client_configs() {
         echo -e "########################################${RESET}"
         cat $DOCKER_DST_DIR/hysteria/client/hysteria.json
         # Create and notify about HOME/proxy-clients.zip
-        mkdir -p $DOCKER_DST_DIR/clients
+        if [ ! -d "${DOCKER_DST_DIR}/clients" ]; then
+            mkdir -p $DOCKER_DST_DIR/clients
+        fi
         cp $DOCKER_DST_DIR/xray/client/xray_share_urls.txt $DOCKER_DST_DIR/clients/xray_share_urls.txt
         cp $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/clients/hysteria.json
         cp $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/clients/telegram_share_urls.txt
