@@ -10,7 +10,7 @@ domain = "MTPROTO_SUBDOMAIN"
 
 [mtproto]
 # Server Name Indication that is inserted in TLS HelloClient packets
-# if you're this behind Caddy, this is the factor Caddy decides on where to reverse proxy the data
+# if you're running this behind Caddy, this is the factor Caddy decides on where to reverse proxy the data
 sni = "MTPROTO_SUBDOMAIN"
 # Tag for advertising, obtainable from @MTProxybot
 #ad_tag = "3c09c680b76ee91a4c25ad51f742267d"
