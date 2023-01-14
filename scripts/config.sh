@@ -10,7 +10,7 @@ DOCKER_DST_DIR=$HOME/Docker
 DOCKER_SRC_DIR=/tmp/0xLem0nade/Docker
 
 ### Domains ###
-DOMAIN=""
+CAMOUFLAGE_DOMAIN=""
 SNI_ARR=()
 # Xray proxies
 XTLS_UUID=$(cat /proc/sys/kernel/random/uuid)

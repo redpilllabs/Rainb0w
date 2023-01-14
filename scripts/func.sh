@@ -216,11 +216,11 @@ function fn_install_docker() {
 function fn_prompt_domain() {
     echo ""
     while true; do
-        DOMAIN=""
-        while [[ $DOMAIN = "" ]]; do
-            read -r -p "Enter your domain name: " DOMAIN
+        CAMOUFLAGE_DOMAIN=""
+        while [[ $CAMOUFLAGE_DOMAIN = "" ]]; do
+            read -r -p "Enter your camouflage domain name: " CAMOUFLAGE_DOMAIN
         done
-        read -p "$(echo -e "Do you confirm ${YELLOW}\"${DOMAIN}\"${RESET}? (Y/n): ")" confirm
+        read -p "$(echo -e "Do you confirm ${YELLOW}\"${CAMOUFLAGE_DOMAIN}\"${RESET}? (Y/n): ")" confirm
         if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
             break
         else
@@ -631,11 +631,11 @@ function fn_configure_hysteria_client() {
     jq ".server_name = \"${HYSTERIA_SUBDOMAIN}\"" <<<"$tmp_hysteria" >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
-function fn_configure_caddy() {
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${DOMAIN}\"]" $1)
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${DOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.http.servers.web.routes[0].match[0].host += [\"${DOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${DOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $1
+function fn_configure_camouflage_website() {
+    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${CAMOUFLAGE_DOMAIN}\"]" $1)
+    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy")
+    tmp_caddy=$(jq ".apps.http.servers.web.routes[0].match[0].host += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy")
+    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
 function fn_setup_docker() {
@@ -681,12 +681,6 @@ function fn_spinup_docker_containers() {
     fn_docker_container_launcher mtproto
 }
 
-function fn_clone_html_templates() {
-    git clone https://github.com/designmodo/html-website-templates.git
-    cd html-website-templates
-    #TODO: To be implemeneted!
-}
-
 function fn_cleanup_source_dir() {
     if [ -d $DOCKER_SRC_DIR ]; then
         rm -rf $DOCKER_SRC_DIR
@@ -730,7 +724,9 @@ function fn_start_proxies() {
                 fn_configure_mtproto_users "${DOCKER_SRC_DIR}/mtproto/config/users.toml"
                 fn_configure_hysteria "${DOCKER_SRC_DIR}/hysteria/etc/hysteria.json"
                 fn_configure_hysteria_client "${DOCKER_SRC_DIR}/hysteria/client/hysteria.json"
-                fn_configure_caddy "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
+                if [ ! -z "${CAMOUFLAGE_DOMAIN}" ]; then
+                    fn_configure_camouflage_website "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
+                fi
                 fn_cleanup_destination_dir
                 fn_setup_docker
                 fn_spinup_docker_containers
@@ -797,6 +793,10 @@ function fn_get_client_configs() {
         echo -e "${GREEN}\nYou can also find these urls and configs inside HOME/proxy-clients.zip ${RESET}"
         echo -e "${GREEN}To download this file, you can use Filezilla to FTP or run the command below on your local computer :\n ${RESET}"
         echo -e "${CYAN}scp ${USER}@${PUBLIC_IP}:~/proxy-clients.zip ~/Downloads/proxy-clients.zip${RESET}"
+
+        if [ ! -z "${CAMOUFLAGE_DOMAIN}" ]; then
+            echo -e "${GREEN}Place your static HTML files inside '${HOME}/Docker/caddy/www' for your camouflage website."
+        fi
 
         echo -e "\nAll done! You can now connect to your proxies!"
     fi
