@@ -186,26 +186,6 @@ function fn_enable_xtgeoip_cronjob() {
     fi
 }
 
-function fn_harden_ssh_security() {
-    echo -e "${B_GREEN}### Installing fail2ban \n  ${RESET}"
-    sudo apt install -y fail2ban
-
-    echo -e "${B_GREEN}### Hardening SSH against brute-force \n  ${RESET}"
-    sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-    fail2ban_contents="[sshd]\n
-        enabled=true\n
-        port=ssh\n
-        filter=sshd\n
-        logpath=/var/log/auth.log\n
-        maxretry=5\n
-        findtime=300\n
-        bantime=3600\n
-        ignoreip=127.0.0.1"
-    fail2ban_contents="${fail2ban_contents// /}"
-    echo -e $fail2ban_contents | awk '{$1=$1};1' | sudo tee /etc/fail2ban/jail.local >/dev/null
-    sudo systemctl restart fail2ban.service
-}
-
 function fn_cleanup_source_dir() {
     if [ -d $DOCKER_SRC_DIR ]; then
         rm -rf $DOCKER_SRC_DIR

@@ -131,26 +131,20 @@ ${GREEN}1)${RESET} Update packages
 ${GREEN}2)${RESET} Install Docker
 ${GREEN}3)${RESET} Setup Firewall           ${MAGENTA}[Security]${RESET} (Optional)
 ${GREEN}4)${RESET} Block outbound to Iran   ${MAGENTA}[Security]${RESET} (Optional)
-${GREEN}5)${RESET} Harden SSH Logins        ${MAGENTA}[Security]${RESET} (Optional)
-${GREEN}6)${RESET} Install ZRAM             ${CYAN}[Performance]${RESET} (Optional)
-${GREEN}7)${RESET} Tune Network Stack       ${CYAN}[Performance]${RESET} (Optional)
+${GREEN}5)${RESET} Install ZRAM             ${CYAN}[Performance]${RESET} (Optional)
+${GREEN}6)${RESET} Tune Network Stack       ${CYAN}[Performance]${RESET} (Optional)
 ${RED}0)${RESET} Return to Main Menu
 Choose an option: "
     read -r ans
     case $ans in
-    7)
+    6)
         clear
         fn_tune_system
         fn_setup_server_submenu
         ;;
-    6)
-        clear
-        fn_setup_zram
-        fn_setup_server_submenu
-        ;;
     5)
         clear
-        fn_harden_ssh_security
+        fn_setup_zram
         fn_setup_server_submenu
         ;;
     4)
