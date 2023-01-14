@@ -1,36 +1,36 @@
 #!/bin/bash
 
-source scripts/colors.sh
-source scripts/config.sh
-source scripts/func.sh
+source $PWD/scripts/colors.sh
+source $PWD/scripts/config.sh
+source $PWD/scripts/func.sh
 
 trap '' INT
 
-# OS check
-if ! [[ "$DISTRO" =~ "Ubuntu" || "$DISTRO" =~ "Debian" ]]; then
-    echo "$DISTRO"
-    echo -e "${B_RED}This installer only supports Debian and Ubuntu OS!${RESET}"
-    exit 0
-else
-    # Version check
-    if [[ "$DISTRO" =~ "Ubuntu" ]]; then
-        if [ ! "$DISTRO_VERSION" == "20.04" ] && [ ! "$DISTRO_VERSION" == "22.04" ]; then
-            echo "Your version of Ubuntu is not supported! Only 20.04 and 22.04 versions are supported."
-            exit 0
-        fi
-    elif [[ "$DISTRO" =~ "Debian GNU/Linux" ]]; then
-        if [ ! "$DISTRO_VERSION" == "11" ]; then
-            echo "Your version of Debian is not supported! Minimum required version is 11"
-            exit 0
-        fi
-    fi
-fi
+# # OS check
+# if ! [[ "$DISTRO" =~ "Ubuntu" || "$DISTRO" =~ "Debian" ]]; then
+#     echo "$DISTRO"
+#     echo -e "${B_RED}This installer only supports Debian and Ubuntu OS!${RESET}"
+#     exit 0
+# else
+#     # Version check
+#     if [[ "$DISTRO" =~ "Ubuntu" ]]; then
+#         if [ ! "$DISTRO_VERSION" == "20.04" ] && [ ! "$DISTRO_VERSION" == "22.04" ]; then
+#             echo "Your version of Ubuntu is not supported! Only 20.04 and 22.04 versions are supported."
+#             exit 0
+#         fi
+#     elif [[ "$DISTRO" =~ "Debian GNU/Linux" ]]; then
+#         if [ ! "$DISTRO_VERSION" == "11" ]; then
+#             echo "Your version of Debian is not supported! Minimum required version is 11"
+#             exit 0
+#         fi
+#     fi
+# fi
 
 # Header
 echo -e "####################################################################"
 echo -e "#                                                                  #"
 echo -e "#                                                                  #"
-echo -e "#                Dockerized Proxy Installer                        #"
+echo -e "#                Dockerized TLS Proxy Installer                    #"
 echo -e "#                      Version: ${VERSION}                                #"
 echo -e "#                      Author: 0xLem0nade                          #"
 echo -e "#                  Twitter: twitter.com/0xLem0nade                 #"
@@ -52,75 +52,6 @@ function fn_exit() {
 }
 function fn_fail() {
     echo "Wrong option!"
-}
-
-function fn_config_proxy_submenu() {
-    echo -ne "
-Choose any option to add or edit the entry,
-${IBG_YELLOW}${BI_BLACK}BLANK ENTRIES WILL BE IGNORED.${RESET}
-
-${GREEN}1)${RESET} Camouflage domain:           ${CYAN}${DOMAIN}${RESET}
-${GREEN}2)${RESET} VLESS [XTLS]:                ${CYAN}${XTLS_SUBDOMAIN}${RESET}
-${GREEN}3)${RESET} Trojan [HTTP2]:              ${CYAN}${TROJAN_H2_SUBDOMAIN}${RESET}
-${GREEN}4)${RESET} Trojan [gRPC]:               ${CYAN}${TROJAN_GRPC_SUBDOMAIN}${RESET}
-${GREEN}5)${RESET} Trojan [Websocket]:          ${CYAN}${TROJAN_WS_SUBDOMAIN}${RESET}
-${GREEN}6)${RESET} Vmess [Websocket]:           ${CYAN}${VMESS_WS_SUBDOMAIN}${RESET}
-${GREEN}7)${RESET} Hysteria [UDP]:              ${CYAN}${HYSTERIA_SUBDOMAIN}${RESET}
-${GREEN}8)${RESET} MTProto (Telegram):          ${CYAN}${MTPROTO_SUBDOMAIN}${RESET}
-${RED}0)${RESET} Return to Main Menu
-Choose an option: "
-    read -r ans
-    case $ans in
-    8)
-        clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Telegram MTProto proxy" MTPROTO_SUBDOMAIN
-        fn_config_proxy_submenu
-        ;;
-    7)
-        clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Hysteria [UDP] proxy" HYSTERIA_SUBDOMAIN
-        fn_config_proxy_submenu
-        ;;
-    6)
-        clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for VMess [Websocket] proxy" VMESS_WS_SUBDOMAIN
-        fn_config_proxy_submenu
-        ;;
-    5)
-        clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Trojan [Websocket] proxy" TROJAN_WS_SUBDOMAIN
-        fn_config_proxy_submenu
-        ;;
-    4)
-        clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Trojan [gRPC] proxy" TROJAN_GRPC_SUBDOMAIN
-        fn_config_proxy_submenu
-        ;;
-    3)
-        clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Trojan [HTTP2] proxy" TROJAN_H2_SUBDOMAIN
-        fn_config_proxy_submenu
-        ;;
-    2)
-        clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for VLESS [XTLS] proxy" XTLS_SUBDOMAIN
-        fn_config_proxy_submenu
-        ;;
-    1)
-        clear
-        fn_prompt_domain
-        fn_config_proxy_submenu
-        ;;
-    0)
-        clear
-        mainmenu
-        ;;
-    *)
-        fn_fail
-        clear
-        fn_config_proxy_submenu
-        ;;
-    esac
 }
 
 function fn_setup_server_submenu() {
@@ -185,26 +116,38 @@ function mainmenu() {
 Choose from options below to proceed:
 
 ${GREEN}1)${RESET} Setup Server
-${GREEN}2)${RESET} Configure Proxies
-${GREEN}3)${RESET} Start Proxies
-${GREEN}4)${RESET} Get Client Configs
+${GREEN}2)${RESET} Configure Xray [VLESS,Vmess,Trojan]
+${GREEN}3)${RESET} Configure Hysteria
+${GREEN}4)${RESET} Configure MTProto
+${GREEN}5)${RESET} Start Proxies
+${GREEN}6)${RESET} Get Client Configs
 ${RED}0)${RESET} Exit
 Choose an option: "
     read -r ans
     case $ans in
-    4)
+    6)
         clear
         fn_get_client_configs
         fn_exit
         ;;
-    3)
+    5)
         clear
         fn_start_proxies
         mainmenu
         ;;
+    4)
+        clear
+        fn_config_mtproto_submenu
+        mainmenu
+        ;;
+    3)
+        clear
+        fn_config_hysteria_submenu
+        mainmenu
+        ;;
     2)
         clear
-        fn_config_proxy_submenu
+        fn_config_xray_submenu
         mainmenu
         ;;
     1)

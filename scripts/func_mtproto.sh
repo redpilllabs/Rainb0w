@@ -36,3 +36,30 @@ function fn_configure_mtproto() {
     tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy")
     jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
 }
+
+function fn_config_mtproto_submenu() {
+    echo -ne "
+*** Telegram MTProto ***
+
+${GREEN}1)${RESET} Domain Address:              ${CYAN}${MTPROTO_SUBDOMAIN}${RESET}
+${GREEN}-)${RESET} Secret (AUTO GENERATED):     ${CYAN}${TG_SECRET}${RESET}
+${RED}0)${RESET} Return to Main Menu
+Choose any option: "
+    read -r ans
+    case $ans in
+    1)
+        clear
+        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for MTProto proxy" MTPROTO_SUBDOMAIN
+        fn_config_mtproto_submenu
+        ;;
+    0)
+        clear
+        mainmenu
+        ;;
+    *)
+        fn_fail
+        clear
+        fn_config_mtproto_submenu
+        ;;
+    esac
+}

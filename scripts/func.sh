@@ -1,9 +1,9 @@
 #!/bin/bash
 
-source func_docker.sh
-source func_xray.sh
-source func_hysteria.sh
-source func_mtproto.sh
+source $PWD/scripts/func_docker.sh
+source $PWD/scripts/func_xray.sh
+source $PWD/scripts/func_hysteria.sh
+source $PWD/scripts/func_mtproto.sh
 
 # Functions
 function fn_prompt_domain() {
