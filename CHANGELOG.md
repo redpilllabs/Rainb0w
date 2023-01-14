@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 1.3
+
+- Fixed bugs
+- Break down submenus
+- Add more network tuning parameters
+- Remove useless functions for a leaner codebase
+
 ## Version 1.2
 
 - Moved PUBLIC_IP detection to the dependent function for faster start time
