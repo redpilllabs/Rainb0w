@@ -771,35 +771,28 @@ function fn_get_client_configs() {
             echo "vmess://${vmess_config}" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         fi
 
-        # Create and notify about HOME/proxy-clients.zip
-        if [ ! -d "${DOCKER_DST_DIR}/clients" ]; then
-            mkdir -p $DOCKER_DST_DIR/clients
-        fi
         # Print share URLs
         if [ -f "$DOCKER_DST_DIR/xray/client/xray_share_urls.txt" ]; then
             echo -e "${GREEN}########################################"
             echo -e "#           Xray/v2ray Proxies         #"
             echo -e "########################################${RESET}"
             cat $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-            cp $DOCKER_DST_DIR/xray/client/xray_share_urls.txt $DOCKER_DST_DIR/clients/xray_share_urls.txt
         fi
         if [ ! -z "${MTPROTO_SUBDOMAIN}" ]; then
             echo -e "${GREEN}########################################"
             echo -e "#           Telegram Proxies           #"
             echo -e "########################################${RESET}"
             cat $DOCKER_DST_DIR/mtproto/client/share_urls.txt
-            cp $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/clients/telegram_share_urls.txt
         fi
         if [ ! -z "${HYSTERIA_SUBDOMAIN}" ]; then
             echo -e "${GREEN}########################################"
             echo -e "#           Hysteria config            #"
             echo -e "########################################${RESET}"
             cat $DOCKER_DST_DIR/hysteria/client/hysteria.json
-            cp $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/clients/hysteria.json
         fi
 
         echo -e "${MAGENTA}Zipping all the share url text files inside ${HOME}/proxy-clients.zip\n"
-        zip -r $HOME/proxy-clients.zip $DOCKER_DST_DIR/clients/*
+        zip -q $HOME/proxy-clients.zip $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         PUBLIC_IP=$(curl -s icanhazip.com)
         echo -e "${GREEN}\nYou can also find these urls and configs inside HOME/proxy-clients.zip ${RESET}"
         echo -e "${GREEN}To download this file, you can use Filezilla to FTP or run the command below on your local computer :\n ${RESET}"
