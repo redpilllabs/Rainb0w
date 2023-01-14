@@ -1,6 +1,7 @@
 #!/bin/bash
 
 function fn_upgrade_os() {
+    trap - INT
     # Update OS
     echo -e " ${B_GREEN}### Updating the operating system \n ${RESET}"
     sudo apt update
@@ -23,6 +24,7 @@ function fn_tune_system() {
 }
 
 function fn_setup_zram() {
+    trap - INT
     echo -e "${B_GREEN}### Installing required packages for ZRam swap \n  ${RESET}"
     sudo apt install -y zram-tools linux-modules-extra-$(uname -r)
 
@@ -33,6 +35,7 @@ function fn_setup_zram() {
 }
 
 function fn_setup_firewall() {
+    trap - INT
     echo -e "${B_GREEN}### Installing ufw firewall \n  ${RESET}"
     sudo apt install -y ufw
 
@@ -50,6 +53,7 @@ function fn_setup_firewall() {
 }
 
 function fn_block_outbound_connections_to_iran() {
+    trap - INT
     if [ "$DISTRO_VERSION" == "20.04" ]; then
         echo -e "${RED}xt_geoip module on Ubuntu 20.04 needs MaxMind database which is no longer available without a license! You need to upgrade to 22.04!"
         return 1
@@ -148,6 +152,7 @@ function fn_harden_ssh_security() {
 }
 
 function fn_install_docker() {
+    trap - INT
     dpkg --status docker-ce &>/dev/null
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Docker is already installed! ${RESET}"
@@ -633,6 +638,7 @@ function fn_setup_docker() {
 }
 
 function fn_spinup_docker_containers() {
+    trap - INT
     echo -e "${GREEN}Spinning up Caddy Docker container${RESET}"
     sudo docker compose -f $DOCKER_DST_DIR/caddy/docker-compose.yml up -d
     echo -e "${CYAN}Waiting 10 seconds for TLS certificates to fully download..."
@@ -684,6 +690,7 @@ function fn_cleanup_destination_dir() {
 }
 
 function fn_start_proxies() {
+    trap - INT
     dpkg --status docker-ce &>/dev/null
     if [ $? -eq 0 ]; then
         dpkg --status docker-ce &>/dev/null
@@ -711,6 +718,7 @@ function fn_start_proxies() {
 }
 
 function fn_get_client_configs() {
+    trap - INT
     if [ -v "${DOMAIN}" ]; then
         touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         if [ -v "${XTLS_SUBDOMAIN}" ]; then
