@@ -68,12 +68,21 @@ function fn_tune_system() {
     if [ ! -d "/etc/sysctl.d" ]; then
         sudo mkdir -p /etc/sysctl.d
     fi
-    sudo touch /etc/sysctl.d/99-sysctl.conf
-    echo "net.core.rmem_max=4000000" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
-    echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
-    echo "net.core.default_qdisc=fq" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
-    echo "net.ipv4.tcp_slow_start_after_idle=0" | sudo tee -a /etc/sysctl.d/99-sysctl.conf >/dev/null
-    sudo sysctl -p /etc/sysctl.d/99-sysctl.conf
+    sudo touch /etc/sysctl.d/99-sysctl-network-tune.conf
+    if [ -f "/etc/sysctl.d/99-sysctl-network-tune.conf" ]; then
+        sudo rm /etc/sysctl.d/99-sysctl-network-tune.conf
+        sudo touch /etc/sysctl.d/99-sysctl-network-tune.conf
+    fi
+    # Optimizations recommended from [https://blog.cloudflare.com/http-2-prioritization-with-nginx/]
+    echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee -a /etc/sysctl.d/99-sysctl-network-tune.conf >/dev/null
+    echo "net.core.default_qdisc=fq" | sudo tee -a /etc/sysctl.d/99-sysctl-network-tune.conf >/dev/null
+    echo "net.ipv4.tcp_notsent_lowat=16384" | sudo tee -a /etc/sysctl.d/99-sysctl-network-tune.conf >/dev/null
+    # TCP optimizations
+    echo "net.ipv4.tcp_slow_start_after_idle=0" | sudo tee -a /etc/sysctl.d/99-sysctl-network-tune.conf >/dev/null
+    # UDP optimizations
+    echo "net.core.rmem_max=4000000" | sudo tee -a /etc/sysctl.d/99-sysctl-network-tune.conf >/dev/null
+    echo "net.core.wmem_max=4000000" | sudo tee -a /etc/sysctl.d/99-sysctl-network-tune.conf >/dev/null
+    sudo sysctl -p /etc/sysctl.d/99-sysctl-network-tune.conf
     echo -e "${B_GREEN}Done!${RESET}"
     sleep 1
 }
