@@ -1,5 +1,53 @@
 #!/bin/bash
 
+source func_docker.sh
+source func_xray.sh
+source func_hysteria.sh
+source func_mtproto.sh
+
+# Functions
+function fn_prompt_domain() {
+    echo ""
+    while true; do
+        CAMOUFLAGE_DOMAIN=""
+        while [[ $CAMOUFLAGE_DOMAIN = "" ]]; do
+            read -r -p "Enter your camouflage domain name: " CAMOUFLAGE_DOMAIN
+        done
+        read -p "$(echo -e "Do you confirm ${YELLOW}\"${CAMOUFLAGE_DOMAIN}\"${RESET}? (Y/n): ")" confirm
+        if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
+            break
+        else
+            echo -e "Okay! Let's try that again..."
+            continue
+        fi
+    done
+}
+
+function fn_prompt_subdomain() {
+    echo ""
+    local -n input=$2 # Pass var by reference
+
+    while true; do
+        input=""
+        while [[ $input = "" ]]; do
+            read -r -p "$1: " input
+        done
+        read -p "$(echo -e "Do you confirm ${YELLOW}\"${input}\"${RESET}? (Y/n): ")" confirm
+        if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
+            if [[ "${SNI_ARR[*]}" =~ ${input} ]]; then
+                echo -e "\n${B_RED}ERROR: This subdomain is already reserved for another proxy, enter another one!${RESET}"
+                continue
+            else
+                SNI_ARR+=(${input})
+                break
+            fi
+        else
+            echo -e "Okay! Let's try that again..."
+            continue
+        fi
+    done
+}
+
 function fn_check_for_pkg() {
     if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
         sudo apt install -y $1
@@ -156,529 +204,6 @@ function fn_harden_ssh_security() {
     fail2ban_contents="${fail2ban_contents// /}"
     echo -e $fail2ban_contents | awk '{$1=$1};1' | sudo tee /etc/fail2ban/jail.local >/dev/null
     sudo systemctl restart fail2ban.service
-}
-
-function fn_install_docker() {
-    trap - INT
-    dpkg --status docker-ce &>/dev/null
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Docker is already installed! ${RESET}"
-    else
-        echo -e "${B_GREEN}### Installing required packages for Docker \n  ${RESET}"
-        sudo apt install -y \
-            openssl \
-            ca-certificates \
-            curl \
-            gnupg \
-            lsb-release \
-            jq
-
-        # Preparations
-        if [ ! -d "/etc/apt/keyrings" ]; then
-            sudo mkdir -p /etc/apt/keyrings
-        fi
-
-        echo -e "${GREEN}Setting up Docker repositories \n ${RESET}"
-        if [[ $DISTRO =~ "Ubuntu" ]]; then
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-            echo -e \
-                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-        elif [[ $DISTRO =~ "Debian GNU/Linux" ]]; then
-            curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-            echo -e \
-                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-        fi
-
-        # Fix permissions
-        sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-        echo -e "${GREEN}Installing Docker from official repository \n ${RESET}"
-        sudo apt-get update
-        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-        echo -e "${GREEN}Enabling Rootless Docker Execution \n ${RESET}"
-        sudo usermod -aG docker $USER
-        sudo systemctl daemon-reload
-        sudo systemctl enable --now docker
-        sudo systemctl enable --now containerd
-
-        # Test installation
-        sudo docker run hello-world
-
-        echo -e "${B_GREEN}*** Docker is now installed! *** \n ${RESET}"
-        # newgrp docker
-    fi
-}
-
-# Functions
-function fn_prompt_domain() {
-    echo ""
-    while true; do
-        CAMOUFLAGE_DOMAIN=""
-        while [[ $CAMOUFLAGE_DOMAIN = "" ]]; do
-            read -r -p "Enter your camouflage domain name: " CAMOUFLAGE_DOMAIN
-        done
-        read -p "$(echo -e "Do you confirm ${YELLOW}\"${CAMOUFLAGE_DOMAIN}\"${RESET}? (Y/n): ")" confirm
-        if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
-            break
-        else
-            echo -e "Okay! Let's try that again..."
-            continue
-        fi
-    done
-}
-
-function fn_prompt_subdomain() {
-    echo ""
-    local -n input=$2 # Pass var by reference
-
-    while true; do
-        input=""
-        while [[ $input = "" ]]; do
-            read -r -p "$1: " input
-        done
-        read -p "$(echo -e "Do you confirm ${YELLOW}\"${input}\"${RESET}? (Y/n): ")" confirm
-        if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
-            if [[ "${SNI_ARR[*]}" =~ ${input} ]]; then
-                echo -e "\n${B_RED}ERROR: This subdomain is already reserved for another proxy, enter another one!${RESET}"
-                continue
-            else
-                SNI_ARR+=(${input})
-                break
-            fi
-        else
-            echo -e "Okay! Let's try that again..."
-            continue
-        fi
-    done
-}
-
-function fn_xray_add_xtls() {
-    xray_entry="{
-            \"listen\": \"0.0.0.0\",
-            \"port\": 3443,
-            \"protocol\": \"vless\",
-            \"settings\": {
-                \"clients\": [
-                    {
-                        \"id\": \"${XTLS_UUID}\",
-                        \"flow\": \"xtls-rprx-vision\"
-                    }
-                ],
-                \"decryption\": \"none\"
-            },
-            \"streamSettings\": {
-                \"network\": \"tcp\",
-                \"security\": \"tls\",
-                \"tlsSettings\": {
-                    \"rejectUnknownSni\": true,
-                    \"certificates\": [
-                        {
-                            \"certificateFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${XTLS_SUBDOMAIN}/${XTLS_SUBDOMAIN}.crt\",
-                            \"keyFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${XTLS_SUBDOMAIN}/${XTLS_SUBDOMAIN}.key\"
-                        }
-                    ]
-                }
-            }
-        }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${XTLS_SUBDOMAIN}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"xray:3443\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${XTLS_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${XTLS_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${XTLS_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
-}
-
-function fn_xray_add_trojan_h2() {
-    xray_entry="{
-            \"listen\": \"0.0.0.0\",
-            \"port\": 3444,
-            \"protocol\": \"trojan\",
-            \"settings\": {
-                \"clients\": [
-                    {
-                        \"password\": \"${TROJAN_H2_PASSWORD}\"
-                    }
-                ]
-            },
-            \"streamSettings\": {
-                \"network\": \"http\",
-                \"httpSettings\": {
-                    \"path\": \"/${TROJAN_H2_PATH}\",
-                    \"host\": [
-                        \"${TROJAN_H2_SUBDOMAIN}\"
-                    ]
-                },
-                \"security\": \"tls\",
-                \"tlsSettings\": {
-                    \"rejectUnknownSni\": true,
-                    \"certificates\": [
-                        {
-                            \"certificateFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${TROJAN_H2_SUBDOMAIN}/${TROJAN_H2_SUBDOMAIN}.crt\",
-                            \"keyFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${TROJAN_H2_SUBDOMAIN}/${TROJAN_H2_SUBDOMAIN}.key\"
-                        }
-                    ]
-                }
-            }
-        }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${TROJAN_H2_SUBDOMAIN}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"xray:3444\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${TROJAN_H2_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${TROJAN_H2_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${TROJAN_H2_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
-}
-
-function fn_xray_add_trojan_grpc() {
-    xray_entry="{
-            \"listen\": \"/dev/shm/Xray-Trojan-gRPC.socket,0666\",
-            \"protocol\": \"trojan\",
-            \"settings\": {
-                \"clients\": [
-                    {
-                        \"password\": \"${TROJAN_GRPC_PASSWORD}\"
-                    }
-                ]
-            },
-            \"streamSettings\": {
-                \"network\": \"grpc\",
-                \"grpcSettings\": {
-                    \"serviceName\": \"${TROJAN_GRPC_SERVICENAME}\"
-                },
-                \"security\": \"tls\",
-                \"tlsSettings\": {
-                    \"rejectUnknownSni\": true,
-                    \"certificates\": [
-                        {
-                            \"certificateFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${TROJAN_GRPC_SUBDOMAIN}/${TROJAN_GRPC_SUBDOMAIN}.crt\",
-                            \"keyFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${TROJAN_GRPC_SUBDOMAIN}/${TROJAN_GRPC_SUBDOMAIN}.key\"
-                        }
-                    ]
-                }
-            }
-        }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${TROJAN_GRPC_SUBDOMAIN}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"unix//dev/shm/Xray-Trojan-gRPC.socket\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${TROJAN_GRPC_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${TROJAN_GRPC_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${TROJAN_GRPC_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
-}
-
-function fn_xray_add_trojan_ws() {
-    xray_entry="{
-            \"listen\": \"0.0.0.0\",
-            \"port\": 3445,
-            \"protocol\": \"trojan\",
-            \"settings\": {
-                \"clients\": [
-                    {
-                        \"password\": \"${TROJAN_WS_PASSWORD}\"
-                    }
-                ]
-            },
-            \"streamSettings\": {
-                \"network\": \"ws\",
-                \"wsSettings\": {
-                    \"path\": \"/${TROJAN_WS_PATH}\",
-                    \"host\": [
-                        \"${TROJAN_WS_SUBDOMAIN}\"
-                    ]
-                },
-                \"security\": \"tls\",
-                \"tlsSettings\": {
-                    \"rejectUnknownSni\": true,
-                    \"certificates\": [
-                        {
-                            \"certificateFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${TROJAN_WS_SUBDOMAIN}/${TROJAN_WS_SUBDOMAIN}.crt\",
-                            \"keyFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${TROJAN_WS_SUBDOMAIN}/${TROJAN_WS_SUBDOMAIN}.key\"
-                        }
-                    ]
-                }
-            }
-        }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${TROJAN_WS_SUBDOMAIN}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"xray:3445\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${TROJAN_WS_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${TROJAN_WS_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${TROJAN_WS_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
-}
-
-function fn_xray_add_vmess_ws() {
-    xray_entry="{
-            \"listen\": \"0.0.0.0\",
-            \"port\": 3446,
-            \"protocol\": \"vmess\",
-            \"settings\": {
-                \"clients\": [
-                    {
-                        \"id\": \"${VMESS_UUID}\",
-                        \"security\": \"none\"
-                    }
-                ]
-            },
-            \"streamSettings\": {
-                \"network\": \"ws\",
-                \"wsSettings\": {
-                    \"path\": \"/${VMESS_WS_PATH}\",
-                    \"host\": [
-                        \"${VMESS_WS_SUBDOMAIN}\"
-                    ]
-                },
-                \"security\": \"tls\",
-                \"tlsSettings\": {
-                    \"rejectUnknownSni\": true,
-                    \"certificates\": [
-                        {
-                            \"certificateFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${VMESS_WS_SUBDOMAIN}/${VMESS_WS_SUBDOMAIN}.crt\",
-                            \"keyFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${VMESS_WS_SUBDOMAIN}/${VMESS_WS_SUBDOMAIN}.key\"
-                        }
-                    ]
-                }
-            }
-        }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${VMESS_WS_SUBDOMAIN}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"xray:3446\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${VMESS_WS_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${VMESS_WS_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${VMESS_WS_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
-}
-
-function fn_configure_xray() {
-    if [ -v "${XTLS_SUBDOMAIN}" ]; then
-        fn_xray_add_xtls $1 $2
-    fi
-    if [ -v "${TROJAN_H2_SUBDOMAIN}" ]; then
-        fn_xray_add_trojan_h2 $1 $2
-    fi
-    if [ -v "${TROJAN_GRPC_SUBDOMAIN}" ]; then
-        fn_xray_add_trojan_grpc $1 $2
-    fi
-    if [ -v "${TROJAN_WS_SUBDOMAIN}" ]; then
-        fn_xray_add_trojan_ws $1 $2
-    fi
-    if [ -v "${VMESS_WS_SUBDOMAIN}" ]; then
-        fn_xray_add_vmess_ws $1 $2
-    fi
-}
-
-function fn_configure_mtproto_users() {
-    sed -i -e "s/\<TG_SECRET\>/$TG_SECRET/" $1
-}
-
-function fn_configure_mtproto() {
-    # This is a TOML file so we revert to sed
-    sed -i -e "s/\<MTPROTO_SUBDOMAIN\>/$MTPROTO_SUBDOMAIN/g" $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${MTPROTO_SUBDOMAIN}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"mtproto:5443\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
-
-}
-
-function fn_configure_hysteria() {
-    tmp_hysteria=$(jq ".obfs = \"${HYSTERIA_PASSWORD}\"" $1)
-    tmp_hysteria=$(jq ".cert = \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${HYSTERIA_SUBDOMAIN}/${HYSTERIA_SUBDOMAIN}.crt\"" <<<"$tmp_hysteria")
-    jq ".key = \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${HYSTERIA_SUBDOMAIN}/${HYSTERIA_SUBDOMAIN}.key\"" <<<"$tmp_hysteria" >/tmp/tmp.json && mv /tmp/tmp.json $1
-}
-
-function fn_configure_hysteria_client() {
-    tmp_hysteria=$(jq ".obfs = \"${HYSTERIA_PASSWORD}\"" $1)
-    tmp_hysteria=$(jq ".server = \"${HYSTERIA_SUBDOMAIN}:554\"" <<<"$tmp_hysteria")
-    jq ".server_name = \"${HYSTERIA_SUBDOMAIN}\"" <<<"$tmp_hysteria" >/tmp/tmp.json && mv /tmp/tmp.json $1
-}
-
-function fn_configure_camouflage_website() {
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${CAMOUFLAGE_DOMAIN}\"]" $1)
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.http.servers.web.routes[0].match[0].host += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $1
-}
-
-function fn_setup_docker() {
-    echo -e "${GREEN}Creating Docker volumes and networks ${RESET}"
-    if [ ! "$(docker volume inspect sockets | grep Created)" ]; then
-        sudo docker volume create sockets
-    fi
-    if [ ! "$(docker volume inspect sockets | grep Created)" ]; then
-        sudo docker network create caddy
-    fi
-}
-
-function fn_docker_container_launcher() {
-    CID=$(docker ps -q -f status=running -f name=^/$1$)
-    if [ ! "${CID}" ]; then
-        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml up -d
-    else
-        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml down --remove-orphans
-        sleep 1
-        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml up -d
-    fi
-}
-
-function fn_spinup_docker_containers() {
-    trap - INT
-    echo -e "${GREEN}\nLaunching Caddy...${RESET}"
-    fn_docker_container_launcher caddy
-    echo -e "${CYAN}Waiting 10 seconds for TLS certificates to fully download..."
-    sleep 10
-    echo -e "${GREEN}Spinning up proxy Docker container...${RESET}"
-    if [ $DNS_FILTERING = true ]; then
-        echo -e "\nLaunching blocky DNS server..."
-        fn_docker_container_launcher blocky
-        sleep 1
-    fi
-    echo -e "\nLaunching Xray..."
-    fn_docker_container_launcher xray
-    sleep 1
-    echo -e "\nLaunching Hysteria..."
-    fn_docker_container_launcher hysteria
-    sleep 1
-    echo -e "\nLaunching MTProtoPy..."
-    fn_docker_container_launcher mtproto
 }
 
 function fn_cleanup_source_dir() {
