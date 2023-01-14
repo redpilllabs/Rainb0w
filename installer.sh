@@ -201,7 +201,7 @@ Choose an option: "
     4)
         clear
         fn_get_client_configs
-        mainmenu
+        fn_exit
         ;;
     3)
         clear

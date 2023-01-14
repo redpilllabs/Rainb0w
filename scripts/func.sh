@@ -1,5 +1,12 @@
 #!/bin/bash
 
+function fn_check_for_pkg() {
+    if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
+        sudo apt install -y $1
+    fi
+
+}
+
 function fn_upgrade_os() {
     trap - INT
     # Update OS
@@ -633,26 +640,45 @@ function fn_configure_caddy() {
 
 function fn_setup_docker() {
     echo -e "${GREEN}Creating Docker volumes and networks ${RESET}"
-    sudo docker volume create sockets
-    sudo docker network create caddy
+    if [ ! "$(docker volume inspect sockets | grep Created)" ]; then
+        sudo docker volume create sockets
+    fi
+    if [ ! "$(docker volume inspect sockets | grep Created)" ]; then
+        sudo docker network create caddy
+    fi
+}
+
+function fn_docker_container_launcher() {
+    CID=$(docker ps -q -f status=running -f name=^/$1$)
+    if [ ! "${CID}" ]; then
+        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml up -d
+    else
+        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml down --remove-orphans
+        sleep 1
+        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml up -d
+    fi
 }
 
 function fn_spinup_docker_containers() {
     trap - INT
-    echo -e "${GREEN}Spinning up Caddy Docker container${RESET}"
-    sudo docker compose -f $DOCKER_DST_DIR/caddy/docker-compose.yml up -d
+    echo -e "${GREEN}\nLaunching Caddy...${RESET}"
+    fn_docker_container_launcher caddy
     echo -e "${CYAN}Waiting 10 seconds for TLS certificates to fully download..."
     sleep 10
-    echo -e "${GREEN}Spinning up proxy Docker container${RESET}"
+    echo -e "${GREEN}Spinning up proxy Docker container...${RESET}"
     if [ $DNS_FILTERING = true ]; then
-        sudo docker compose -f $DOCKER_DST_DIR/blocky/docker-compose.yml up -d
+        echo -e "\nLaunching blocky DNS server..."
+        fn_docker_container_launcher blocky
         sleep 1
     fi
-    sudo docker compose -f $DOCKER_DST_DIR/xray/docker-compose.yml up -d
+    echo -e "\nLaunching Xray..."
+    fn_docker_container_launcher xray
     sleep 1
-    sudo docker compose -f $DOCKER_DST_DIR/hysteria/docker-compose.yml up -d
+    echo -e "\nLaunching Hysteria..."
+    fn_docker_container_launcher hysteria
     sleep 1
-    sudo docker compose -f $DOCKER_DST_DIR/mtproto/docker-compose.yml up -d
+    echo -e "\nLaunching MTProtoPy..."
+    fn_docker_container_launcher mtproto
 }
 
 function fn_clone_html_templates() {
@@ -719,54 +745,66 @@ function fn_start_proxies() {
 
 function fn_get_client_configs() {
     trap - INT
+    fn_check_for_pkg zip
     if [ ${#SNI_ARR[@]} -eq 0 ]; then
         echo -e "${B_RED}ERROR: You have to first add your proxy domains (option 2 in the main menu)!${RESET}"
     else
-        touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        if [ -v "${XTLS_SUBDOMAIN}" ]; then
-            echo -e "vless://${XTLS_UUID}@${XTLS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${XTLS_SUBDOMAIN}#0xLem0nade+XTLS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        # Create and notify about HOME/proxy-clients.zip
+        # touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        if [ ! -z "${XTLS_SUBDOMAIN}" ]; then
+            echo -e "\nvless://${XTLS_UUID}@${XTLS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${XTLS_SUBDOMAIN}#0xLem0nade+XTLS\n" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         fi
-        if [ -v "${TROJAN_H2_SUBDOMAIN}" ]; then
-            echo -e "trojan://${TROJAN_H2_PASSWORD}@${TROJAN_H2_SUBDOMAIN}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_H2_SUBDOMAIN}&type=http&sni=${TROJAN_H2_SUBDOMAIN}#0xLem0nade+Trojan+H2" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        if [ ! -z "${TROJAN_H2_SUBDOMAIN}" ]; then
+            echo "trojan://${TROJAN_H2_PASSWORD}@${TROJAN_H2_SUBDOMAIN}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_H2_SUBDOMAIN}&type=http&sni=${TROJAN_H2_SUBDOMAIN}#0xLem0nade+Trojan+H2" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         fi
-        if [ -v "${TROJAN_GRPC_SUBDOMAIN}" ]; then
-            echo -e "trojan://${TROJAN_GRPC_PASSWORD}@${TROJAN_GRPC_SUBDOMAIN}:443?mode=gun&security=tls&alpn=h2,http/1.1&type=grpc&serviceName=${TROJAN_GRPC_SERVICENAME}&sni=${TROJAN_GRPC_SUBDOMAIN}#0xLem0nade+Trojan+gRPC" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        if [ ! -z "${TROJAN_GRPC_SUBDOMAIN}" ]; then
+            echo -e "\ntrojan://${TROJAN_GRPC_PASSWORD}@${TROJAN_GRPC_SUBDOMAIN}:443?mode=gun&security=tls&alpn=h2,http/1.1&type=grpc&serviceName=${TROJAN_GRPC_SERVICENAME}&sni=${TROJAN_GRPC_SUBDOMAIN}#0xLem0nade+Trojan+gRPC \n" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         fi
-        if [ -v "${TROJAN_WS_SUBDOMAIN}" ]; then
-            echo -e "trojan://${TROJAN_WS_PASSWORD}@${TROJAN_WS_SUBDOMAIN}:443?path=${TROJAN_WS_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_WS_SUBDOMAIN}&type=ws&sni=${TROJAN_WS_SUBDOMAIN}#0xLem0nade+Trojan+WS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        if [ ! -z "${TROJAN_WS_SUBDOMAIN}" ]; then
+            echo "\n"
+            echo "trojan://${TROJAN_WS_PASSWORD}@${TROJAN_WS_SUBDOMAIN}:443?path=${TROJAN_WS_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_WS_SUBDOMAIN}&type=ws&sni=${TROJAN_WS_SUBDOMAIN}#0xLem0nade+Trojan+WS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         fi
-        if [ -v "${VMESS_WS_SUBDOMAIN}" ]; then
+        if [ ! -z "${VMESS_WS_SUBDOMAIN}" ]; then
+            echo "\n"
             vmess_config="{\"add\":\"${VMESS_WS_SUBDOMAIN}\",\"aid\":\"0\",\"alpn\":\"h2,http/1.1\",\"host\":\"${VMESS_WS_SUBDOMAIN}\",\"id\":\"${VMESS_WS_UUID}\",\"net\":\"ws\",\"path\":\"${VMESS_WS_PATH}\",\"port\":\"443\",\"ps\":\"Vmess\",\"scy\":\"none\",\"sni\":\"${VMESS_WS_SUBDOMAIN}\",\"tls\":\"tls\",\"type\":\"\",\"v\":\"2\"}"
             vmess_config=$(echo $vmess_config | base64 | tr -d '\n')
-            echo -e "vmess://${vmess_config}" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+            echo "vmess://${vmess_config}" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         fi
-        # Print share URLs
-        echo -e "${GREEN}########################################"
-        echo -e "#           Xray/v2ray Proxies         #"
-        echo -e "########################################${RESET}"
-        cat $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        echo -e "${GREEN}########################################"
-        echo -e "#           Telegram Proxies           #"
-        echo -e "########################################${RESET}"
-        cat $DOCKER_DST_DIR/mtproto/client/share_urls.txt
-        echo -e "${GREEN}########################################"
-        echo -e "#           Hysteria config            #"
-        echo -e "########################################${RESET}"
-        cat $DOCKER_DST_DIR/hysteria/client/hysteria.json
+
         # Create and notify about HOME/proxy-clients.zip
         if [ ! -d "${DOCKER_DST_DIR}/clients" ]; then
             mkdir -p $DOCKER_DST_DIR/clients
         fi
-        cp $DOCKER_DST_DIR/xray/client/xray_share_urls.txt $DOCKER_DST_DIR/clients/xray_share_urls.txt
-        cp $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/clients/hysteria.json
-        cp $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/clients/telegram_share_urls.txt
+        # Print share URLs
+        if [ -f "$DOCKER_DST_DIR/xray/client/xray_share_urls.txt" ]; then
+            echo -e "${GREEN}########################################"
+            echo -e "#           Xray/v2ray Proxies         #"
+            echo -e "########################################${RESET}"
+            cat $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+            cp $DOCKER_DST_DIR/xray/client/xray_share_urls.txt $DOCKER_DST_DIR/clients/xray_share_urls.txt
+        fi
+        if [ ! -z "${MTPROTO_SUBDOMAIN}" ]; then
+            echo -e "${GREEN}########################################"
+            echo -e "#           Telegram Proxies           #"
+            echo -e "########################################${RESET}"
+            cat $DOCKER_DST_DIR/mtproto/client/share_urls.txt
+            cp $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/clients/telegram_share_urls.txt
+        fi
+        if [ ! -z "${HYSTERIA_SUBDOMAIN}" ]; then
+            echo -e "${GREEN}########################################"
+            echo -e "#           Hysteria config            #"
+            echo -e "########################################${RESET}"
+            cat $DOCKER_DST_DIR/hysteria/client/hysteria.json
+            cp $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/clients/hysteria.json
+        fi
+
+        echo -e "${MAGENTA}Zipping all the share url text files inside ${HOME}/proxy-clients.zip\n"
         zip -r $HOME/proxy-clients.zip $DOCKER_DST_DIR/clients/*
         PUBLIC_IP=$(curl -s icanhazip.com)
-        echo -e "${GREEN}You can also find these urls and configs inside HOME/proxy-clients.zip ${RESET}"
-        echo -e "${GREEN}To download, run this command: ${RESET}"
-        echo -e "scp ${USER}@${PUBLIC_IP}:~/proxy-clients.zip ~/Downloads/proxy-clients.zip"
-        else
-        echo -e "${B_RED}ERROR: You have to first configure the proxy settings (option 2 in the menu)!${RESET}"
-    fi
+        echo -e "${GREEN}\nYou can also find these urls and configs inside HOME/proxy-clients.zip ${RESET}"
+        echo -e "${GREEN}To download this file, you can use Filezilla to FTP or run the command below on your local computer :\n ${RESET}"
+        echo -e "${CYAN}scp ${USER}@${PUBLIC_IP}:~/proxy-clients.zip ~/Downloads/proxy-clients.zip${RESET}"
 
+        echo -e "\nAll done! You can now connect to your proxies!"
+    fi
 }
