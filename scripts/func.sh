@@ -158,7 +158,8 @@ function fn_install_docker() {
             ca-certificates \
             curl \
             gnupg \
-            lsb-release
+            lsb-release \
+            jq
 
         # Preparations
         if [ ! -d "/etc/apt/keyrings" ]; then
@@ -685,19 +686,24 @@ function fn_cleanup_destination_dir() {
 function fn_start_proxies() {
     dpkg --status docker-ce &>/dev/null
     if [ $? -eq 0 ]; then
-        if [ -v "${DOMAIN}" ]; then
-            fn_cleanup_source_dir
-            fn_configure_xray "${DOCKER_SRC_DIR}/xray/etc/xray.json" "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
-            fn_configure_mtproto "${DOCKER_SRC_DIR}/mtproto/config/config.toml" "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
-            fn_configure_mtproto_users "${DOCKER_SRC_DIR}/mtproto/config/users.toml"
-            fn_configure_hysteria "${DOCKER_SRC_DIR}/hysteria/etc/hysteria.json"
-            fn_configure_hysteria_client "${DOCKER_SRC_DIR}/hysteria/client/hysteria.json"
-            fn_configure_caddy "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
-            fn_cleanup_destination_dir
-            fn_setup_docker
-            fn_spinup_docker_containers
+        dpkg --status docker-ce &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${#SNI_ARR[@]} -eq 0 ]; then
+                echo -e "${B_RED}ERROR: You have to first add your proxy domains (option 2 in the main menu)!${RESET}"
+            else
+                fn_cleanup_source_dir
+                fn_configure_xray "${DOCKER_SRC_DIR}/xray/etc/xray.json" "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
+                fn_configure_mtproto "${DOCKER_SRC_DIR}/mtproto/config/config.toml" "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
+                fn_configure_mtproto_users "${DOCKER_SRC_DIR}/mtproto/config/users.toml"
+                fn_configure_hysteria "${DOCKER_SRC_DIR}/hysteria/etc/hysteria.json"
+                fn_configure_hysteria_client "${DOCKER_SRC_DIR}/hysteria/client/hysteria.json"
+                fn_configure_caddy "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
+                fn_cleanup_destination_dir
+                fn_setup_docker
+                fn_spinup_docker_containers
+            fi
         else
-            echo -e "${B_RED}ERROR: You have to first configure the proxy settings (option 2 in the menu)!${RESET}"
+            echo -e "${B_RED}jq is missing! Install with [sudo apt install jq]${RESET}"
         fi
     else
         echo -e "${B_RED}Docker is missing! Select option 1 in the main menu to install.${RESET}"
