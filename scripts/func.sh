@@ -719,7 +719,9 @@ function fn_start_proxies() {
 
 function fn_get_client_configs() {
     trap - INT
-    if [ -v "${DOMAIN}" ]; then
+    if [ ${#SNI_ARR[@]} -eq 0 ]; then
+        echo -e "${B_RED}ERROR: You have to first add your proxy domains (option 2 in the main menu)!${RESET}"
+    else
         touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         if [ -v "${XTLS_SUBDOMAIN}" ]; then
             echo -e "vless://${XTLS_UUID}@${XTLS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${XTLS_SUBDOMAIN}#0xLem0nade+XTLS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
@@ -763,7 +765,7 @@ function fn_get_client_configs() {
         echo -e "${GREEN}You can also find these urls and configs inside HOME/proxy-clients.zip ${RESET}"
         echo -e "${GREEN}To download, run this command: ${RESET}"
         echo -e "scp ${USER}@${PUBLIC_IP}:~/proxy-clients.zip ~/Downloads/proxy-clients.zip"
-    else
+        else
         echo -e "${B_RED}ERROR: You have to first configure the proxy settings (option 2 in the menu)!${RESET}"
     fi
 
