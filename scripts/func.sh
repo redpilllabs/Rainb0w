@@ -693,7 +693,7 @@ function fn_start_proxies() {
     trap - INT
     dpkg --status docker-ce &>/dev/null
     if [ $? -eq 0 ]; then
-        dpkg --status docker-ce &>/dev/null
+        dpkg --status jq &>/dev/null
         if [ $? -eq 0 ]; then
             if [ ${#SNI_ARR[@]} -eq 0 ]; then
                 echo -e "${B_RED}ERROR: You have to first add your proxy domains (option 2 in the main menu)!${RESET}"
