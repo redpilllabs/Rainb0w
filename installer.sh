@@ -59,56 +59,51 @@ function fn_config_proxy_submenu() {
 Choose any option to add or edit the entry,
 ${IBG_YELLOW}${BI_BLACK}BLANK ENTRIES WILL BE IGNORED.${RESET}
 
-${GREEN}1)${RESET} Camouflage Website/Blog:     ${CYAN}${DOMAIN}${RESET}
-${GREEN}3)${RESET} VLESS [XTLS]:                ${CYAN}${XTLS_SUBDOMAIN}${RESET}
-${GREEN}4)${RESET} Trojan [HTTP2]:              ${CYAN}${TROJAN_H2_SUBDOMAIN}${RESET}
-${GREEN}5)${RESET} Trojan [gRPC]:               ${CYAN}${TROJAN_GRPC_SUBDOMAIN}${RESET}
-${GREEN}6)${RESET} Trojan [Websocket]:          ${CYAN}${TROJAN_WS_SUBDOMAIN}${RESET}
-${GREEN}7)${RESET} Vmess [Websocket]:           ${CYAN}${VMESS_WS_SUBDOMAIN}${RESET}
-${GREEN}8)${RESET} Hysteria [UDP]:              ${CYAN}${HYSTERIA_SUBDOMAIN}${RESET}
-${GREEN}9)${RESET} MTProto (Telegram):          ${CYAN}${MTPROTO_SUBDOMAIN}${RESET}
+${GREEN}1)${RESET} Camouflage domain:     ${CYAN}${DOMAIN}${RESET}
+${GREEN}2)${RESET} VLESS [XTLS]:                ${CYAN}${XTLS_SUBDOMAIN}${RESET}
+${GREEN}3)${RESET} Trojan [HTTP2]:              ${CYAN}${TROJAN_H2_SUBDOMAIN}${RESET}
+${GREEN}4)${RESET} Trojan [gRPC]:               ${CYAN}${TROJAN_GRPC_SUBDOMAIN}${RESET}
+${GREEN}5)${RESET} Trojan [Websocket]:          ${CYAN}${TROJAN_WS_SUBDOMAIN}${RESET}
+${GREEN}6)${RESET} Vmess [Websocket]:           ${CYAN}${VMESS_WS_SUBDOMAIN}${RESET}
+${GREEN}7)${RESET} Hysteria [UDP]:              ${CYAN}${HYSTERIA_SUBDOMAIN}${RESET}
+${GREEN}8)${RESET} MTProto (Telegram):          ${CYAN}${MTPROTO_SUBDOMAIN}${RESET}
 ${RED}0)${RESET} Return to Main Menu
 Choose an option: "
     read -r ans
     case $ans in
-    9)
-        clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.${DOMAIN}) for Telegram MTProto proxy" MTPROTO_SUBDOMAIN
-        fn_config_proxy_submenu
-        ;;
     8)
         clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.${DOMAIN}) for Hysteria [UDP] proxy" HYSTERIA_SUBDOMAIN
+        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Telegram MTProto proxy" MTPROTO_SUBDOMAIN
         fn_config_proxy_submenu
         ;;
     7)
         clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.${DOMAIN}) for VMess [Websocket] proxy" VMESS_WS_SUBDOMAIN
+        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Hysteria [UDP] proxy" HYSTERIA_SUBDOMAIN
         fn_config_proxy_submenu
         ;;
     6)
         clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.${DOMAIN}) for Trojan [Websocket] proxy" TROJAN_WS_SUBDOMAIN
+        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for VMess [Websocket] proxy" VMESS_WS_SUBDOMAIN
         fn_config_proxy_submenu
         ;;
     5)
         clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.${DOMAIN}) for Trojan [gRPC] proxy" TROJAN_GRPC_SUBDOMAIN
+        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Trojan [Websocket] proxy" TROJAN_WS_SUBDOMAIN
         fn_config_proxy_submenu
         ;;
     4)
         clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.${DOMAIN}) for Trojan [HTTP2] proxy" TROJAN_H2_SUBDOMAIN
+        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Trojan [gRPC] proxy" TROJAN_GRPC_SUBDOMAIN
         fn_config_proxy_submenu
         ;;
     3)
         clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.${DOMAIN}) for VLESS [XTLS] proxy" XTLS_SUBDOMAIN
+        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for Trojan [HTTP2] proxy" TROJAN_H2_SUBDOMAIN
         fn_config_proxy_submenu
         ;;
     2)
         clear
-        fn_prompt_email
+        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for VLESS [XTLS] proxy" XTLS_SUBDOMAIN
         fn_config_proxy_submenu
         ;;
     1)
