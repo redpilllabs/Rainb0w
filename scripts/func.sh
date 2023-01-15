@@ -29,21 +29,25 @@ function fn_prompt_subdomain() {
 
     while true; do
         input=""
-        while [[ $input = "" ]]; do
-            read -r -p "$1: " input
-        done
-        read -p "$(echo -e "Do you confirm ${YELLOW}\"${input}\"${RESET}? (Y/n): ")" confirm
-        if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
-            if [[ "${SNI_ARR[*]}" =~ ${input} ]]; then
-                echo -e "\n${B_RED}ERROR: This subdomain is already reserved for another proxy, enter another one!${RESET}"
-                continue
+        echo -e "(i) Press 'Enter' to go back or clear the entry."
+        read -r -p "$1: " input
+
+        if [ -z input]; then
+            read -p "$(echo -e "Do you confirm ${YELLOW}\"${input}\"${RESET}? (Y/n): ")" confirm
+            if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
+                if [[ "${SNI_ARR[*]}" =~ ${input} ]]; then
+                    echo -e "\n${B_RED}ERROR: This subdomain is already reserved for another proxy, enter another one!${RESET}"
+                    continue
+                else
+                    SNI_ARR+=(${input})
+                    break
+                fi
             else
-                SNI_ARR+=(${input})
-                break
+                echo -e "Okay! Let's try that again..."
+                continue
             fi
         else
-            echo -e "Okay! Let's try that again..."
-            continue
+            break
         fi
     done
 }
