@@ -32,7 +32,7 @@ function fn_prompt_subdomain() {
         echo -e "(i) Press 'Enter' to go back or clear the entry."
         read -r -p "$1: " input
 
-        if [ -z input]; then
+        if [[ $input ]]; then
             read -p "$(echo -e "Do you confirm ${YELLOW}\"${input}\"${RESET}? (Y/n): ")" confirm
             if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
                 if [[ "${SNI_ARR[*]}" =~ ${input} ]]; then
