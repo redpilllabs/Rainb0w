@@ -439,6 +439,9 @@ function fn_configure_xray() {
 }
 
 function fn_print_xray_client_urls() {
+    if [ -f "$DOCKER_DST_DIR/xray/client/xray_share_urls.txt" ]; then
+        rm $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+    fi
     if [ ! -z "${VLESS_TCP_SUBDOMAIN}" ]; then
         echo -e "\nvless://${VLESS_TCP_UUID}@${VLESS_TCP_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${VLESS_TCP_SUBDOMAIN}#0xLem0nade+VLESS+TCP" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
