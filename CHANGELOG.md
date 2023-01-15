@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.4
+
+- Make compatible transports [gRPC, Websocket] CDN ready
+- Let the user return from domain prompt without entring anything
+
 ## Version 1.3
 
 - Fixed bugs
