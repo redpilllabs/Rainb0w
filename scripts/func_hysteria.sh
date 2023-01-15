@@ -12,6 +12,15 @@ function fn_configure_hysteria_client() {
     jq ".server_name = \"${HYSTERIA_SUBDOMAIN}\"" <<<"$tmp_hysteria" >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
+function fn_print_hysteria_client_config() {
+    if [ ! -z "${HYSTERIA_SUBDOMAIN}" ]; then
+        echo -e "${GREEN}########################################"
+        echo -e "#           Hysteria config            #"
+        echo -e "########################################${RESET}"
+        cat $DOCKER_DST_DIR/hysteria/client/hysteria.json
+    fi
+}
+
 function fn_config_hysteria_submenu() {
     echo -ne "
 *** Hysteria [UDP] ***

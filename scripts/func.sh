@@ -257,50 +257,12 @@ function fn_get_client_configs() {
     trap - INT
     fn_check_for_pkg zip
     if [ ${#SNI_ARR[@]} -eq 0 ]; then
-        echo -e "${B_RED}ERROR: You have to first add your proxy domains (option 2 in the main menu)!${RESET}"
+        echo -e "${B_RED}ERROR: You have to first add your proxy domains in the main menu!${RESET}"
     else
+        fn_print_xray_client_urls
+        fn_print_mtproto_client_urls
+        fn_print_hysteria_client_config
         # Create and notify about HOME/proxy-clients.zip
-        # touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        if [ ! -z "${XTLS_SUBDOMAIN}" ]; then
-            echo -e "\nvless://${XTLS_UUID}@${XTLS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${XTLS_SUBDOMAIN}#0xLem0nade+XTLS\n" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        fi
-        if [ ! -z "${TROJAN_H2_SUBDOMAIN}" ]; then
-            echo "trojan://${TROJAN_H2_PASSWORD}@${TROJAN_H2_SUBDOMAIN}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_H2_SUBDOMAIN}&type=http&sni=${TROJAN_H2_SUBDOMAIN}#0xLem0nade+Trojan+H2" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        fi
-        if [ ! -z "${TROJAN_GRPC_SUBDOMAIN}" ]; then
-            echo -e "\ntrojan://${TROJAN_GRPC_PASSWORD}@${TROJAN_GRPC_SUBDOMAIN}:443?mode=gun&security=tls&alpn=h2,http/1.1&type=grpc&serviceName=${TROJAN_GRPC_SERVICENAME}&sni=${TROJAN_GRPC_SUBDOMAIN}#0xLem0nade+Trojan+gRPC \n" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        fi
-        if [ ! -z "${TROJAN_WS_SUBDOMAIN}" ]; then
-            echo "\n"
-            echo "trojan://${TROJAN_WS_PASSWORD}@${TROJAN_WS_SUBDOMAIN}:443?path=${TROJAN_WS_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_WS_SUBDOMAIN}&type=ws&sni=${TROJAN_WS_SUBDOMAIN}#0xLem0nade+Trojan+WS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        fi
-        if [ ! -z "${VMESS_WS_SUBDOMAIN}" ]; then
-            echo "\n"
-            vmess_config="{\"add\":\"${VMESS_WS_SUBDOMAIN}\",\"aid\":\"0\",\"alpn\":\"h2,http/1.1\",\"host\":\"${VMESS_WS_SUBDOMAIN}\",\"id\":\"${VMESS_WS_UUID}\",\"net\":\"ws\",\"path\":\"${VMESS_WS_PATH}\",\"port\":\"443\",\"ps\":\"Vmess\",\"scy\":\"none\",\"sni\":\"${VMESS_WS_SUBDOMAIN}\",\"tls\":\"tls\",\"type\":\"\",\"v\":\"2\"}"
-            vmess_config=$(echo $vmess_config | base64 | tr -d '\n')
-            echo "vmess://${vmess_config}" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        fi
-
-        # Print share URLs
-        if [ -f "$DOCKER_DST_DIR/xray/client/xray_share_urls.txt" ]; then
-            echo -e "${GREEN}########################################"
-            echo -e "#           Xray/v2ray Proxies         #"
-            echo -e "########################################${RESET}"
-            cat $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        fi
-        if [ ! -z "${MTPROTO_SUBDOMAIN}" ]; then
-            echo -e "${GREEN}########################################"
-            echo -e "#           Telegram Proxies           #"
-            echo -e "########################################${RESET}"
-            cat $DOCKER_DST_DIR/mtproto/client/share_urls.txt
-        fi
-        if [ ! -z "${HYSTERIA_SUBDOMAIN}" ]; then
-            echo -e "${GREEN}########################################"
-            echo -e "#           Hysteria config            #"
-            echo -e "########################################${RESET}"
-            cat $DOCKER_DST_DIR/hysteria/client/hysteria.json
-        fi
-
         echo -e "${MAGENTA}Zipping all the share url text files inside ${HOME}/proxy-clients.zip\n"
         zip -q $HOME/proxy-clients.zip $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         PUBLIC_IP=$(curl -s icanhazip.com)

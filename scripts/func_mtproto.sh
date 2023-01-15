@@ -37,6 +37,15 @@ function fn_configure_mtproto() {
     jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
 }
 
+function fn_print_mtproto_client_urls() {
+    if [ ! -z "${MTPROTO_SUBDOMAIN}" ]; then
+        echo -e "${GREEN}########################################"
+        echo -e "#           Telegram Proxies           #"
+        echo -e "########################################${RESET}"
+        cat $DOCKER_DST_DIR/mtproto/client/share_urls.txt
+    fi
+}
+
 function fn_config_mtproto_submenu() {
     echo -ne "
 *** Telegram MTProto ***
