@@ -33,14 +33,20 @@ function fn_spinup_docker_containers() {
         fn_docker_container_launcher blocky
         sleep 1
     fi
-    echo -e "\nLaunching Xray..."
-    fn_docker_container_launcher xray
-    sleep 1
-    echo -e "\nLaunching Hysteria..."
-    fn_docker_container_launcher hysteria
-    sleep 1
-    echo -e "\nLaunching MTProtoPy..."
-    fn_docker_container_launcher mtproto
+    if [ ! -z "${VLESS_TCP_SUBDOMAIN}" ] || [ ! -z "${VLESS_GRPC_SUBDOMAIN}" ] || [ ! -z "${VLESS_WS_SUBDOMAIN}" ] || [ ! -z "${TROJAN_H2_SUBDOMAIN}" ] || [ ! -z "${TROJAN_GRPC_SUBDOMAIN}" ] || [ ! -z "${TROJAN_WS_SUBDOMAIN}" ] || [ ! -z "${VMESS_WS_SUBDOMAIN}" ]; then
+        echo -e "\nLaunching Xray..."
+        fn_docker_container_launcher xray
+        sleep 1
+    fi
+    if [ ! -z "${HYSTERIA_SUBDOMAIN}" ]; then
+        echo -e "\nLaunching Hysteria..."
+        fn_docker_container_launcher hysteria
+        sleep 1
+    fi
+    if [ ! -z "${MTPROTO_SUBDOMAIN}" ]; then
+        echo -e "\nLaunching MTProtoPy..."
+        fn_docker_container_launcher mtproto
+    fi
 }
 
 function fn_install_docker() {
