@@ -2,14 +2,8 @@
 
 function fn_setup_docker() {
     echo -e "${GREEN}Creating Docker volumes and networks ${RESET}"
-    docker_volume_output=$(docker volume inspect sockets | grep Created)
-    if [ -z "${docker_volume_output}" ] || [[ $docker_volume_output == *"No such volume"* ]]; then
-        docker volume create sockets
-    fi
-    docker_network_output=$(docker network inspect caddy | grep Created)
-    if [ -z "${docker_network_output}" ] || [[ $docker_network_output == *"No such network"* ]]; then
-        docker network create caddy
-    fi
+    docker volume create sockets
+    docker network create caddy
 }
 
 function fn_docker_container_launcher() {
