@@ -102,103 +102,6 @@ function fn_setup_zram() {
     sudo systemctl restart zramswap.service
 }
 
-function fn_setup_firewall() {
-    trap - INT
-    echo -e "${B_GREEN}### Installing ufw firewall \n  ${RESET}"
-    sudo apt install -y ufw
-
-    echo -e "${B_GREEN}### Setting up ufw firewall \n  ${RESET}"
-    sudo ufw default deny incoming
-    sudo ufw default allow outgoing
-    sudo ufw allow ssh
-    sudo ufw allow http
-    sudo ufw allow https
-    sudo ufw allow 554/udp
-
-    echo -e "${IBG_YELLOW}${B_BLACK}Enter ${B_RED}'y'${IBG_YELLOW}${B_BLACK} below to activate the firewall ↴ ${RESET}"
-    sudo ufw enable
-    sudo ufw status verbose
-}
-
-function fn_block_outbound_connections_to_iran() {
-    trap - INT
-    if [ "$DISTRO_VERSION" == "20.04" ]; then
-        echo -e "${RED}xt_geoip module on Ubuntu 20.04 needs MaxMind database which is no longer available without a license! You need to upgrade to 22.04!"
-        return 1
-    fi
-    echo -e "${B_GREEN}### Installing required packages for GeoIP blocking \n  ${RESET}"
-    sudo apt install -y \
-        xtables-addons-dkms \
-        xtables-addons-common \
-        libtext-csv-xs-perl \
-        libmoosex-types-netaddr-ip-perl \
-        pkg-config \
-        iptables-persistent \
-        gzip \
-        wget \
-        cron
-
-    # Download the latest GeoIP database
-    MON=$(date +"%m")
-    YR=$(date +"%Y")
-    if [ ! -d "/usr/share/xt_geoip" ]; then
-        sudo mkdir /usr/share/xt_geoip
-    fi
-
-    sudo curl -s "https://download.db-ip.com/free/dbip-country-lite-${YR}-${MON}.csv.gz" >/usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv.gz
-    sudo gunzip /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv.gz
-
-    # Convert CSV database to binary format for xt_geoip
-    sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv
-
-    # Load xt_geoip kernel module
-    modprobe xt_geoip
-    lsmod | grep ^xt_geoip
-
-    # Block outgoing connections to Iran
-    sudo iptables -A OUTPUT -m geoip --dst-cc IR -j DROP
-
-    # Save and cleanup
-    sudo iptables-save | sudo tee /etc/iptables/rules.v4
-    sudo ip6tables-save | sudo tee /etc/iptables/rules.v6
-    sudo rm /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv
-
-    echo -e "${B_GREEN}### Disabling local DNSStubListener \n  ${RESET}"
-    if [ ! -d "/etc/systemd/resolved.conf.d" ]; then
-        sudo mkdir -p /etc/systemd/resolved.conf.d
-    fi
-
-    if [ ! -f "/etc/systemd/resolved.conf.d/nostublistener.conf" ]; then
-        sudo touch /etc/systemd/resolved.conf.d/nostublistener.conf
-        nostublistener="[Resolve]\n
-        DNS=127.0.0.1\nDNSStubListener=no"
-        nostublistener="${nostublistener// /}"
-        echo -e $nostublistener | awk '{$1=$1};1' | sudo tee /etc/systemd/resolved.conf.d/nostublistener.conf >/dev/null
-        sudo systemctl reload-or-restart systemd-resolved
-    fi
-
-    DNS_FILTERING=true
-}
-
-function fn_enable_xtgeoip_cronjob() {
-    if [ "$(lsmod | grep ^xt_geoip)" ]; then
-        # Enable cronjobs service for future automatic updates
-        sudo systemctl enable cron
-        if [ ! "$(cat /etc/crontab | grep ^xt_geoip_update)" ]; then
-            echo -e "${B_GREEN}### Adding cronjob to update xt_goip database \n  ${RESET}"
-            sudo cp $PWD/scripts/xt_geoip_update.sh /usr/share/xt_geoip/xt_geoip_update.sh
-            sudo chmod +x /usr/share/xt_geoip/xt_geoip_update.sh
-            sudo touch /etc/crontab
-            # Run on the second day of each month
-            echo "0 0 2 * * root bash /usr/share/xt_geoip/xt_geoip_update.sh >/tmp/xt_geoip_update.log" | sudo tee -a /etc/crontab >/dev/null
-        else
-            echo -e "${YELLOW}### Cronjob already exists! \n  ${RESET}"
-        fi
-    else
-        echo -e "${B_RED}### xt_geoip Kernel module is not loaded! \n  ${RESET}"
-    fi
-}
-
 function fn_cleanup_source_dir() {
     if [ -d $DOCKER_SRC_DIR ]; then
         rm -rf $DOCKER_SRC_DIR
@@ -267,12 +170,12 @@ function fn_get_client_configs() {
         fn_print_mtproto_client_urls
         fn_print_hysteria_client_config
         # Create and notify about HOME/proxy-clients.zip
-        echo -e "${MAGENTA}Zipping all the share url text files inside ${HOME}/proxy-clients.zip\n"
+        echo -e "${MAGENTA}\nZipping all the share url text files inside ${HOME}/proxy-clients.zip\n"
         zip -q $HOME/proxy-clients.zip $DOCKER_DST_DIR/hysteria/client/hysteria.json $DOCKER_DST_DIR/mtproto/client/share_urls.txt $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        PUBLIC_IP=$(curl -s icanhazip.com)
-        echo -e "${GREEN}\nYou can also find these urls and configs inside HOME/proxy-clients.zip ${RESET}"
+        PUBLIC_IP=$(curl ipinfo.io/ip)
+        echo -e "${GREEN}\nYou can also find these urls and configs inside ${HOME}/proxy-clients.zip ${RESET}"
         echo -e "${GREEN}To download this file, you can use Filezilla to FTP or run the command below on your local computer :\n ${RESET}"
-        echo -e "${CYAN}scp ${USER}@${PUBLIC_IP}:~/proxy-clients.zip ~/Downloads/proxy-clients.zip${RESET}"
+        echo -e "${CYAN}scp ${USER}@${PUBLIC_IP}:${HOME}/proxy-clients.zip ~/Downloads/proxy-clients.zip${RESET}"
 
         if [ ! -z "${CAMOUFLAGE_DOMAIN}" ]; then
             echo -e "${GREEN}Place your static HTML files inside '${HOME}/Docker/caddy/www' for your camouflage website."
