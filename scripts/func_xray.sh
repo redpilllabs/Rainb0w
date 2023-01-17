@@ -444,27 +444,27 @@ function fn_print_xray_client_urls() {
         touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${VLESS_TCP_SUBDOMAIN}" ]; then
-        echo -e "\nvless://${VLESS_TCP_UUID}@${VLESS_TCP_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${VLESS_TCP_SUBDOMAIN}#0xLem0nade+VLESS+TCP" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\nvless://${VLESS_TCP_UUID}@${VLESS_TCP_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${VLESS_TCP_SUBDOMAIN}#0xLem0nade+VLESS+TCP" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${VLESS_GRPC_SUBDOMAIN}" ]; then
-        echo -e "\nvless://${VLESS_GRPC_UUID}@${VLESS_GRPC_SUBDOMAIN}:443?mode=gun&security=tls&encryption=none&alpn=h2,http/1.1&type=grpc&serviceName=&sni=${VLESS_GRPC_SUBDOMAIN}#0xLem0nade+VLESS+gRPC" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\nvless://${VLESS_GRPC_UUID}@${VLESS_GRPC_SUBDOMAIN}:443?mode=gun&security=tls&encryption=none&alpn=h2,http/1.1&type=grpc&serviceName=&sni=${VLESS_GRPC_SUBDOMAIN}#0xLem0nade+VLESS+gRPC" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${VLESS_WS_SUBDOMAIN}" ]; then
-        echo -e "\nvless://${VLESS_WS_UUID}@${VLESS_WS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&type=ws&sni=${VLESS_WS_SUBDOMAIN}#0xLem0nade+VLESS+WS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\nvless://${VLESS_WS_UUID}@${VLESS_WS_SUBDOMAIN}:443?security=tls&encryption=none&alpn=h2,http/1.1&type=ws&sni=${VLESS_WS_SUBDOMAIN}#0xLem0nade+VLESS+WS" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${TROJAN_H2_SUBDOMAIN}" ]; then
-        echo "\ntrojan://${TROJAN_H2_PASSWORD}@${TROJAN_H2_SUBDOMAIN}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_H2_SUBDOMAIN}&type=http&sni=${TROJAN_H2_SUBDOMAIN}#0xLem0nade+Trojan+H2" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo "\ntrojan://${TROJAN_H2_PASSWORD}@${TROJAN_H2_SUBDOMAIN}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${TROJAN_H2_SUBDOMAIN}&type=http&sni=${TROJAN_H2_SUBDOMAIN}#0xLem0nade+Trojan+H2" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${TROJAN_GRPC_SUBDOMAIN}" ]; then
-        echo -e "\ntrojan://${TROJAN_GRPC_PASSWORD}@${TROJAN_GRPC_SUBDOMAIN}:443?mode=gun&security=tls&alpn=h2,http/1.1&type=grpc&sni=${TROJAN_GRPC_SUBDOMAIN}#0xLem0nade+Trojan+gRPC" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\ntrojan://${TROJAN_GRPC_PASSWORD}@${TROJAN_GRPC_SUBDOMAIN}:443?mode=gun&security=tls&alpn=h2,http/1.1&type=grpc&sni=${TROJAN_GRPC_SUBDOMAIN}#0xLem0nade+Trojan+gRPC" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${TROJAN_WS_SUBDOMAIN}" ]; then
-        echo "\ntrojan://${TROJAN_WS_PASSWORD}@${TROJAN_WS_SUBDOMAIN}:443?security=tls&alpn=h2,http/1.1&type=ws&sni=${TROJAN_WS_SUBDOMAIN}#0xLem0nade+Trojan+WS" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo "\ntrojan://${TROJAN_WS_PASSWORD}@${TROJAN_WS_SUBDOMAIN}:443?security=tls&alpn=h2,http/1.1&type=ws&sni=${TROJAN_WS_SUBDOMAIN}#0xLem0nade+Trojan+WS" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${VMESS_WS_SUBDOMAIN}" ]; then
         vmess_config="{\"add\":\"${VMESS_WS_SUBDOMAIN}\",\"aid\":\"0\",\"alpn\":\"h2,http/1.1\",\"host\":\"${VMESS_WS_SUBDOMAIN}\",\"id\":\"${VMESS_WS_UUID}\",\"net\":\"ws\",\"path\":\"\",\"port\":\"443\",\"ps\":\"0xLem0nade Vmess WS\",\"scy\":\"none\",\"sni\":\"${VMESS_WS_SUBDOMAIN}\",\"tls\":\"tls\",\"type\":\"\",\"v\":\"2\"}"
         vmess_config=$(echo $vmess_config | base64 | tr -d '\n')
-        echo "\nvmess://${vmess_config}" >>$DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo "\nvmess://${vmess_config}" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
     fi
 
     # Print share URLs
