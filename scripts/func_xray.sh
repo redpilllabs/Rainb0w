@@ -439,6 +439,9 @@ function fn_configure_xray() {
 }
 
 function fn_print_xray_client_urls() {
+    if [ -d $DOCKER_DST_DIR/xray/client ]; then
+        mkdir -p $DOCKER_DST_DIR/xray/client
+    fi
     if [ -f $DOCKER_DST_DIR/xray/client/xray_share_urls.txt ]; then
         rm $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
         touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
