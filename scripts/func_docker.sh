@@ -2,11 +2,11 @@
 
 function fn_setup_docker() {
     echo -e "${GREEN}Creating Docker volumes and networks ${RESET}"
-    if [ ! "$(docker volume inspect sockets | grep Created)" ]; then
-        sudo docker volume create sockets
+    if [ -z "$(docker volume inspect sockets | grep Created)" ]; then
+        docker volume create sockets
     fi
-    if [ ! "$(docker volume inspect sockets | grep Created)" ]; then
-        sudo docker network create caddy
+    if [ -z "$(docker volume inspect sockets | grep Created)" ]; then
+        docker network create caddy
     fi
 }
 
