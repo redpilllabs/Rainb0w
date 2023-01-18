@@ -6,14 +6,14 @@ function fn_configure_mtproto_users() {
 
 function fn_configure_mtproto() {
     # This is a TOML file so we revert to sed
-    sed -i -e "s/\<MTPROTO_SUBDOMAIN\>/$MTPROTO_SUBDOMAIN/g" $1
+    sed -i -e "s/\<MTPROTO_SUBDOMAIN\>/${SNI_DICT[MTPROTO_SUBDOMAIN]}/g" $1
     # Edit Caddy config.json
     caddy_entry="{
                     \"match\": [
                         {
                             \"tls\": {
                                 \"sni\": [
-                                    \"${MTPROTO_SUBDOMAIN}\"
+                                    \"${SNI_DICT[MTPROTO_SUBDOMAIN]}\"
                                 ]
                             }
                         }
@@ -32,13 +32,13 @@ function fn_configure_mtproto() {
                     ]
                 }"
     tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${MTPROTO_SUBDOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
+    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[MTPROTO_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
+    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[MTPROTO_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
+    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[MTPROTO_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
 }
 
 function fn_print_mtproto_client_urls() {
-    if [ ! -z "${MTPROTO_SUBDOMAIN}" ]; then
+    if [ ! -z "${SNI_DICT[MTPROTO_SUBDOMAIN]}" ]; then
         echo -e "${GREEN}########################################"
         echo -e "#           Telegram Proxies           #"
         echo -e "########################################${RESET}"
@@ -50,15 +50,16 @@ function fn_config_mtproto_submenu() {
     echo -ne "
 *** Telegram MTProto ***
 
-${GREEN}1)${RESET} Domain Address:              ${CYAN}${MTPROTO_SUBDOMAIN}${RESET}
-${GREEN}-)${RESET} Secret (AUTO GENERATED):     ${CYAN}${TG_SECRET}${RESET}
+${GREEN}1)${RESET} Domain Address:              ${B_GREEN}${SNI_DICT[MTPROTO_SUBDOMAIN]}${RESET}
+${GREEN}-)${RESET} Secret (AUTO GENERATED):     ${B_GREEN}${TG_SECRET}${RESET}
 ${RED}0)${RESET} Return to Main Menu
 Choose any option: "
     read -r ans
     case $ans in
     1)
         clear
-        fn_prompt_subdomain "Enter the full subdomain (e.g: xxx.example.com) for MTProto proxy" MTPROTO_SUBDOMAIN
+        fn_prompt_domain "MTProto proxy" MTPROTO_SUBDOMAIN
+        clear
         fn_config_mtproto_submenu
         ;;
     0)

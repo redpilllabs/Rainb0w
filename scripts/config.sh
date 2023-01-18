@@ -10,9 +10,19 @@ DOCKER_DST_DIR=$HOME/Docker
 DOCKER_SRC_DIR=/tmp/0xLem0nade/Docker
 
 ### Domains ###
-SNI_ARR=()
+declare -A SNI_DICT
+SNI_DICT[CAMOUFLAGE_DOMAIN]=""
+SNI_DICT[VLESS_TCP_SUBDOMAIN]=""
+SNI_DICT[VLESS_GRPC_SUBDOMAIN]=""
+SNI_DICT[VLESS_WS_SUBDOMAIN]=""
+SNI_DICT[TROJAN_H2_SUBDOMAIN]=""
+SNI_DICT[TROJAN_GRPC_SUBDOMAIN]=""
+SNI_DICT[TROJAN_WS_SUBDOMAIN]=""
+SNI_DICT[VMESS_WS_SUBDOMAIN]=""
+SNI_DICT[HYSTERIA_SUBDOMAIN]=""
+SNI_DICT[MTPROTO_SUBDOMAIN]=""
+
 # Xray proxies
-CAMOUFLAGE_DOMAIN=""
 VLESS_TCP_UUID=$(cat /proc/sys/kernel/random/uuid)
 VLESS_GRPC_UUID=$(cat /proc/sys/kernel/random/uuid)
 VLESS_WS_UUID=$(cat /proc/sys/kernel/random/uuid)
@@ -21,18 +31,12 @@ TROJAN_H2_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n
 TROJAN_H2_PATH=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)
 TROJAN_GRPC_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
 TROJAN_WS_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
-VLESS_TCP_SUBDOMAIN=""
-VLESS_GRPC_SUBDOMAIN=""
-VLESS_WS_SUBDOMAIN=""
-TROJAN_H2_SUBDOMAIN=""
-TROJAN_GRPC_SUBDOMAIN=""
-TROJAN_WS_SUBDOMAIN=""
-VMESS_WS_SUBDOMAIN=""
+
 # Hysteria proxy
 HYSTERIA_OBFS=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
-HYSTERIA_SUBDOMAIN=""
+
 # Telegram proxy
 TG_SECRET=$(head -c 16 /dev/urandom | xxd -ps)
-MTPROTO_SUBDOMAIN=""
+
 # DNS filtering
 DNS_FILTERING=false

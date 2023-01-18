@@ -7,46 +7,29 @@ source $PWD/scripts/func_mtproto.sh
 
 # Functions
 function fn_prompt_domain() {
-    echo ""
-    while true; do
-        CAMOUFLAGE_DOMAIN=""
-        while [[ $CAMOUFLAGE_DOMAIN = "" ]]; do
-            read -r -p "Enter your camouflage domain name: " CAMOUFLAGE_DOMAIN
-        done
-        read -p "$(echo -e "Do you confirm ${YELLOW}\"${CAMOUFLAGE_DOMAIN}\"${RESET}? (Y/n): ")" confirm
-        if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
-            break
-        else
-            echo -e "Okay! Let's try that again..."
-            continue
-        fi
-    done
-}
-
-function fn_prompt_subdomain() {
-    echo ""
-    local -n input=$2 # Pass var by reference
-
+    echo -e "\n\n"
+    echo -e "Enter the full domain or SNI (e.g: ${GREEN}example.com${RESET} or ${GREEN}xxx.example.com${RESET})"
+    echo -e "${B_YELLOW}(i)${RESET} To clear the entry, press 'Enter' when the field is blank.\n"
     while true; do
         input=""
-        echo -e "(i) Press 'Enter' to go back or clear the entry."
-        read -r -p "$1: " input
+        read -e -r -p "Domain/SNI for ${1}: " -i "${SNI_DICT[$2]}" input
 
         if [[ $input ]]; then
-            read -p "$(echo -e "Do you confirm ${YELLOW}\"${input}\"${RESET}? (Y/n): ")" confirm
-            if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] || "$confirm" == "" ]]; then
-                if [[ "${SNI_ARR[*]}" =~ ${input} ]]; then
-                    echo -e "\n${B_RED}ERROR: This subdomain is already reserved for another proxy, enter another one!${RESET}"
+            if [[ ! "${SNI_DICT[$2]}" = "$input" ]]; then
+                UNIQUE_VALS=$(echo "${SNI_DICT[@]}" | xargs)
+                OTHER_VALS=${UNIQUE_VALS/${SNI_DICT[$2]}/}
+                if [[ " $OTHER_VALS " =~ .*\ $input\ .* ]]; then
+                    echo -e "\n${B_RED}ERROR: This domain or SNI is already reserved for another proxy, enter another one!${RESET}"
                     continue
                 else
-                    SNI_ARR+=(${input})
+                    SNI_DICT[$2]="$input"
                     break
                 fi
             else
-                echo -e "Okay! Let's try that again..."
-                continue
+                break
             fi
         else
+            SNI_DICT[$2]=""
             break
         fi
     done
@@ -136,8 +119,8 @@ function fn_start_proxies() {
     if [ $? -eq 0 ]; then
         dpkg --status jq &>/dev/null
         if [ $? -eq 0 ]; then
-            if [ ${#SNI_ARR[@]} -eq 0 ]; then
-                echo -e "${B_RED}ERROR: You have to first add your proxy domains (option 2 in the main menu)!${RESET}"
+            if [[ ! "${SNI_DICT[@]}" = " " ]]; then
+                echo -e "${B_RED}ERROR: No domains have been set for your proxies!${RESET}"
             else
                 fn_cleanup_source_dir
                 fn_configure_xray "${DOCKER_SRC_DIR}/xray/etc/xray.json" "${DOCKER_SRC_DIR}/caddy/etc/caddy.json"
@@ -163,8 +146,8 @@ function fn_start_proxies() {
 function fn_get_client_configs() {
     trap - INT
     fn_check_for_pkg zip
-    if [ ${#SNI_ARR[@]} -eq 0 ]; then
-        echo -e "${B_RED}ERROR: You have to first add your proxy domains in the main menu!${RESET}"
+    if [[ ! "${SNI_DICT[@]}" = " " ]]; then
+        echo -e "${B_RED}ERROR: No domains have been set for your proxies!${RESET}"
     else
         fn_print_xray_client_urls
         fn_print_mtproto_client_urls
@@ -177,7 +160,7 @@ function fn_get_client_configs() {
         echo -e "${GREEN}To download this file, you can use Filezilla to FTP or run the command below on your local computer :\n ${RESET}"
         echo -e "${CYAN}scp ${USER}@${PUBLIC_IP}:${HOME}/proxy-clients.zip ~/Downloads/proxy-clients.zip${RESET}"
 
-        if [ ! -z "${CAMOUFLAGE_DOMAIN}" ]; then
+        if [ ! -z "${SNI_DICT[CAMOUFLAGE_DOMAIN]}" ]; then
             echo -e "${GREEN}Place your static HTML files inside '${HOME}/Docker/caddy/www' for your camouflage website."
         fi
 
