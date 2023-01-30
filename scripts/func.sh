@@ -102,7 +102,7 @@ function fn_install_required_packages() {
     fn_check_and_install_pkg jq
     if [ ! -f "/usr/local/bin/yq" ]; then
         echo -e "${B_YELLOW}\n'yq' is missing! Installing now... ${RESET}"
-        sudo wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq &&
+        sudo wget -q https://github.com/mikefarah/yq/releases/download/v4.30.8/yq_linux_amd64 -O /usr/local/bin/yq &&
             sudo chmod +x /usr/local/bin/yq
     fi
 }
