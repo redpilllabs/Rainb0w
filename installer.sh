@@ -116,11 +116,7 @@ function mainmenu() {
 Choose from options below to proceed:
 
 ${GREEN}1)${RESET} Setup Server
-${GREEN}2)${RESET} Configure Xray [VLESS,Vmess,Trojan]
-${GREEN}3)${RESET} Configure Hysteria
-${GREEN}4)${RESET} Configure MTProto
-${GREEN}5)${RESET} Start Proxies
-${GREEN}6)${RESET} Get Client Configs
+${GREEN}2)${RESET} Performance Settings
 ${RED}0)${RESET} Exit
 Choose an option: "
     read -r ans
