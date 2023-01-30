@@ -152,7 +152,8 @@ function fn_deploy() {
     if [ "$IS_DOCKER_INSTALLED" = true ]; then
         # Do we have at least one domain name input?
         if [[ "${#SNI_DICT[@]}" -ne 0 ]]; then
-            fn_typewriter "\n\nFiring up engines... 🚀 \n" $B_RED
+            echo -e "\n\n"
+            fn_typewriter "Firing up engines... 🚀" $B_RED
             fn_start_caddy $CADDY_CONFIG_FILE
             echo -e "${B_YELLOW}\nWaiting 10 seconds for TLS certificates to fully download...\n"
             sleep 10
