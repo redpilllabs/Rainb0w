@@ -90,16 +90,19 @@ Choose an option: "
     3)
         clear
         fn_ac_submenu
+        clear
         mainmenu
         ;;
     2)
         clear
         fn_performance_submenu
+        clear
         mainmenu
         ;;
     1)
         clear
         fn_setup_server_submenu
+        clear
         mainmenu
         ;;
     0)
@@ -140,41 +143,49 @@ Choose an option: "
     8)
         clear
         fn_deploy
+        clear
         mainmenu
         ;;
     7)
         clear
         fn_mtproto_submenu
+        clear
         mainmenu
         ;;
     6)
         clear
         fn_hysteria_submenu
+        clear
         mainmenu
         ;;
     5)
         clear
         fn_xray_submenu
+        clear
         mainmenu
         ;;
     4)
         clear
         fn_dns_submenu
+        clear
         mainmenu
         ;;
     3)
         clear
         fn_ac_submenu
+        clear
         mainmenu
         ;;
     2)
         clear
         fn_performance_submenu
+        clear
         mainmenu
         ;;
     1)
         clear
         fn_setup_server_submenu
+        clear
         mainmenu
         ;;
     0)
