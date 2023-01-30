@@ -1,7 +1,7 @@
 version: "3.9"
 services:
-    mtproto:
-        container_name: mtproto
+    mtprotopy:
+        container_name: mtprotopy
         image: 0xlem0nade/mtprotopy:latest
         restart: always
         networks:
@@ -9,9 +9,9 @@ services:
         expose:
             - 5443
         volumes:
-            - $HOME/Docker/mtproto/config/config.toml:/config/config.toml:ro
-            - $HOME/Docker/mtproto/config/users.toml:/config/users.toml:ro
-            - $HOME/Docker/mtproto/client/:/client
+            - $HOME/Docker/mtprotopy/config/config.toml:/config/config.toml:ro
+            - $HOME/Docker/mtprotopy/config/users.toml:/config/users.toml:ro
+            - $HOME/Docker/mtprotopy/client/:/client
         logging:
             driver: "json-file"
             options:
