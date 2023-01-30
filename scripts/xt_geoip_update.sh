@@ -1,32 +1,18 @@
 #!/bin/bash
 
-DISTRO="$(awk -F= '/^NAME/{print $2}' /etc/os-release)"
-DISTRO_VERSION=$(echo "$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)" | tr -d '"')
-MON=$(date +"%m")
-YR=$(date +"%Y")
-
-if [ "$DISTRO_VERSION" == "20.04" ]; then
-    echo -e "${RED}xt_geoip module on Ubuntu 20.04 needs MaxMind database which is no longer available without a license! You need to upgrade to 22.04!"
-    exit 0
-fi
-
 if [ "$(lsmod | grep ^xt_geoip)" ]; then
-    # Download the latest GeoIP database
-    MON=$(date +"%m")
-    YR=$(date +"%Y")
-    if [ ! -d "/usr/share/xt_geoip" ]; then
-        sudo mkdir /usr/share/xt_geoip
+    curl -s "https://raw.githubusercontent.com/0xLem0nade/GFIGeoIP/main/Aggregated_Data/agg_cidrs.csv" >/tmp/agg_cidrs.csv
+
+    OLD_SIZE=$(wc -c </usr/libexec/0xLem0nade/agg_cidr.csv)
+    NEW_SIZE=$(wc -c </tmp/agg_cidrs.csv)
+    if [ "$OLD_SIZE" != "$NEW_SIZE" ]; then
+        sudo mv /tmp/agg_cidrs.csv /usr/libexec/0xLem0nade/agg_cidrs.csv
+        # Convert CSV database to binary format for xt_geoip
+        echo -e "${B_GREEN}Newer aggregated CIDR database found, updating now... ${RESET}"
+        sudo /usr/libexec/0xLem0nade/xt_geoip_build_agg -s -i /usr/libexec/0xLem0nade/agg_cidrs.csv
+        # Load xt_geoip kernel module
+        sudo modprobe xt_geoip
+    else
+        rm /tmp/agg_cidrs.csv
     fi
-
-    sudo curl -s "https://download.db-ip.com/free/dbip-country-lite-${YR}-${MON}.csv.gz" >/usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv.gz
-    sudo gunzip /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv.gz
-
-    # Convert CSV database to binary format for xt_geoip
-    sudo /usr/libexec/xtables-addons/xt_geoip_build -s -i /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv
-
-    # Load xt_geoip kernel module
-    modprobe xt_geoip
-
-    # Cleanup
-    sudo rm /usr/share/xt_geoip/dbip-country-lite-$YR-$MON.csv
 fi
