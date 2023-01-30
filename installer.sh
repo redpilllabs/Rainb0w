@@ -26,141 +26,174 @@ else
     fi
 fi
 
-# Header
-echo -e "####################################################################"
-echo -e "#                                                                  #"
-echo -e "#                                                                  #"
-echo -e "#                Dockerized TLS Proxy Installer                    #"
-echo -e "#                      Version: ${VERSION}                                #"
-echo -e "#                      Author: 0xLem0nade                          #"
-echo -e "#                  Twitter: twitter.com/0xLem0nade                 #"
-echo -e "#                  Telegram Channel: t.me/Lem0net                  #"
-echo -e "#               Telegram Group: t.me/Lem0netDiscussion             #"
-echo -e "#                                                                  #"
-echo -e "#                                                                  #"
-echo -e "####################################################################"
-echo ""
-echo -e "${B_RED}\n*** Make sure you have gone through the README over the GitHub repo before proceeding! ***\n${RESET}"
-echo -e "${YELLOW}NOTE: You will need the following requirements before proceeding:${RESET}"
-echo -e "${CYAN}- A free Cloudflare account"
-echo -e "- A free/paid domain name added to your Cloudflare account"
-echo -e "- Subdomains created for each proxy destination \n${RESET}"
+# Install pre-requisites
+echo -e "${B_GREEN}Checking for requried packages${RESET}"
+fn_install_required_packages
+clear
 
-function fn_exit() {
-    echo "Quitting!"
-    exit 0
-}
-function fn_fail() {
-    echo "Wrong option!"
-}
+# Check for existing setups
+fn_update_installation_status
+clear
 
-function fn_setup_server_submenu() {
+function fn_print_header() {
     echo -ne "
-Choose from options below to proceed:
+    ##############################################################
+    #                                                            #
+    #  ${BB_GREEN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣶⣶⣿⠿⡿⡇${RESET}         Rainbow Proxy Installer    #
+    #  ${BB_MAGENTA}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣴⠿⢛⡫⠭⠄⠒⠈⡉⡁${RESET}              Version: ${VERSION}          #
+    #  ${BB_YELLOW}⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⡾⢫⡡⠋⠁⣀⠤⣔⣖⠩⠭⡇${RESET}            Author: 0xLem0nade      #
+    #  ${BB_CYAN}⠀⠀⠀⠀⠀⠀⠀⢠⣾⠏⡰⠋⢀⣔⡭⠚⢉⣡⣤⣤⣶⡇${RESET}                                    #
+    #  ${BB_GREEN}⠀⠀⠀⠀⠀⠀⢰⣿⠏⡜⠁⡰⡽⠋⣠⣾⣿⣿⠿⠟⠛⠃${RESET}           twitter.com/0xLem0nade   #
+    #  ${BB_YELLOW}⠀⠀⠀⠀⠀⢠⣿⡏⡼⠁⡰⡽⢁⣾⣿⡿⠋⠀⠀⠀⠀⠀${RESET}               t.me/Lem0net         #
+    #  ${BB_RED}⠀⠀⠀⠀⠀⣾⣿⣰⠃⣰⢳⠁⣼⣿⡟⠀⠀⠀⠀⠀⠀⠀${RESET}          t.me/Lem0netDiscussion    #
+    #  ${BB_MAGENTA}⠀⠀⠀⡠⠒⠙⠓⡯⠒⠉⠉⠉⠛⢿⠁⠀⠀⠀⠀⠀⠀⠀${RESET}                                    #
+    #  ${BB_BLUE}⠀⠀⢰⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⡄⠀⠀⠀⠀⠀⠀⠀${RESET}             #WomenLifeFreedom      #
+    #  ${BB_BLUE}⢠⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⡄⠀⠀⠀⠀⠀${RESET}                                    #
+    #  ${BB_CYAN}⢹⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⠀⠀⠀⠀⠀${RESET}                                    #
+    #  ${BB_YELLOW}⠀⠑⠠⠤⠤⡀⠀⠀⠀⠀⢀⠤⢀⣀⠠⠜⠁⠀⠀⠀⠀⠀${RESET}                                    #
+    #  ${BB_GREEN}⠀⠀⠀⠀⠀⠈⠐⠒⠒⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀${RESET}                                    #
+    ##############################################################
+    "
+}
 
-${GREEN}1)${RESET} Update packages
-${GREEN}2)${RESET} Install Docker
-${GREEN}3)${RESET} Setup Firewall           ${MAGENTA}[Security]${RESET} (Optional)
-${GREEN}4)${RESET} Block outbound to Iran   ${MAGENTA}[Security]${RESET} (Optional)
-${GREEN}5)${RESET} Install ZRAM             ${CYAN}[Performance]${RESET} (Optional)
-${GREEN}6)${RESET} Tune Network Stack       ${CYAN}[Performance]${RESET} (Optional)
-${RED}0)${RESET} Return to Main Menu
+function mainmenu_limited() {
+    fn_print_header
+    echo -ne "
+${BB_YELLOW}<<< EXISTING SETUP DETECTED AT '${DOCKER_HOME}' >>>${RESET}
+${B_CYAN}(i) To add/change proxies, you have to remove
+the existing setup and re-run the installer!
+Otherwise only the following options will be accessible.>>>${RESET}
+
+*** Main Menu ***
+
+${GREEN}1)${RESET} Setup Server
+${GREEN}2)${RESET} Performance Tuning
+${GREEN}3)${RESET} Access Controls
+${GREEN}4)${RESET} Get Client Configs
+${CYAN}5)${RESET} REMOVE EXISTING SETUP
+${RED}0)${RESET} Exit
+
 Choose an option: "
     read -r ans
     case $ans in
-    6)
-        clear
-        fn_tune_system
-        fn_setup_server_submenu
-        ;;
     5)
         clear
-        fn_setup_zram
-        fn_setup_server_submenu
+        fn_clear_existing_setup
+        clear
+        mainmenu
         ;;
     4)
         clear
-        fn_block_outbound_connections_to_iran
-        fn_enable_xtgeoip_cronjob
-        fn_setup_server_submenu
+        fn_get_client_configs
+        exit 0
         ;;
     3)
         clear
-        fn_setup_firewall
-        fn_setup_server_submenu
+        fn_ac_submenu
+        mainmenu
         ;;
     2)
         clear
-        fn_install_docker
-        fn_setup_server_submenu
+        fn_performance_submenu
+        mainmenu
         ;;
     1)
         clear
-        fn_upgrade_os
         fn_setup_server_submenu
+        mainmenu
         ;;
     0)
-        clear
-        mainmenu
+        fn_exit
         ;;
     *)
         fn_fail
         clear
+        mainmenu
+        ;;
+    esac
+}
+
+function mainmenu_new() {
+    fn_print_header
+    echo -ne "
+*** Main Menu ***
+
+${GREEN}1)${RESET} Setup Server
+${GREEN}2)${RESET} Performance Settings
+${GREEN}3)${RESET} Access Controls
+${GREEN}4)${RESET} DNS over HTTPS/TLS
+${GREEN}5)${RESET} Xray/v2ray
+${GREEN}6)${RESET} Hysteria
+${GREEN}7)${RESET} MTProto (Telegram)
+${GREEN}8)${RESET} Deploy Proxies
+${GREEN}9)${RESET} Get Client Configs
+${RED}0)${RESET} Exit
+
+Choose an option: "
+    read -r ans
+    case $ans in
+    9)
+        clear
+        fn_get_client_configs
+        exit 0
+        ;;
+    8)
+        clear
+        fn_deploy
+        mainmenu
+        ;;
+    7)
+        clear
+        fn_mtproto_submenu
+        mainmenu
+        ;;
+    6)
+        clear
+        fn_hysteria_submenu
+        mainmenu
+        ;;
+    5)
+        clear
+        fn_xray_submenu
+        mainmenu
+        ;;
+    4)
+        clear
+        fn_dns_submenu
+        mainmenu
+        ;;
+    3)
+        clear
+        fn_ac_submenu
+        mainmenu
+        ;;
+    2)
+        clear
+        fn_performance_submenu
+        mainmenu
+        ;;
+    1)
+        clear
         fn_setup_server_submenu
+        mainmenu
+        ;;
+    0)
+        fn_exit
+        ;;
+    *)
+        fn_fail
+        clear
+        mainmenu
         ;;
     esac
 }
 
 function mainmenu() {
-    echo -ne "
-Choose from options below to proceed:
-
-${GREEN}1)${RESET} Setup Server
-${GREEN}2)${RESET} Performance Settings
-${GREEN}3)${RESET} Access Controls
-${RED}0)${RESET} Exit
-Choose an option: "
-    read -r ans
-    case $ans in
-    6)
-        clear
-        fn_get_client_configs
-        fn_exit
-        ;;
-    5)
-        clear
-        fn_start_proxies
-        mainmenu
-        ;;
-    4)
-        clear
-        fn_config_mtproto_submenu
-        mainmenu
-        ;;
-    3)
-        clear
-        fn_config_hysteria_submenu
-        mainmenu
-        ;;
-    2)
-        clear
-        fn_config_xray_submenu
-        mainmenu
-        ;;
-    1)
-        clear
-        fn_setup_server_submenu
-        mainmenu
-        ;;
-    0)
-        fn_exit
-        ;;
-    *)
-        fn_fail
-        clear
-        mainmenu
-        ;;
-    esac
+    if [ "$EXISTING_SETUP" = false ]; then
+        mainmenu_new
+    else
+        mainmenu_limited
+    fi
 }
 
 mainmenu
