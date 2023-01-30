@@ -154,6 +154,7 @@ function fn_deploy() {
         if [[ "${#SNI_DICT[@]}" -ne 0 ]]; then
             echo -e "\n\n"
             fn_typewriter "Firing up engines... 🚀" $B_RED
+            echo -e "\n"
             fn_start_caddy $CADDY_CONFIG_FILE
             echo -e "${B_YELLOW}\nWaiting 10 seconds for TLS certificates to fully download...\n"
             sleep 10
