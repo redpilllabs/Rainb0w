@@ -10,9 +10,15 @@ function fn_is_container_running() {
 }
 
 function fn_setup_docker_vols_networks() {
-    echo -e "${B_GREEN}Creating Docker volumes and networks ${RESET}"
-    docker volume create sockets
-    docker network create caddy
+    if [ -z "$(docker volume inspect sockets | grep CreatedAt)" ]; then
+        echo -e "${B_GREEN}Creating a Docker volume to share the unix sockets ${RESET}"
+        docker volume create sockets
+    fi
+    if [ -z "$(docker network inspect caddy | grep Created)" ]; then
+        echo -e "${B_GREEN}Creating a Docker network to share among containers ${RESET}"
+        docker network create caddy
+    fi
+
 }
 
 function fn_start_docker_container() {
