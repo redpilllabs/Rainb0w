@@ -52,8 +52,8 @@
 
 ```
 cd ~
-git clone https://github.com/0xLem0nade/DockerizedProxyInstaller.git
-cd DockerizedProxyInstaller
+git clone https://github.com/0xLem0nade/Rainbow.git
+cd Rainbow
 chmod +x installer.sh
 ./installer.sh
 ```
