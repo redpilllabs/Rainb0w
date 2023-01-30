@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 2.0
+
+- Add DNS over HTTPS/TLS support
+- Add support for GeoIP or DNS filtering
+- Major overhaul of the user experience
+- Added SNI entry retention and editing
+- Fixed many 🪲
+
 ## Version 1.4
 
 - Make compatible transports [gRPC, Websocket] CDN ready
