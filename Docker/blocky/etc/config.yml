@@ -22,24 +22,23 @@ blocking:
   # definition of blacklist groups. Can be external link (http/https) or local file
   blackLists:
     ads:
-      - https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
-      - https://adaway.org/hosts.txt
       - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
       - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
-    special:
-      - https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts
-    regional:
+    porn:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts
+      - https://raw.githubusercontent.com/4skinSkywalker/Anti-Porn-HOSTS-File/master/HOSTS.txt
+    ir_cctld:
       - |
-        # Block .ir domains
         /\.ir$/
+    cn_cctld:
+      - |
+        /\.cn$/
 
   # definition: which groups should be applied for which client
   clientGroupsBlock:
     # default will be used, if no special definition for a client name exists
     default:
       - ads
-      - special
-      - regional
 
   # which response will be sent, if query is blocked:
   # zeroIp: 0.0.0.0 will be returned (default)
@@ -54,13 +53,13 @@ blocking:
   # 0 value -> use default
   refreshPeriod: 4h
   # optional: timeout for list download (each url). Default: 60s. Use large values for big lists or slow internet connections
-  downloadTimeout: 4m
+  downloadTimeout: 60s
   # optional: Download attempt timeout. Default: 60s
-  downloadAttempts: 5
+  downloadAttempts: 10
   # optional: Time between the download attempts. Default: 1s
   downloadCooldown: 10s
   # optional: if failOnError, application startup will fail if at least one list can't be downloaded / opened. Default: blocking
-  startStrategy: failOnError
+  startStrategy: blocking
 
 # optional: configuration for caching of DNS responses
 caching:
@@ -110,11 +109,7 @@ prometheus:
 
 # optional: DNS listener port(s) and bind ip address(es), default 53 (UDP and TCP). Example: 53, :53, "127.0.0.1:5353,[::1]:5353"
 port: 53
-# optional: Port(s) and bind ip address(es) for DoT (DNS-over-TLS) listener. Example: 853, 127.0.0.1:853
-tlsPort: 0
-# optional: HTTPS listener port(s) and bind ip address(es), default empty = no http listener. If > 0, will be used for prometheus metrics, pprof, REST API, DoH... Example: 443, :443, 127.0.0.1:443
 httpPort: 0
-httpsPort: 0
 # optional: use this DNS server to resolve blacklist urls and upstream DNS servers. Useful if no DNS resolver is configured and blocky needs to resolve a host name. Format net:IP:port, net must be udp or tcp
 bootstrapDns: tcp+udp:1.1.1.1
 
@@ -134,15 +129,18 @@ hostsFile:
   # optional: Whether loopback hosts addresses (127.0.0.0/8 and ::1) should be filtered or not, default: false
   filterLoopback: true
 # optional: Log level (one from debug, info, warn, error). Default: info
-logLevel: debug
+logLevel: warn
 # optional: Log format (text or json). Default: text
 logFormat: text
 # optional: log timestamps. Default: true
 logTimestamp: true
 # optional: obfuscate log output (replace all alphanumeric characters with *) for user sensitive data like request domains or responses to increase privacy. Default: false
-logPrivacy: false
+logPrivacy: true
 
 # optional: add EDE error codes to dns response
 ede:
   # enabled if true, Default: false
   enable: false
+#
+# DoH/DoT settings
+#

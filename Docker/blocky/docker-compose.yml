@@ -14,11 +14,20 @@ services:
     ports:
       - "53:53"
       - "53:53/udp"
+      - "853:853"
+      - "853:853/udp"
+    expose:
+      - 443
     environment:
       - TZ=UTC
     volumes:
+      - caddy_data:/etc/letsencrypt:ro
       - /var/log:/logs
       - $HOME/Docker/blocky/etc/config.yml:/app/config.yml
+
+volumes:
+  caddy_data:
+    external: true
 
 networks:
   caddy:
