@@ -122,7 +122,7 @@ function fn_clear_existing_setup() {
         echo -e "${B_GREEN}Starting afresh... ${RESET}"
         fn_stop_all_docker_containers
         rm -rf $DOCKER_HOME
-        echo -e "${BB_RED}\nGo ahead and re-run the 'installer.sh' \n${RESET}"
+        echo -e "${BB_GREEN}\nGo ahead and re-run the 'installer.sh' \n${RESET}"
         exit 0
     else
         echo -e "Okay! Come back when you're sure! "
@@ -152,7 +152,7 @@ function fn_deploy() {
     if [ "$IS_DOCKER_INSTALLED" = true ]; then
         # Do we have at least one domain name input?
         if [[ "${#SNI_DICT[@]}" -ne 0 ]]; then
-            fn_typewriter "Firing up engines... 🚀" $B_RED
+            fn_typewriter "\n\nFiring up engines... 🚀 \n" $B_RED
             fn_start_caddy $CADDY_CONFIG_FILE
             echo -e "${B_YELLOW}\nWaiting 10 seconds for TLS certificates to fully download...\n"
             sleep 10
