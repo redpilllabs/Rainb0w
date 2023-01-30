@@ -24,6 +24,16 @@ B_MAGENTA="\033[1;35m"
 B_CYAN="\033[1;36m"
 B_WHITE="\033[1;37m"
 
+# Bold Blinkers
+BB_BLACK="\033[1;30;5m"
+BB_RED="\033[1;31;5m"
+BB_GREEN="\033[1;32;5m"
+BB_YELLOW="\033[1;33;5m"
+BB_BLUE="\033[1;34;5m"
+BB_MAGENTA="\033[1;35;5m"
+BB_CYAN="\033[1;36;5m"
+BB_WHITE="\033[1;37;5m"
+
 # Underline
 U_BLACK="\033[4;30m"
 U_RED="\033[4;31m"
