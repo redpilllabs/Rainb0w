@@ -16,6 +16,12 @@ function fn_configure_hysteria_client() {
 
 function fn_add_firewall_rules() {
     echo -e "${GREEN}Allowing Hysteria UDP port ${HYSTERIA_PORT} traffic in the firewall ${RESET}"
+    if [ "$(sudo iptables -L | grep 'Allow Hysteria')" ]; then
+        while sudo iptables -L --line-number | grep "Allow Hysteria" >/dev/null; do sudo iptables -D INPUT $(sudo iptables -L --line-number | grep "Allow Hysteria" | head -1 | awk '{print $1}'); done
+    fi
+    if [ "$(sudo ip6tables -L | grep 'Allow Hysteria')" ]; then
+        while sudo ip6tables -L --line-number | grep "Allow Hysteria" >/dev/null; do sudo ip6tables -D INPUT $(sudo ip6tables -L --line-number | grep "Allow Hysteria" | head -1 | awk '{print $1}'); done
+    fi
     sudo iptables -A INPUT -p udp --dport $HYSTERIA_PORT -m comment --comment "Allow Hysteria" -j ACCEPT
     sudo ip6tables -A INPUT -p udp --dport $HYSTERIA_PORT -m comment --comment "Allow Hysteria" -j ACCEPT
 }
