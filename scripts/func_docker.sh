@@ -30,12 +30,28 @@ function fn_start_docker_container() {
 
 function fn_stop_all_docker_containers() {
     echo -e "${B_YELLOW}Stopping all running proxy containers ${RESET}"
-    docker compose -f $DOCKER_HOME/xray/docker-compose.yml down --remove-orphans
-    docker compose -f $DOCKER_HOME/mtprotopy/docker-compose.yml down --remove-orphans
-    docker compose -f $DOCKER_HOME/hysteria/docker-compose.yml down --remove-orphans
-    docker compose -f $DOCKER_HOME/caddy/docker-compose.yml down --remove-orphans
-    docker compose -f $DOCKER_HOME/blocky/docker-compose.yml down --remove-orphans
-    echo -e "${B_GREEN}<<< All containers stopped! >>> ${RESET}"
+
+    if [ "$(fn_is_container_running xray)" = true ]; then
+        docker compose -f $DOCKER_HOME/xray/docker-compose.yml down --remove-orphans
+    fi
+
+    if [ "$(fn_is_container_running xray)" = true ]; then
+        docker compose -f $DOCKER_HOME/mtprotopy/docker-compose.yml down --remove-orphans
+    fi
+
+    if [ "$(fn_is_container_running xray)" = true ]; then
+        docker compose -f $DOCKER_HOME/hysteria/docker-compose.yml down --remove-orphans
+    fi
+
+    if [ "$(fn_is_container_running xray)" = true ]; then
+        docker compose -f $DOCKER_HOME/blocky/docker-compose.yml down --remove-orphans
+    fi
+
+    if [ "$(fn_is_container_running xray)" = true ]; then
+        docker compose -f $DOCKER_HOME/caddy/docker-compose.yml down --remove-orphans
+    fi
+
+    echo -e "${B_GREEN}<<< All Docker containers unloaded to the dock! >>> ${RESET}"
 }
 
 function fn_install_docker() {
