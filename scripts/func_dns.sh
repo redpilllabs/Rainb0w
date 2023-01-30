@@ -1,12 +1,12 @@
 #!/bin/bash
 
 function fn_configure_blocky() {
-    yq '. += {"httpPort": 0}' $1 >$1
-    yq '. += {"httpsPort": 443}' $1 >$1
-    yq '. += {"tlsPort": 853}' $1 >$1
-    yq '. += {"minTlsServeVersion": 1.3}' $1 >$1
-    yq ". += {\"certFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${SNI_DICT[DNS_SUBDOMAIN]}/${SNI_DICT[DNS_SUBDOMAIN]}.crt\"}" $1 >$1
-    yq ". += {\"keyFile\": \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${SNI_DICT[DNS_SUBDOMAIN]}/${SNI_DICT[DNS_SUBDOMAIN]}.key\"}" $1 >$1
+    yq -i '.httpPort = 0' $1
+    yq -i '.httpsPort = 443' $1
+    yq -i '.tlsPort = 853' $1
+    yq -i '.minTlsServeVersion = 1.3' $1
+    yq -i ".certFile = \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${SNI_DICT[DNS_SUBDOMAIN]}/${SNI_DICT[DNS_SUBDOMAIN]}.crt\"" $1
+    yq -i ".keyFile = \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${SNI_DICT[DNS_SUBDOMAIN]}/${SNI_DICT[DNS_SUBDOMAIN]}.key\"" $1
 }
 
 function fn_configure_blocky_client() {
