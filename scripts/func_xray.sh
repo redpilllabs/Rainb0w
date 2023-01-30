@@ -28,35 +28,7 @@ function fn_xray_add_vless_tcp() {
                 }
             }
         }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${SNI_DICT[VLESS_TCP_SUBDOMAIN]}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"xray:3443\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[VLESS_TCP_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[VLESS_TCP_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[VLESS_TCP_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
+    jq ".inbounds +=  [${xray_entry}]" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
 function fn_xray_add_vless_grpc() {
@@ -85,35 +57,7 @@ function fn_xray_add_vless_grpc() {
                 }
             }
         }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"unix//dev/shm/Xray-VLESS-gRPC.socket\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
+    jq ".inbounds +=  [${xray_entry}]" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
 function fn_xray_add_vless_ws() {
@@ -142,35 +86,7 @@ function fn_xray_add_vless_ws() {
                 }
             }
         }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${SNI_DICT[VLESS_WS_SUBDOMAIN]}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"unix//dev/shm/Xray-VLESS-WSS.socket\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[VLESS_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[VLESS_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[VLESS_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
+    jq ".inbounds +=  [${xray_entry}]" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
 function fn_xray_add_trojan_h2() {
@@ -205,35 +121,7 @@ function fn_xray_add_trojan_h2() {
                 }
             }
         }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${SNI_DICT[TROJAN_H2_SUBDOMAIN]}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"xray:3444\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[TROJAN_H2_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[TROJAN_H2_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[TROJAN_H2_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
+    jq ".inbounds +=  [${xray_entry}]" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
 function fn_xray_add_trojan_grpc() {
@@ -261,35 +149,7 @@ function fn_xray_add_trojan_grpc() {
                 }
             }
         }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"unix//dev/shm/Xray-Trojan-gRPC.socket\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
+    jq ".inbounds +=  [${xray_entry}]" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
 function fn_xray_add_trojan_ws() {
@@ -318,35 +178,7 @@ function fn_xray_add_trojan_ws() {
                 }
             }
         }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${SNI_DICT[TROJAN_WS_SUBDOMAIN]}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"xray:3445\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[TROJAN_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[TROJAN_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[TROJAN_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
+    jq ".inbounds +=  [${xray_entry}]" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
 function fn_xray_add_vmess_ws() {
@@ -376,173 +208,167 @@ function fn_xray_add_vmess_ws() {
                 }
             }
         }"
-    jq ".inbounds[.inbounds| length] |= . + ${xray_entry}" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
-    # Edit Caddy config.json
-    caddy_entry="{
-                    \"match\": [
-                        {
-                            \"tls\": {
-                                \"sni\": [
-                                    \"${SNI_DICT[VMESS_WS_SUBDOMAIN]}\"
-                                ]
-                            }
-                        }
-                    ],
-                    \"handle\": [
-                        {
-                            \"handler\": \"proxy\",
-                            \"upstreams\": [
-                                {
-                                    \"dial\": [
-                                        \"xray:3446\"
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }"
-    tmp_caddy=$(jq ".apps.layer4.servers.tls_proxy.routes[.routes| length] |= . + ${caddy_entry}" $2)
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[VMESS_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[VMESS_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[VMESS_WS_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $2
+    jq ".inbounds +=  [${xray_entry}]" $1 >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
-function fn_configure_camouflage_website() {
-    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${CAMOUFLAGE_DOMAIN}\"]" $1)
-    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy")
-    tmp_caddy=$(jq ".apps.http.servers.web.routes[0].match[0].host += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy")
-    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${CAMOUFLAGE_DOMAIN}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $1
+function fn_logrotate_xray() {
+    if [ ! -f "/etc/logrotate.d/xray" ]; then
+        sudo touch /etc/logrotate.d/xray
+        sudo sh -c 'echo "/var/log/xray.log
+{
+	size 20M
+    rotate 5
+    copytruncate
+	missingok
+	notifempty
+	compress
+	delaycompress
+}" > /etc/logrotate.d/xray'
+    fi
 }
 
 function fn_configure_xray() {
-    if [ -v "${SNI_DICT[VLESS_TCP_SUBDOMAIN]}" ]; then
-        fn_xray_add_vless_tcp $1 $2
+    if [ ! -z "${SNI_DICT[VLESS_TCP_SUBDOMAIN]}" ]; then
+        fn_xray_add_vless_tcp $1
     fi
-    if [ -v "${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}" ]; then
-        fn_xray_add_vless_grpc $1 $2
+    if [ ! -z "${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}" ]; then
+        fn_xray_add_vless_grpc $1
     fi
-    if [ -v "${SNI_DICT[VLESS_WS_SUBDOMAIN]}" ]; then
-        fn_xray_add_vless_ws $1 $2
+    if [ ! -z "${SNI_DICT[VLESS_WS_SUBDOMAIN]}" ]; then
+        fn_xray_add_vless_ws $1
     fi
-    if [ -v "${SNI_DICT[TROJAN_H2_SUBDOMAIN]}" ]; then
-        fn_xray_add_trojan_h2 $1 $2
+    if [ ! -z "${SNI_DICT[TROJAN_H2_SUBDOMAIN]}" ]; then
+        fn_xray_add_trojan_h2 $1
     fi
-    if [ -v "${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}" ]; then
-        fn_xray_add_trojan_grpc $1 $2
+    if [ ! -z "${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}" ]; then
+        fn_xray_add_trojan_grpc $1
     fi
-    if [ -v "${SNI_DICT[TROJAN_WS_SUBDOMAIN]}" ]; then
-        fn_xray_add_trojan_ws $1 $2
+    if [ ! -z "${SNI_DICT[TROJAN_WS_SUBDOMAIN]}" ]; then
+        fn_xray_add_trojan_ws $1
     fi
-    if [ -v "${SNI_DICT[VMESS_WS_SUBDOMAIN]}" ]; then
-        fn_xray_add_vmess_ws $1 $2
+    if [ ! -z "${SNI_DICT[VMESS_WS_SUBDOMAIN]}" ]; then
+        fn_xray_add_vmess_ws $1
     fi
 }
 
-function fn_print_xray_client_urls() {
-    if [ -d $DOCKER_DST_DIR/xray/client ]; then
-        mkdir -p $DOCKER_DST_DIR/xray/client
+function fn_configure_xray_client() {
+    if [ ! -d $DOCKER_HOME/xray/client ]; then
+        mkdir -p $DOCKER_HOME/xray/client
     fi
-    if [ -f $DOCKER_DST_DIR/xray/client/xray_share_urls.txt ]; then
-        rm $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-        touch $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+    if [ -f $DOCKER_HOME/xray/client/xray_share_urls.txt ]; then
+        rm $DOCKER_HOME/xray/client/xray_share_urls.txt
+        touch $DOCKER_HOME/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${SNI_DICT[VLESS_TCP_SUBDOMAIN]}" ]; then
-        echo -e "\nvless://${VLESS_TCP_UUID}@${SNI_DICT[VLESS_TCP_SUBDOMAIN]}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${SNI_DICT[VLESS_TCP_SUBDOMAIN]}#0xLem0nade+VLESS+TCP" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\nvless://${VLESS_TCP_UUID}@${SNI_DICT[VLESS_TCP_SUBDOMAIN]}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&sni=${SNI_DICT[VLESS_TCP_SUBDOMAIN]}#0xLem0nade+VLESS+TCP" >$DOCKER_HOME/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}" ]; then
-        echo -e "\nvless://${VLESS_GRPC_UUID}@${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}:443?mode=gun&security=tls&encryption=none&alpn=h2,http/1.1&type=grpc&serviceName=&sni=${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}#0xLem0nade+VLESS+gRPC" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\nvless://${VLESS_GRPC_UUID}@${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}:443?mode=gun&security=tls&encryption=none&alpn=h2,http/1.1&type=grpc&serviceName=&sni=${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}#0xLem0nade+VLESS+gRPC" >>$DOCKER_HOME/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${SNI_DICT[VLESS_WS_SUBDOMAIN]}" ]; then
-        echo -e "\nvless://${VLESS_WS_UUID}@${SNI_DICT[VLESS_WS_SUBDOMAIN]}:443?security=tls&encryption=none&alpn=h2,http/1.1&type=ws&sni=${SNI_DICT[VLESS_WS_SUBDOMAIN]}#0xLem0nade+VLESS+WS" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\nvless://${VLESS_WS_UUID}@${SNI_DICT[VLESS_WS_SUBDOMAIN]}:443?security=tls&encryption=none&alpn=h2,http/1.1&type=ws&sni=${SNI_DICT[VLESS_WS_SUBDOMAIN]}#0xLem0nade+VLESS+WS" >>$DOCKER_HOME/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${SNI_DICT[TROJAN_H2_SUBDOMAIN]}" ]; then
-        echo "\ntrojan://${TROJAN_H2_PASSWORD}@${SNI_DICT[TROJAN_H2_SUBDOMAIN]}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${SNI_DICT[TROJAN_H2_SUBDOMAIN]}&type=http&sni=${SNI_DICT[TROJAN_H2_SUBDOMAIN]}#0xLem0nade+Trojan+H2" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\ntrojan://${TROJAN_H2_PASSWORD}@${SNI_DICT[TROJAN_H2_SUBDOMAIN]}:443?path=${TROJAN_H2_PATH}&security=tls&alpn=h2,http/1.1&host=${SNI_DICT[TROJAN_H2_SUBDOMAIN]}&type=http&sni=${SNI_DICT[TROJAN_H2_SUBDOMAIN]}#0xLem0nade+Trojan+H2" >>$DOCKER_HOME/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}" ]; then
-        echo -e "\ntrojan://${TROJAN_GRPC_PASSWORD}@${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}:443?mode=gun&security=tls&alpn=h2,http/1.1&type=grpc&sni=${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}#0xLem0nade+Trojan+gRPC" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\ntrojan://${TROJAN_GRPC_PASSWORD}@${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}:443?mode=gun&security=tls&alpn=h2,http/1.1&type=grpc&sni=${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}#0xLem0nade+Trojan+gRPC" >>$DOCKER_HOME/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${SNI_DICT[TROJAN_WS_SUBDOMAIN]}" ]; then
-        echo "\ntrojan://${TROJAN_WS_PASSWORD}@${SNI_DICT[TROJAN_WS_SUBDOMAIN]}:443?security=tls&alpn=h2,http/1.1&type=ws&sni=${SNI_DICT[TROJAN_WS_SUBDOMAIN]}#0xLem0nade+Trojan+WS" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\ntrojan://${TROJAN_WS_PASSWORD}@${SNI_DICT[TROJAN_WS_SUBDOMAIN]}:443?security=tls&alpn=h2,http/1.1&type=ws&sni=${SNI_DICT[TROJAN_WS_SUBDOMAIN]}#0xLem0nade+Trojan+WS" >>$DOCKER_HOME/xray/client/xray_share_urls.txt
     fi
     if [ ! -z "${SNI_DICT[VMESS_WS_SUBDOMAIN]}" ]; then
         vmess_config="{\"add\":\"${SNI_DICT[VMESS_WS_SUBDOMAIN]}\",\"aid\":\"0\",\"alpn\":\"h2,http/1.1\",\"host\":\"${SNI_DICT[VMESS_WS_SUBDOMAIN]}\",\"id\":\"${VMESS_WS_UUID}\",\"net\":\"ws\",\"path\":\"\",\"port\":\"443\",\"ps\":\"0xLem0nade Vmess WS\",\"scy\":\"none\",\"sni\":\"${SNI_DICT[VMESS_WS_SUBDOMAIN]}\",\"tls\":\"tls\",\"type\":\"\",\"v\":\"2\"}"
         vmess_config=$(echo $vmess_config | base64 | tr -d '\n')
-        echo "\nvmess://${vmess_config}" | tee -a $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
-    fi
-
-    # Print share URLs
-    if [ -s $DOCKER_DST_DIR/xray/client/xray_share_urls.txt ]; then
-        echo -e "${GREEN}########################################"
-        echo -e "#           Xray/v2ray Proxies         #"
-        echo -e "########################################${RESET}"
-        cat $DOCKER_DST_DIR/xray/client/xray_share_urls.txt
+        echo -e "\nvmess://${vmess_config}" >>$DOCKER_HOME/xray/client/xray_share_urls.txt
     fi
 }
 
-function fn_config_xray_submenu() {
+function fn_start_xray() {
+    fn_logrotate_xray
+    fn_configure_xray $1
+    fn_start_docker_container xray
+    fn_configure_xray_client
+}
+
+function fn_print_xray_client_urls() {
+    # Print share URLs
+    if [ -s "$DOCKER_HOME/xray/client/xray_share_urls.txt" ]; then
+        echo -e "${B_MAGENTA}\n########################################"
+        echo -e "#           Xray/v2ray Proxies         #"
+        echo -e "########################################${RESET}"
+        cat $DOCKER_HOME/xray/client/xray_share_urls.txt
+        echo -e ""
+        echo -e "${B_YELLOW}NOTE: Remember to set the 'uTLS Fingerprint' in your client"
+        echo -e "sharing urls do not include this setting by default!${RESET}"
+    fi
+}
+
+function fn_xray_submenu() {
     echo -ne "
 *** Xray ***
 ${IBG_YELLOW}${BI_BLACK}BLANK ENTRIES WILL BE IGNORED.${RESET}
 
-${GREEN}1)${RESET} Camouflage domain:                       ${B_GREEN}${SNI_DICT[CAMOUFLAGE_DOMAIN]}${RESET}
-${GREEN}2)${RESET} VLESS [TCP]        [Direct]:             ${B_GREEN}${SNI_DICT[VLESS_TCP_SUBDOMAIN]}${RESET}
-${GREEN}3)${RESET} VLESS [gRPC]       [CDN Compatible]:     ${B_GREEN}${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}${RESET}
-${GREEN}4)${RESET} VLESS [Websocket]  [CDN Compatible]:     ${B_GREEN}${SNI_DICT[VLESS_WS_SUBDOMAIN]}${RESET}
-${GREEN}5)${RESET} Trojan [HTTP2]     [Direct]:             ${B_GREEN}${SNI_DICT[TROJAN_H2_SUBDOMAIN]}${RESET}
-${GREEN}6)${RESET} Trojan [gRPC]      [CDN Compatible]:     ${B_GREEN}${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}${RESET}
-${GREEN}7)${RESET} Trojan [Websocket] [CDN Compatible]:     ${B_GREEN}${SNI_DICT[TROJAN_WS_SUBDOMAIN]}${RESET}
-${GREEN}8)${RESET} Vmess [Websocket]  [CDN Compatible]:     ${B_GREEN}${SNI_DICT[VMESS_WS_SUBDOMAIN]}${RESET}
+${GREEN}1)${RESET} VLESS [TCP]        [Direct]:             ${B_GREEN}${SNI_DICT[VLESS_TCP_SUBDOMAIN]}${RESET}
+${GREEN}2)${RESET} VLESS [gRPC]       [CDN Compatible]:     ${B_GREEN}${SNI_DICT[VLESS_GRPC_SUBDOMAIN]}${RESET}
+${GREEN}3)${RESET} VLESS [Websocket]  [CDN Compatible]:     ${B_GREEN}${SNI_DICT[VLESS_WS_SUBDOMAIN]}${RESET}
+${GREEN}4)${RESET} Trojan [HTTP2]     [Direct]:             ${B_GREEN}${SNI_DICT[TROJAN_H2_SUBDOMAIN]}${RESET}
+${GREEN}5)${RESET} Trojan [gRPC]      [CDN Compatible]:     ${B_GREEN}${SNI_DICT[TROJAN_GRPC_SUBDOMAIN]}${RESET}
+${GREEN}6)${RESET} Trojan [Websocket] [CDN Compatible]:     ${B_GREEN}${SNI_DICT[TROJAN_WS_SUBDOMAIN]}${RESET}
+${GREEN}7)${RESET} Vmess [Websocket]  [CDN Compatible]:     ${B_GREEN}${SNI_DICT[VMESS_WS_SUBDOMAIN]}${RESET}
+${GREEN}8)${RESET} Fallback (camouflage) domain             ${B_GREEN}${SNI_DICT[FALLBACK_DOMAIN]}${RESET}
 ${RED}0)${RESET} Return to Main Menu
+
 Choose an option: "
     read -r ans
     case $ans in
     8)
         clear
-        fn_prompt_domain "Vmess [Websocket]" VMESS_WS_SUBDOMAIN
+        fn_prompt_domain "Fallback camouflage website" FALLBACK_DOMAIN
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     7)
         clear
-        fn_prompt_domain "Trojan [Websocket]" TROJAN_WS_SUBDOMAIN
+        fn_prompt_domain "Vmess [Websocket]" VMESS_WS_SUBDOMAIN
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     6)
         clear
-        fn_prompt_domain "Trojan [gRPC]" TROJAN_GRPC_SUBDOMAIN
+        fn_prompt_domain "Trojan [Websocket]" TROJAN_WS_SUBDOMAIN
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     5)
         clear
-        fn_prompt_domain "Trojan [HTTP2]" TROJAN_H2_SUBDOMAIN
+        fn_prompt_domain "Trojan [gRPC]" TROJAN_GRPC_SUBDOMAIN
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     4)
         clear
-        fn_prompt_domain "VLESS [WS]" VLESS_WS_SUBDOMAIN
+        fn_prompt_domain "Trojan [HTTP2]" TROJAN_H2_SUBDOMAIN
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     3)
         clear
-        fn_prompt_domain "VLESS [gRPC]" VLESS_GRPC_SUBDOMAIN
+        fn_prompt_domain "VLESS [WS]" VLESS_WS_SUBDOMAIN
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     2)
         clear
-        fn_prompt_domain "VLESS [TCP]" VLESS_TCP_SUBDOMAIN
+        fn_prompt_domain "VLESS [gRPC]" VLESS_GRPC_SUBDOMAIN
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     1)
         clear
-        fn_prompt_domain "Camouflage website" CAMOUFLAGE_DOMAIN
+        fn_prompt_domain "VLESS [TCP]" VLESS_TCP_SUBDOMAIN
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     0)
         clear
@@ -551,7 +377,7 @@ Choose an option: "
     *)
         fn_fail
         clear
-        fn_config_xray_submenu
+        fn_xray_submenu
         ;;
     esac
 }

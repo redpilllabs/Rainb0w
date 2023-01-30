@@ -1,71 +1,62 @@
 #!/bin/bash
 
-function fn_setup_docker() {
-    echo -e "${GREEN}Creating Docker volumes and networks ${RESET}"
+function fn_is_container_running() {
+    local CID=$(docker ps -q -f status=running -f name=^/$1$)
+    if [ "$CID" ]; then
+        echo true
+    else
+        echo false
+    fi
+}
+
+function fn_setup_docker_vols_networks() {
+    echo -e "${B_GREEN}Creating Docker volumes and networks ${RESET}"
     docker volume create sockets
     docker network create caddy
 }
 
-function fn_docker_container_launcher() {
-    CID=$(docker ps -q -f status=running -f name=^/$1$)
-    if [ ! "${CID}" ]; then
-        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml up -d
-    else
-        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml down --remove-orphans
+function fn_start_docker_container() {
+    local IS_CONTAINER_RUNNING=$(fn_is_container_running $1)
+    if [ "$IS_CONTAINER_RUNNING" = true ]; then
+        echo -e "${B_YELLOW}\n$1 Docker container is already running. Restarting it for changes to take affect...${RESET}"
+        docker compose -f $DOCKER_HOME/$1/docker-compose.yml down --remove-orphans
         sleep 1
-        docker compose -f $DOCKER_DST_DIR/$1/docker-compose.yml up -d
+        docker compose -f $DOCKER_HOME/$1/docker-compose.yml up -d
+    else
+        echo -e "${B_GREEN}\nStarting $1 Docker container..."
+        docker compose -f $DOCKER_HOME/$1/docker-compose.yml up -d
     fi
 }
 
-function fn_spinup_docker_containers() {
-    trap - INT
-    echo -e "${GREEN}\nLaunching Caddy...${RESET}"
-    fn_docker_container_launcher caddy
-    echo -e "${CYAN}Waiting 10 seconds for TLS certificates to fully download..."
-    sleep 10
-    echo -e "${GREEN}Spinning up proxy Docker container...${RESET}"
-    if [ $DNS_FILTERING = true ]; then
-        echo -e "\nLaunching blocky DNS server..."
-        fn_docker_container_launcher blocky
-        sleep 1
-    fi
-    if [ ! -z "${VLESS_TCP_SUBDOMAIN}" ] || [ ! -z "${VLESS_GRPC_SUBDOMAIN}" ] || [ ! -z "${VLESS_WS_SUBDOMAIN}" ] || [ ! -z "${TROJAN_H2_SUBDOMAIN}" ] || [ ! -z "${TROJAN_GRPC_SUBDOMAIN}" ] || [ ! -z "${TROJAN_WS_SUBDOMAIN}" ] || [ ! -z "${VMESS_WS_SUBDOMAIN}" ]; then
-        echo -e "\nLaunching Xray..."
-        fn_docker_container_launcher xray
-        sleep 1
-    fi
-    if [ ! -z "${HYSTERIA_SUBDOMAIN}" ]; then
-        echo -e "\nLaunching Hysteria..."
-        fn_docker_container_launcher hysteria
-        sleep 1
-    fi
-    if [ ! -z "${MTPROTO_SUBDOMAIN}" ]; then
-        echo -e "\nLaunching MTProtoPy..."
-        fn_docker_container_launcher mtproto
-    fi
+function fn_stop_all_docker_containers() {
+    echo -e "${B_YELLOW}Stopping all running proxy containers ${RESET}"
+    docker compose -f $DOCKER_HOME/xray/docker-compose.yml down --remove-orphans
+    docker compose -f $DOCKER_HOME/mtprotopy/docker-compose.yml down --remove-orphans
+    docker compose -f $DOCKER_HOME/hysteria/docker-compose.yml down --remove-orphans
+    docker compose -f $DOCKER_HOME/caddy/docker-compose.yml down --remove-orphans
+    docker compose -f $DOCKER_HOME/blocky/docker-compose.yml down --remove-orphans
+    echo -e "${B_GREEN}<<< All containers stopped! >>> ${RESET}"
 }
 
 function fn_install_docker() {
     trap - INT
-    dpkg --status docker-ce &>/dev/null
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Docker is already installed! ${RESET}"
+    local IS_DOCKER_INSTALLED=$(fn_check_for_pkg docker-ce)
+    if [ "$IS_DOCKER_INSTALLED" = true ]; then
+        echo -e "${B_GREEN}Docker is already installed! ${RESET}"
     else
-        echo -e "${B_GREEN}### Installing required packages for Docker \n  ${RESET}"
-        sudo apt install -y \
-            openssl \
-            ca-certificates \
-            curl \
-            gnupg \
-            lsb-release \
-            jq
+        echo -e "${B_GREEN}Checking for and installing required packages for Docker ${RESET}"
+        fn_check_and_install_pkg openssl
+        fn_check_and_install_pkg ca-certificates
+        fn_check_and_install_pkg curl
+        fn_check_and_install_pkg gnupg
+        fn_check_and_install_pkg lsb-release
 
         # Preparations
         if [ ! -d "/etc/apt/keyrings" ]; then
             sudo mkdir -p /etc/apt/keyrings
         fi
 
-        echo -e "${GREEN}Setting up Docker repositories \n ${RESET}"
+        echo -e "${B_GREEN}Setting up Docker repositories ${RESET}"
         if [[ $DISTRO =~ "Ubuntu" ]]; then
             curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
             echo -e \
@@ -81,20 +72,26 @@ function fn_install_docker() {
         # Fix permissions
         sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-        echo -e "${GREEN}Installing Docker from official repository \n ${RESET}"
+        echo -e "${B_GREEN}Installing Docker from official repository ${RESET}"
         sudo apt-get update
         sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-        echo -e "${GREEN}Enabling Rootless Docker Execution \n ${RESET}"
-        sudo usermod -aG docker $USER
-        sudo systemctl daemon-reload
-        sudo systemctl enable --now docker
-        sudo systemctl enable --now containerd
-
         # Test installation
         sudo docker run hello-world
+        echo -e "${B_GREEN}\n*** Docker is now installed! *** \n ${RESET}"
+        sleep 2
 
-        echo -e "${B_GREEN}*** Docker is now installed! *** \n ${RESET}"
-        # newgrp docker
+        if [ ! "$USER" = "root" ]; then
+            echo -e "${B_YELLOW}\nNOTE: This is not the root user and I need to apply changes to their group,"
+            echo -e "but doing so will make this script exit! You need to re-run the installer afterwards!"
+            echo -e "${B_GREEN}\nAdding user to Docker group ${RESET}"
+            sudo usermod -aG docker $USER
+            sudo systemctl daemon-reload
+            sudo systemctl enable --now docker
+            sudo systemctl enable --now containerd
+
+            echo -e "${BB_CYAN}\nPlease re-run the 'installer.sh' to continue!\n"
+            newgrp docker
+        fi
     fi
 }
