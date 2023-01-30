@@ -5,6 +5,7 @@ function fn_configure_hysteria() {
     tmp_hysteria=$(jq ".obfs = \"${HYSTERIA_OBFS}\"" <<<"$tmp_hysteria")
     tmp_hysteria=$(jq ".cert = \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${SNI_DICT[HYSTERIA_SUBDOMAIN]}/${SNI_DICT[HYSTERIA_SUBDOMAIN]}.crt\"" <<<"$tmp_hysteria")
     jq ".key = \"/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory/${SNI_DICT[HYSTERIA_SUBDOMAIN]}/${SNI_DICT[HYSTERIA_SUBDOMAIN]}.key\"" <<<"$tmp_hysteria" >/tmp/tmp.json && mv /tmp/tmp.json $1
+    yq -i ".services.hysteria.ports += [\"$HYSTERIA_PORT:$HYSTERIA_PORT/udp\"]" $DOCKER_HOME/blocky/docker-compose.yml
 }
 
 function fn_configure_hysteria_client() {

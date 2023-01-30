@@ -296,6 +296,12 @@ function fn_caddy_add_doh_dot() {
     jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[DNS_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $1
 }
 
+function fn_caddy_add_hysteria() {
+    tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[HYSTERIA_SUBDOMAIN]}\"]" $1)
+    tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[HYSTERIA_SUBDOMAIN]}\"]" <<<"$tmp_caddy")
+    jq ".apps.http.servers.web.tls_connection_policies[0].match.sni += [\"${SNI_DICT[HYSTERIA_SUBDOMAIN]}\"]" <<<"$tmp_caddy" >/tmp/tmp.json && mv /tmp/tmp.json $1
+}
+
 function fn_caddy_add_fallback_camouflage() {
     tmp_caddy=$(jq ".apps.tls.certificates.automate += [\"${SNI_DICT[FALLBACK_DOMAIN]}\"]" $1)
     tmp_caddy=$(jq ".apps.tls.automation.policies[0].subjects += [\"${SNI_DICT[FALLBACK_DOMAIN]}\"]" <<<"$tmp_caddy")
@@ -304,9 +310,11 @@ function fn_caddy_add_fallback_camouflage() {
 }
 
 function fn_configure_caddy() {
+    # DoT/DoH
     if [ ! -z "${SNI_DICT[DNS_SUBDOMAIN]}" ]; then
         fn_caddy_add_doh_dot $1
     fi
+    # Xray proxies
     if [ ! -z "${SNI_DICT[VLESS_TCP_SUBDOMAIN]}" ]; then
         fn_caddy_add_vless_tcp $1
     fi
@@ -328,8 +336,13 @@ function fn_configure_caddy() {
     if [ ! -z "${SNI_DICT[VMESS_WS_SUBDOMAIN]}" ]; then
         fn_caddy_add_vmess_ws $1
     fi
+    #  MTProto
     if [ ! -z "${SNI_DICT[MTPROTO_SUBDOMAIN]}" ]; then
         fn_caddy_add_mtproto $1
+    fi
+    #  Hysteria
+    if [ ! -z "${SNI_DICT[HYSTERIA_SUBDOMAIN]}" ]; then
+        fn_caddy_add_hysteria $1
     fi
 }
 
