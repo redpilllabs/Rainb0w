@@ -117,6 +117,7 @@ Choose from options below to proceed:
 
 ${GREEN}1)${RESET} Setup Server
 ${GREEN}2)${RESET} Performance Settings
+${GREEN}3)${RESET} Access Controls
 ${RED}0)${RESET} Exit
 Choose an option: "
     read -r ans
