@@ -189,7 +189,7 @@ function fn_install_xt_geoip_module() {
 
     # Add cronjob to keep the databased updated
     sudo systemctl enable --now cron
-    if [ ! "$(cat /etc/crontab | grep ^xt_geoip_update)" ]; then
+    if [ ! "$(cat /etc/crontab | grep xt_geoip_update)" ]; then
         echo -e "${B_GREEN}Adding cronjob to update xt_goip database \n  ${RESET}"
         sudo cp $PWD/scripts/xt_geoip_update.sh /usr/libexec/0xLem0nade/xt_geoip_update.sh
         sudo chmod +x /usr/libexec/0xLem0nade/xt_geoip_update.sh
