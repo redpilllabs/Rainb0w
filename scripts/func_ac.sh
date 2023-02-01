@@ -111,9 +111,9 @@ function fn_setup_firewall() {
         sudo iptables -A INPUT -p udp --dport 853 -m conntrack --ctstate NEW -m comment --comment "Allow DoQ" -j ACCEPT
         sudo ip6tables -A INPUT -p udp --dport 853 -m conntrack --ctstate NEW -m comment --comment "Allow DoQ" -j ACCEPT
 
-        echo -e "${B_GREEN}Allow incoming DNS-over-TLS/QUIC ${RESET}"
-        sudo iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
-        sudo ip6tables -A INPUT -m conntrack --ctstate INVALID -j DROP
+        # echo -e "${B_GREEN}Block invalid packets ${RESET}"
+        # sudo iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+        # sudo ip6tables -A INPUT -m conntrack --ctstate INVALID -j DROP
 
         echo -e "${B_GREEN}Setting default policies${RESET}"
         sudo iptables -P INPUT DROP
@@ -247,8 +247,6 @@ function fn_block_outgoing_iran() {
 
         sudo iptables -I FORWARD -m geoip --dst-cc IR -j REJECT
         sudo ip6tables -I FORWARD -m geoip --dst-cc IR -j REJECT
-        sudo iptables -I OUTPUT -m geoip --dst-cc IR -j REJECT
-        sudo ip6tables -I OUTPUT -m geoip --dst-cc IR -j REJECT
 
         # Save and cleanup
         sudo iptables-save | sudo tee /etc/iptables/rules.v4
@@ -274,8 +272,6 @@ function fn_unblock_outgoing_iran() {
 
     sudo iptables -D FORWARD -m geoip --dst-cc IR -j REJECT
     sudo ip6tables -D FORWARD -m geoip --dst-cc IR -j REJECT
-    sudo iptables -D OUTPUT -m geoip --dst-cc IR -j REJECT
-    sudo ip6tables -D OUTPUT -m geoip --dst-cc IR -j REJECT
 
     # Save and cleanup
     sudo iptables-save | sudo tee /etc/iptables/rules.v4
