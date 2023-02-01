@@ -563,9 +563,11 @@ Choose any option: "
         fn_ac_submenu
         ;;
     1)
-        clear
-        fn_toggle_iran_outbound_blocking
-        clear
+        # clear
+        # fn_toggle_iran_outbound_blocking
+        # clear
+        # fn_ac_submenu
+        echo -e "Disabled for troubleshooting!"
         fn_ac_submenu
         ;;
     0)
