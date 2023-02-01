@@ -245,8 +245,8 @@ function fn_block_outgoing_iran() {
         echo -e "${B_GREEN}\n\nBlocking OUTGOING connections to Iran ${RESET}"
         sleep 1
 
-        sudo iptables -I FORWARD -m geoip --dst-cc IR -j REJECT
-        sudo ip6tables -I FORWARD -m geoip --dst-cc IR -j REJECT
+        sudo iptables -I FORWARD -m geoip --dst-cc IR -m conntrack --ctstate NEW -j REJECT
+        sudo ip6tables -I FORWARD -m geoip --dst-cc IR -m conntrack --ctstate NEW -j REJECT
 
         # Save and cleanup
         sudo iptables-save | sudo tee /etc/iptables/rules.v4
@@ -270,8 +270,8 @@ function fn_unblock_outgoing_iran() {
     echo -e "${B_GREEN}\n\nUnblocking OUTGOING connections to Iran ${RESET}"
     sleep 1
 
-    sudo iptables -D FORWARD -m geoip --dst-cc IR -j REJECT
-    sudo ip6tables -D FORWARD -m geoip --dst-cc IR -j REJECT
+    sudo iptables -D FORWARD -m geoip --dst-cc IR -m conntrack --ctstate NEW -j REJECT
+    sudo ip6tables -D FORWARD -m geoip --dst-cc IR -m conntrack --ctstate NEW -j REJECT
 
     # Save and cleanup
     sudo iptables-save | sudo tee /etc/iptables/rules.v4
@@ -306,7 +306,7 @@ function fn_update_iran_outbound_blocking_status() {
     local IS_MODULE_LOADED=$(lsmod | grep ^xt_geoip)
     if [ ! -z "$IS_MODULE_LOADED" ]; then
         if [ -f "/etc/iptables/rules.v4" ]; then
-            local IS_IPTABLES_CONFIGURED=$(cat /etc/iptables/rules.v4 | grep 'FORWARD -m geoip --destination-country IR  -j REJECT')
+            local IS_IPTABLES_CONFIGURED=$(cat /etc/iptables/rules.v4 | grep 'FORWARD -m geoip --destination-country IR  -m conntrack --ctstate NEW -j REJECT')
             if [ "${IS_IPTABLES_CONFIGURED}" ]; then
                 BLOCK_IRAN_OUT_STATUS="ACTIVATED"
                 BLOCK_IRAN_OUT_STATUS_COLOR=$B_GREEN
@@ -563,11 +563,9 @@ Choose any option: "
         fn_ac_submenu
         ;;
     1)
-        # clear
-        # fn_toggle_iran_outbound_blocking
-        # clear
-        # fn_ac_submenu
-        echo -e "Disabled for troubleshooting!"
+        clear
+        fn_toggle_iran_outbound_blocking
+        clear
         fn_ac_submenu
         ;;
     0)
