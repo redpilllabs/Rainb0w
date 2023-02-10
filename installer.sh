@@ -124,7 +124,7 @@ function mainmenu_new() {
 ${GREEN}1)${RESET} Setup Server
 ${GREEN}2)${RESET} Performance Settings
 ${GREEN}3)${RESET} Access Controls
-${GREEN}4)${RESET} DNS over HTTPS/TLS
+
 ${GREEN}5)${RESET} Xray/v2ray
 ${GREEN}6)${RESET} Hysteria
 ${GREEN}7)${RESET} MTProto (Telegram)
@@ -164,12 +164,12 @@ Choose an option: "
         clear
         mainmenu
         ;;
-    4)
-        clear
-        fn_dns_submenu
-        clear
-        mainmenu
-        ;;
+    # 4)
+    #     clear
+    #     fn_dns_submenu
+    #     clear
+    #     mainmenu
+    #     ;;
     3)
         clear
         fn_ac_submenu
