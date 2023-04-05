@@ -4,8 +4,7 @@ upstream:
   # this configuration is mandatory, please define at least one external DNS resolver
   default:
     - 94.140.14.14
-    - 94.140.15.15
-    - tcp-tls:dns.adguard-dns.com
+    - 2a10:50c0::ad1:ff
 
 # optional: timeout to query the upstream resolver. Default: 2s
 upstreamTimeout: 2s
@@ -15,7 +14,7 @@ startVerifyUpstream: true
 
 # optional: Determines how blocky will create outgoing connections. This impacts both upstreams, and lists.
 # accepted: dual, v4, v6
-connectIPVersion: v4
+connectIPVersion: dual
 
 # optional: use black and white lists to block queries (for example ads, trackers, adult pages etc.)
 blocking:
@@ -26,11 +25,9 @@ blocking:
       - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
     porn:
       - https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts
-      - https://raw.githubusercontent.com/4skinSkywalker/Anti-Porn-HOSTS-File/master/HOSTS.txt
-    ir_cctld:
+    cctlds:
       - |
         /\.ir$/
-    cn_cctld:
       - |
         /\.cn$/
 
@@ -39,12 +36,13 @@ blocking:
     # default will be used, if no special definition for a client name exists
     default:
       - ads
+      - cctlds
 
   # which response will be sent, if query is blocked:
   # zeroIp: 0.0.0.0 will be returned (default)
   # nxDomain: return NXDOMAIN as return code
   # comma separated list of destination IP addresses (for example: 192.100.100.15, 2001:0db8:85a3:08d3:1319:8a2e:0370:7344). Should contain ipv4 and ipv6 to cover all query types. Useful with running web server on this address to display the "blocked" page.
-  blockType: nxDomain
+  blockType: zeroIp
   # optional: TTL for answers to blocked domains
   # default: 6h
   blockTTL: 24h
@@ -107,40 +105,29 @@ prometheus:
   # url path, optional (default '/metrics')
   path: /metrics
 
-# optional: DNS listener port(s) and bind ip address(es), default 53 (UDP and TCP). Example: 53, :53, "127.0.0.1:5353,[::1]:5353"
-port: 53
-httpPort: 0
-# optional: use this DNS server to resolve blacklist urls and upstream DNS servers. Useful if no DNS resolver is configured and blocky needs to resolve a host name. Format net:IP:port, net must be udp or tcp
-bootstrapDns: tcp+udp:1.1.1.1
+# optional: ports configuration
+ports:
+  # optional: DNS listener port(s) and bind ip address(es), default 53 (UDP and TCP). Example: 53, :53, "127.0.0.1:5353,[::1]:5353"
+  dns: 53
+  # optional: Port(s) and bind ip address(es) for DoT (DNS-over-TLS) listener. Example: 853, 127.0.0.1:853
+  # tls: 853
+  # optional: Port(s) and optional bind ip address(es) to serve HTTPS used for prometheus metrics, pprof, REST API, DoH... If you wish to specify a specific IP, you can do so such as 192.168.0.1:443. Example: 443, :443, 127.0.0.1:443,[::1]:443
+  # https: 443
+  # optional: Port(s) and optional bind ip address(es) to serve HTTP used for prometheus metrics, pprof, REST API, DoH... If you wish to specify a specific IP, you can do so such as 192.168.0.1:4000. Example: 4000, :4000, 127.0.0.1:4000,[::1]:4000
+  http: 4000
 
-# filtering:
-#   # optional: drop all queries with following query types. Default: empty
-#   queryTypes:
-#     - AAAA
-
-# optional: if path defined, use this file for query resolution (A, AAAA and rDNS). Default: empty
-hostsFile:
-  # optional: Path to hosts file (e.g. /etc/hosts on Linux)
-  filePath: /etc/hosts
-  # optional: TTL, default: 1h
-  hostsTTL: 60m
-  # optional: Time between hosts file refresh, default: 1h
-  refreshPeriod: 30m
-  # optional: Whether loopback hosts addresses (127.0.0.0/8 and ::1) should be filtered or not, default: false
-  filterLoopback: true
-# optional: Log level (one from debug, info, warn, error). Default: info
-logLevel: warn
-# optional: Log format (text or json). Default: text
-logFormat: text
-# optional: log timestamps. Default: true
-logTimestamp: true
-# optional: obfuscate log output (replace all alphanumeric characters with *) for user sensitive data like request domains or responses to increase privacy. Default: false
-logPrivacy: true
+# optional: logging configuration
+log:
+  # optional: Log level (one from debug, info, warn, error). Default: info
+  level: warn
+  # optional: Log format (text or json). Default: text
+  format: text
+  # optional: log timestamps. Default: true
+  timestamp: true
+  # optional: obfuscate log output (replace all alphanumeric characters with *) for user sensitive data like request domains or responses to increase privacy. Default: false
+  privacy: false
 
 # optional: add EDE error codes to dns response
 ede:
   # enabled if true, Default: false
   enable: false
-#
-# DoH/DoT settings
-#

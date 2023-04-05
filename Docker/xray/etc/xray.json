@@ -1,36 +1,336 @@
 {
     "log": {
-        "error": "/var/log/xray.log",
         "loglevel": "debug"
     },
-    "routing": {
-        "domainStrategy": "IPIfNonMatch",
-        "rules": [
-            {
-                "type": "field",
-                "ip": [
-                    "geoip:private"
-                ],
-                "outboundTag": "block"
-            },
-            {
-                "type": "field",
-                "protocol": [
-                    "bittorrent"
-                ],
-                "outboundTag": "block"
-            }
-        ]
+    "api": {
+        "services": [
+            "HandlerService",
+            "LoggerService",
+            "StatsService"
+        ],
+        "tag": "api"
     },
-    "inbounds": [],
+    "stats": {},
+    "policy": {
+        "levels": {
+            "0": {
+                "statsUserUplink": true,
+                "statsUserDownlink": true
+            }
+        },
+        "system": {
+            "statsInboundUplink": true,
+            "statsInboundDownlink": true,
+            "statsOutboundUplink": true,
+            "statsOutboundDownlink": true
+        }
+    },
+    "inbounds": [
+        {
+            "listen": "127.0.0.1",
+            "port": 62789,
+            "protocol": "dokodemo-door",
+            "settings": {
+                "address": "127.0.0.1"
+            },
+            "tag": "api",
+            "sniffing": null
+        },
+        {
+            "tag": "VLESS_TCP",
+            "listen": "/dev/shm/Xray-TCP.socket,0666",
+            "protocol": "vless",
+            "settings": {
+                "clients": [],
+                "decryption": "none",
+                "fallbacks": [
+                    {
+                        "alpn": "h2",
+                        "dest": "@TROJAN_TCP",
+                        "xver": 2
+                    },
+                    {
+                        "dest": "/dev/shm/watchdog.socket",
+                        "xver": 2
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "tcpSettings": {
+                    "acceptProxyProtocol": true
+                },
+                "security": "tls",
+                "tlsSettings": {
+                    "rejectUnknownSni": true,
+                    "certificates": [],
+                    "minVersion": "1.3",
+                    "cipherSuites": "TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384",
+                    "alpn": [
+                        "h2",
+                        "http/1.1"
+                    ]
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        },
+        {
+            "tag": "TROJAN_TCP",
+            "listen": "@TROJAN_TCP",
+            "protocol": "trojan",
+            "settings": {
+                "clients": [],
+                "fallbacks": [
+                    {
+                        "dest": "/dev/shm/watchdog.socket",
+                        "xver": 2
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "none",
+                "tcpSettings": {
+                    "acceptProxyProtocol": true
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        },
+        {
+            "tag": "VLESS_WS",
+            "listen": "/dev/shm/Xray-VLESS-WSS.socket,0666",
+            "protocol": "vless",
+            "settings": {
+                "clients": [],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "none",
+                "wsSettings": {
+                    "acceptProxyProtocol": false,
+                    "headers": {
+                        "Host": "WS_HOST"
+                    },
+                    "path": "/VLESS_WS_PATH"
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        },
+        {
+            "tag": "VMESS_WS",
+            "listen": "/dev/shm/Xray-VMESS-WSS.socket,0666",
+            "protocol": "vmess",
+            "settings": {
+                "clients": [],
+                "security": "none"
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "none",
+                "wsSettings": {
+                    "acceptProxyProtocol": false,
+                    "headers": {
+                        "Host": "WS_HOST"
+                    },
+                    "path": "/VMESS_WS_PATH"
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        },
+        {
+            "tag": "TROJAN_WS",
+            "listen": "/dev/shm/Xray-Trojan-WSS.socket,0666",
+            "protocol": "trojan",
+            "settings": {
+                "clients": []
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "none",
+                "wsSettings": {
+                    "acceptProxyProtocol": false,
+                    "headers": {
+                        "Host": "WS_HOST"
+                    },
+                    "path": "/TROJAN_WS_PATH"
+                }
+            }
+        },
+        {
+            "tag": "VLESS_GRPC",
+            "listen": "/dev/shm/Xray-VLESS-gRPC.socket,0666",
+            "protocol": "vless",
+            "settings": {
+                "clients": [],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "grpc",
+                "security": "none",
+                "grpcSettings": {
+                    "serviceName": "VLESS_GRPC_SVCNAME"
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        },
+        {
+            "tag": "VMESS_GRPC",
+            "listen": "/dev/shm/Xray-VMESS-gRPC.socket,0666",
+            "protocol": "vmess",
+            "settings": {
+                "clients": [],
+                "security": "none"
+            },
+            "streamSettings": {
+                "network": "grpc",
+                "security": "none",
+                "grpcSettings": {
+                    "serviceName": "VMESS_GRPC_SVCNAME"
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        },
+        {
+            "tag": "TROJAN_GRPC",
+            "listen": "/dev/shm/Xray-Trojan-gRPC.socket,0666",
+            "protocol": "trojan",
+            "settings": {
+                "clients": []
+            },
+            "streamSettings": {
+                "network": "grpc",
+                "security": "none",
+                "grpcSettings": {
+                    "serviceName": "TROJAN_GRPC_SVCNAME"
+                }
+            }
+        },
+        {
+            "tag": "VMESS_HTTP",
+            "listen": "/dev/shm/Xray-VMESS-H2.socket",
+            "protocol": "vmess",
+            "settings": {
+                "clients": [],
+                "security": "none"
+            },
+            "streamSettings": {
+                "network": "h2",
+                "security": "none",
+                "httpSettings": {
+                    "path": "/VMESS_HTTP_PATH",
+                    "host": []
+                }
+            },
+            "sniffing": {
+                "enabled": true,
+                "destOverride": [
+                    "http",
+                    "tls"
+                ]
+            }
+        },
+        {
+            "tag": "TROJAN_HTTP",
+            "listen": "/dev/shm/Xray-Trojan-H2.socket",
+            "protocol": "trojan",
+            "settings": {
+                "clients": []
+            },
+            "streamSettings": {
+                "network": "h2",
+                "security": "none",
+                "httpSettings": {
+                    "path": "/TROJAN_HTTP_PATH",
+                    "host": []
+                }
+            }
+        }
+    ],
     "outbounds": [
         {
             "protocol": "freedom",
-            "tag": "direct"
+            "settings": {}
         },
         {
             "protocol": "blackhole",
-            "tag": "block"
+            "tag": "blocked"
+        },
+        {
+            "tag": "blocky",
+            "protocol": "dns",
+            "settings": {
+                "address": "172.18.0.53",
+                "port": 53
+            }
         }
-    ]
+    ],
+    "routing": {
+        "domainStrategy": "AsIs",
+        "rules": [
+            {
+                "inboundTag": [
+                    "api"
+                ],
+                "outboundTag": "api",
+                "type": "field"
+            },
+            {
+                "type": "field",
+                "port": 53,
+                "network": "tcp,udp",
+                "outboundTag": "blocky"
+            },
+            {
+                "type": "field",
+                "outboundTag": "blocked",
+                "ip": [
+                    "geoip:private"
+                ]
+            },
+            {
+                "type": "field",
+                "outboundTag": "blocked",
+                "protocol": [
+                    "bittorrent"
+                ]
+            }
+        ]
+    }
 }

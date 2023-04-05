@@ -1,0 +1,30 @@
+# Rainb0w config file
+[DOMAINS]
+# This domain will be used for Xray HTTP protocols, NaiveProxy, and the decoy website.
+MAIN_DOMAIN = ""
+# Used for TCP/UDP connections such as Hysteria, MTProto, and Xray protocols that are not compatible with CDNs.
+DIRECT_CONN_DOMAIN = ""
+# Used for Xray protocols that are CDN compatible (Websocket, gRPC)
+CDN_COMPAT_DOMAIN = ""
+# Used for DNS-over-HTTPS and DNS-over-TLS server
+DOT_DOH_DOMAIN = ""
+# Used for MTProtoPy Proxy
+MTPROTO_DOMAIN = ""
+
+
+[DEPLOYMENT]
+DOT_DOH = false
+XRAY = false
+MTPROTOPY = false
+HYSTERIA = false
+
+[CLOUDFLARE]
+# Boolean value indicating if the domain is ending in [.cf .tk .ml .gq .ga] TLDs
+# These domains are not supported by Cloudflare's DNS plugin for a wilcard cert application
+# In case of using these domains, user has to create a few more subdomains for proxies such
+# as MTProto, Trojan HTTP, and VMess HTTP
+IS_FREE_TLD = false
+# This key will help Caddy's Cloudflare DNS plugin to verify your domain using DNS-01 challenges and obtain TLS certs
+# NOTE: Free domains [.cf .tk .ml .gq .ga] are not supported by this plugin
+# therefore you won't be asked to fill this during installation for these domains!
+CLOUDFLARE_API_KEY = ""

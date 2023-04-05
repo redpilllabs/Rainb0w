@@ -1,0 +1,24 @@
+This script will deploy Docker containers of TLS-based proxies
+such as [VLESS, VMESS, Trojan, Hysteria, MTProto] hence it requires
+the following in order to proceed:
+
+1. A domain name added to your Cloudflare account
+
+2. Based on your selected proxies, you will need a few
+    subdomains with 'A' records pointed to your origin server:
+
+    (A). A subdomain to use for protocols that require a direct connection
+        to your server such as [VLESS(TCP), VMESS(HTTP), Hysteria]
+
+    (B). A subdomain to use for protocols that are compatible with CDNs
+        such as [Websocket, gRPC], this way you can turn on CDN routing
+        for these protocols when your IP is blocked!
+
+    (C). A subdomain for DNS-over-HTTPS/TLS server, this will help
+        encrypt your DNS requests and also block certain ccTLDs
+        such as [.ir] and [.cn] therefore further protecting your server
+        from detection and probing
+
+    (D). A subdomain for MTProto proxy
+
+3. A Cloudflare API key that has permission to modify DNS zones

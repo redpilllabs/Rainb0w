@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 3.0
+
+- Add Hysteria proxy
+- Add NaiveProxy
+- Add user management
+- Add backup/restore
+- Add an unattended WordPress installation as decoy website
+- Move from Docker repo to Dockerfile builds for more privacy clarity
+- Require less individual subdomains
+- Permanent and protected user share links page
+- Paranoid protection: Blocking every incoming connection except from Iran and Cloudflare subnets
+
 ## Version 2.0
 
 - Add DNS over HTTPS/TLS support

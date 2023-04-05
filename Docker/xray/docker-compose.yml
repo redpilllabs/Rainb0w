@@ -1,26 +1,25 @@
 version: "3.9"
 services:
-    xray:
-        image: teddysun/xray:latest
-        container_name: xray
-        restart: always
-        networks:
-            - caddy
-        expose:
-            - "3443-3446"
-        volumes:
-            - caddy_data:/etc/letsencrypt:ro
-            - sockets:/dev/shm
-            - /var/log:/var/log/:rw
-            - $HOME/Docker/xray/etc/xray.json:/etc/xray/config.json:ro
-        command: "xray run --config /etc/xray/config.json"
+  xray:
+    image: teddysun/xray:latest
+    container_name: xray
+    restart: always
+    networks:
+      - caddy
+    volumes:
+      - caddy_data:/etc/letsencrypt:ro
+      - sockets:/dev/shm
+      - /var/log:/var/log/:rw
+      - /etc/localtime:/etc/localtime:ro
+      - ./etc/xray.json:/etc/xray/config.json:ro
+    command: "xray run --config /etc/xray/config.json"
 
 volumes:
-    caddy_data:
-        external: true
-    sockets:
-        external: true
+  caddy_data:
+    external: true
+  sockets:
+    external: true
 
 networks:
-    caddy:
-        external: true
+  caddy:
+    external: true

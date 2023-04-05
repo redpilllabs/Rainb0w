@@ -1,23 +1,23 @@
 version: "3.9"
 services:
-    mtprotopy:
-        container_name: mtprotopy
-        image: 0xlem0nade/mtprotopy:latest
-        restart: always
-        networks:
-            - caddy
-        expose:
-            - 5443
-        volumes:
-            - $HOME/Docker/mtprotopy/config/config.toml:/config/config.toml:ro
-            - $HOME/Docker/mtprotopy/config/users.toml:/config/users.toml:ro
-            - $HOME/Docker/mtprotopy/client/:/client
-        logging:
-            driver: "json-file"
-            options:
-                max-file: "1"
-                max-size: "10m"
+  mtprotopy:
+    container_name: mtprotopy
+    image: mtprotopy
+    restart: always
+    networks:
+      - caddy
+    expose:
+      - "5443"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./etc/config.toml:/config/config.toml:ro
+      - $HOME/Rainb0w_Home/rainb0w_users.toml:/config/users.toml:rw
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "1"
+        max-size: "10m"
 
 networks:
-    caddy:
-        external: true
+  caddy:
+    external: true

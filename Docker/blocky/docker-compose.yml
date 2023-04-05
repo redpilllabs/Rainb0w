@@ -10,20 +10,21 @@ services:
       - CAP_NET_BIND_SERVICE
       - CAP_NET_RAW
     networks:
-      - caddy
+      caddy:
+        ipv4_address: 172.18.0.53
     ports:
-      - "53:53"
+      - "53:53/tcp"
       - "53:53/udp"
-      - "853:853"
+      - "853:853/tcp"
       - "853:853/udp"
     expose:
-      - 443
+      - "4343"
     environment:
       - TZ=UTC
     volumes:
       - caddy_data:/etc/letsencrypt:ro
       - /var/log:/logs
-      - $HOME/Docker/blocky/etc/config.yml:/app/config.yml
+      - ./etc/config.yml:/app/config.yml
 
 volumes:
   caddy_data:

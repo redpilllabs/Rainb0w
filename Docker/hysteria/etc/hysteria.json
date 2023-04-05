@@ -1,7 +1,13 @@
 {
-    "listen": ":HYSTERIA_PORT",
+    "listen": ":4443",
     "protocol": "udp",
     "cert": "PATH/TO/CERT.CERT",
     "key": "PATH/TO/KEY.KEY",
-    "obfs": "HYSTERIA_PASSWORD"
+    "resolver": "udp://172.18.0.53:53",
+    "resolve_preference": "46",
+    "obfs": "HYSTERIA_OBFS",
+    "auth": {
+        "mode": "passwords",
+        "config": []
+    }
 }
