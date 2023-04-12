@@ -55,7 +55,7 @@ SNI:        {domains['MAIN_DOMAIN']}
             file.write("*" * 40 + "\n\n")
             # VLESS TCP
             file.write(
-                f"vless://{user_info['uuid']}@{domains['DIRECT_CONN_DOMAIN']}:443?security=tls&encryption=none&alpn=h2,http/1.1&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&fp=chrome&sni={domains['DIRECT_CONN_DOMAIN']}#VLESS+TCP\n\n"
+                f"vless://{user_info['uuid']}@{domains['DIRECT_CONN_DOMAIN']}:443?security=tls&encryption=none&headerType=none&type=tcp&flow=xtls-rprx-vision-udp443&fp=chrome&sni={domains['DIRECT_CONN_DOMAIN']}#VLESS+TCP\n\n"
             )
 
             # VLESS Websocket
@@ -63,7 +63,7 @@ SNI:        {domains['MAIN_DOMAIN']}
                 (item for item in proxies if item["type"] == "VLESS_WS")
             )
             file.write(
-                f"vless://{user_info['uuid']}@{domains['CDN_COMPAT_DOMAIN']}:443?path={proxy_config['path']}&security=tls&encryption=none&alpn=h2,http/1.1&host={proxy_config['host']}&type=ws&fp=chrome&sni={domains['CDN_COMPAT_DOMAIN']}#VLESS+Websocket\n\n"
+                f"vless://{user_info['uuid']}@{domains['CDN_COMPAT_DOMAIN']}:443?path={proxy_config['path']}&security=tls&encryption=none&alpn=http/1.1&host={proxy_config['host']}&type=ws&fp=chrome&sni={domains['CDN_COMPAT_DOMAIN']}#VLESS+Websocket\n\n"
             )
 
             # VLESS gRPC
@@ -82,7 +82,7 @@ SNI:        {domains['MAIN_DOMAIN']}
                 "add": domains["MAIN_DOMAIN"],
                 "aid": "0",
                 "alpn": "h2,http/1.1",
-                "fp": "chrome",
+                "fp": "edge",
                 "host": domains["MAIN_DOMAIN"],
                 "id": user_info["uuid"],
                 "net": "h2",
@@ -106,8 +106,8 @@ SNI:        {domains['MAIN_DOMAIN']}
             vmess_object = {
                 "add": domains["CDN_COMPAT_DOMAIN"],
                 "aid": "0",
-                "alpn": "h2,http/1.1",
-                "fp": "chrome",
+                "alpn": "http/1.1",
+                "fp": "edge",
                 "host": domains["CDN_COMPAT_DOMAIN"],
                 "id": user_info["uuid"],
                 "net": "ws",
@@ -132,7 +132,7 @@ SNI:        {domains['MAIN_DOMAIN']}
                 "add": domains["CDN_COMPAT_DOMAIN"],
                 "aid": "0",
                 "alpn": "h2,http/1.1",
-                "fp": "chrome",
+                "fp": "edge",
                 "host": "",
                 "id": user_info["uuid"],
                 "net": "grpc",
@@ -159,7 +159,7 @@ SNI:        {domains['MAIN_DOMAIN']}
 
             # Trojan TCP
             file.write(
-                f"trojan://{user_info['password']}@{domains['DIRECT_CONN_DOMAIN']}:443?security=tls&alpn=h2,http/1.1&headerType=none&fp=chrome&type=tcp&sni={domains['DIRECT_CONN_DOMAIN']}#Trojan+TCP\n\n"
+                f"trojan://{user_info['password']}@{domains['DIRECT_CONN_DOMAIN']}:443?security=tls&headerType=none&fp=android&type=tcp&sni={domains['DIRECT_CONN_DOMAIN']}#Trojan+TCP\n\n"
             )
 
             # Trojan Websocket
@@ -167,7 +167,7 @@ SNI:        {domains['MAIN_DOMAIN']}
                 (item for item in proxies if item["type"] == "TROJAN_WS")
             )
             file.write(
-                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?security=tls&alpn=h2,http/1.1&host={proxy_config['host']}&fp=chrome&type=ws&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+Websocket\n\n"
+                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?security=tls&alpn=http/1.1&host={proxy_config['host']}&fp=android&type=ws&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+Websocket\n\n"
             )
 
             # Trojan gRPC
@@ -175,7 +175,7 @@ SNI:        {domains['MAIN_DOMAIN']}
                 (item for item in proxies if item["type"] == "TROJAN_GRPC")
             )
             file.write(
-                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?mode=gun&security=tls&alpn=h2,http/1.1&fp=chrome&type=grpc&serviceName={proxy_config['svc_name']}&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+gRPC\n\n"
+                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?mode=gun&security=tls&alpn=h2,http/1.1&fp=android&type=grpc&serviceName={proxy_config['svc_name']}&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+gRPC\n\n"
             )
 
         if options["HYSTERIA"]:
@@ -258,7 +258,6 @@ def save_users(users: list, users_toml_file: str):
 
 
 def create_new_user(username: str):
-
     print(f"Adding '{username}' as a new user...")
     password = gen_random_string(randint(8, 12))
     uuid = str(uuid4())
