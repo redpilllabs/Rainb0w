@@ -39,11 +39,13 @@ if [ "$IS_DOCKER_INSTALLED" = false ]; then
     apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
     echo -e "${B_GREEN}>> Verifying Docker installation ${RESET}"
-    sudo docker run hello-world
+    docker run hello-world
     sleep 1
 
-    echo -e "${B_GREEN}>> Adding user to Docker group ${RESET}"
-    sudo usermod -aG docker $USER
+    if [ "$EUID" -ne 0 ]; then
+        echo -e "${B_GREEN}>> Adding user to Docker group ${RESET}"
+        usermod -aG docker $USER
+    fi
 
     echo -e "${B_GREEN}>> Enabling Docker systemd services ${RESET}"
     systemctl daemon-reload
