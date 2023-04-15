@@ -1,7 +1,4 @@
 {
-    "log": {
-        "loglevel": "debug"
-    },
     "api": {
         "services": [
             "HandlerService",

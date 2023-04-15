@@ -14,7 +14,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./etc/hysteria.json:/etc/hysteria.json
     environment:
-      - LOGGING_LEVEL=debug
+      - LOGGING_LEVEL=warn
     command: [ "server", "--config", "/etc/hysteria.json" ]
 
 volumes:

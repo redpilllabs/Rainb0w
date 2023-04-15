@@ -2,7 +2,7 @@
     "logging": {
         "logs": {
             "default": {
-                "level": "DEBUG"
+                "level": "WARN"
             }
         }
     },

@@ -256,7 +256,8 @@ def init_config():
 def try_use_cryptography_module():
     try:
         from cryptography.hazmat.backends import default_backend
-        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+        from cryptography.hazmat.primitives.ciphers import (Cipher, algorithms,
+                                                            modes)
     except ImportError:
         pass
 
@@ -2427,8 +2428,8 @@ def create_servers(loop):
 def create_utilitary_tasks(loop):
     tasks = []
 
-    stats_printer_task = asyncio.Task(stats_printer(), loop=loop)
-    tasks.append(stats_printer_task)
+    # stats_printer_task = asyncio.Task(stats_printer(), loop=loop)
+    # tasks.append(stats_printer_task)
 
     if config["proxy"]["use_middle_proxy"]:
         middle_proxy_updater_task = asyncio.Task(update_middle_proxy_info(), loop=loop)
