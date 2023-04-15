@@ -75,18 +75,14 @@ ip6tables -A OUTPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m comment --co
 
 if [ "$1" == "free_tld" ]; then
     # Drop connections to/from China
-    echo -e "${B_GREEN}>> Drop ALL connections to/from China ${RESET}"
+    echo -e "${B_GREEN}>> Drop INCOMING connections from China ${RESET}"
     # Log any connection attempts originating from China to '/var/log/kern.log' tagged with the prefix below
     iptables -A INPUT -m geoip --src-cc CN -m limit --limit 5/min -j LOG --log-prefix '** GFW ** '
     ip6tables -A INPUT -m geoip --src-cc CN -m limit --limit 5/min -j LOG --log-prefix '** GFW ** '
     iptables -A INPUT -m geoip --src-cc CN -j DROP
     ip6tables -A INPUT -m geoip --src-cc CN -j DROP
-    iptables -I FORWARD -i $INTERFACE -m geoip --src-cc CN -j REJECT
-    ip6tables -I FORWARD -i $INTERFACE -m geoip --src-cc CN -j REJECT
-    iptables -I FORWARD -i $INTERFACE -m geoip --dst-cc CN -j REJECT
-    ip6tables -I FORWARD -i $INTERFACE -m geoip --dst-cc CN -j REJECT
-    iptables -A OUTPUT -m geoip --dst-cc CN -j REJECT
-    ip6tables -A OUTPUT -m geoip --dst-cc CN -j REJECT
+    iptables -I FORWARD -i $INTERFACE -m geoip --src-cc CN -j DROP
+    ip6tables -I FORWARD -i $INTERFACE -m geoip --src-cc CN -j DROP
 else
     echo -e "${B_GREEN}>> Drop ALL incoming connections except from Iran and Cloudflare ${RESET}"
     # Log any connection attempts not originating from Iran or Cloudflare
@@ -99,11 +95,11 @@ else
     ip6tables -I FORWARD -i $INTERFACE -m geoip ! --src-cc IR,CF -m conntrack --ctstate NEW -m comment --comment "Drop everything except Iran and Cloudflare" -j DROP
 fi
 
-echo -e "${B_GREEN}>> Drop OUTGOING connections to Iran ${RESET}"
-iptables -I FORWARD -m geoip --dst-cc IR -m conntrack --ctstate NEW -j REJECT
-ip6tables -I FORWARD -m geoip --dst-cc IR -m conntrack --ctstate NEW -j REJECT
-iptables -A OUTPUT -m geoip --dst-cc IR -m conntrack --ctstate NEW -j REJECT
-ip6tables -A OUTPUT -m geoip --dst-cc IR -m conntrack --ctstate NEW -j REJECT
+echo -e "${B_GREEN}>> Drop OUTGOING connections to Iran and China ${RESET}"
+iptables -I FORWARD -i $INTERFACE -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
+ip6tables -I FORWARD -i $INTERFACE -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
+iptables -A OUTPUT -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
+ip6tables -A OUTPUT -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
 
 echo -e "${B_GREEN}>> Allow HTTP and HTTPS/QUIC ${RESET}"
 iptables -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW -m comment --comment "Allow HTTP" -j ACCEPT
