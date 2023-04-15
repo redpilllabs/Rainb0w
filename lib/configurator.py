@@ -5,47 +5,28 @@ import shutil
 import signal
 import sys
 
-from base.config import (
-    BLOCKY_CONFIG_FILE,
-    CADDY_CONFIG_FILE,
-    HYSTERIA_CONFIG_FILE,
-    MTPROTOPY_CONFIG_FILE,
-    RAINB0W_BACKUP_DIR,
-    RAINB0W_CONFIG_FILE,
-    RAINB0W_HOME_DIR,
-    RAINB0W_USERS_FILE,
-    XRAY_CONFIG_FILE,
-)
+from base.config import (BLOCKY_CONFIG_FILE, CADDY_CONFIG_FILE,
+                         HYSTERIA_CONFIG_FILE, MTPROTOPY_CONFIG_FILE,
+                         RAINB0W_BACKUP_DIR, RAINB0W_CONFIG_FILE,
+                         RAINB0W_HOME_DIR, RAINB0W_USERS_FILE,
+                         XRAY_CONFIG_FILE)
 from pick import pick
 from proxy.blocky import config_doh_dot
 from proxy.caddy import caddy_insert_params
 from proxy.hysteria import hysteria_gen_params, hysteria_insert_params
 from proxy.mtproto import mtprotopy_insert_params
-from proxy.xray import (
-    xray_gen_proxy_params,
-    xray_insert_cert_path,
-    xray_insert_proxy_params,
-)
-from user.user_manager import add_user_to_proxies, create_new_user, prompt_username
-from utils.domain_utils import (
-    is_free_domain,
-    prompt_cdn_domain,
-    prompt_cloudflare_api_key,
-    prompt_direct_conn_domain,
-    prompt_dohdot_domain,
-    prompt_main_domain,
-    prompt_mtproto_domain,
-)
-from utils.helper import (
-    clear_screen,
-    gen_random_string,
-    load_toml,
-    print_txt_file,
-    progress_indicator,
-    prompt_clear_screen,
-    remove_dir,
-    save_toml,
-)
+from proxy.xray import (xray_gen_proxy_params, xray_insert_cert_path,
+                        xray_insert_proxy_params)
+from user.user_manager import (add_user_to_proxies, create_new_user,
+                               prompt_username)
+from utils.domain_utils import (is_free_domain, prompt_cdn_domain,
+                                prompt_cloudflare_api_key,
+                                prompt_direct_conn_domain,
+                                prompt_dohdot_domain, prompt_main_domain,
+                                prompt_mtproto_domain)
+from utils.helper import (clear_screen, gen_random_string, load_toml,
+                          print_txt_file, progress_indicator,
+                          prompt_clear_screen, remove_dir, save_toml)
 from utils.wp_utils import wp_insert_params
 
 
@@ -124,23 +105,26 @@ def express_config():
     print_txt_file(f"{os.getcwd()}/notice.txt")
     prompt_clear_screen()
 
-    progress_indicator(1, 4, "Main Domain")
+    progress_indicator(1, 5, "Main Domain")
     rainb0w_config["DOMAINS"]["MAIN_DOMAIN"] = prompt_main_domain()
 
-    progress_indicator(2, 4, "Direct Subdomain")
+    progress_indicator(2, 5, "Direct Subdomain")
     rainb0w_config["DOMAINS"]["DIRECT_CONN_DOMAIN"] = prompt_direct_conn_domain()
 
-    progress_indicator(3, 4, "CDN Subdomain")
+    progress_indicator(3, 5, "CDN Subdomain")
     rainb0w_config["DOMAINS"]["CDN_COMPAT_DOMAIN"] = prompt_cdn_domain()
 
+    progress_indicator(4, 5, "MTProto SNI/Subdomain")
+    rainb0w_config["DOMAINS"]["MTPROTO_DOMAIN"] = prompt_mtproto_domain(
+            rainb0w_config["DOMAINS"]["MAIN_DOMAIN"])
+    rainb0w_config["DEPLOYMENT"]["MTPROTOPY"] = True
+
     if not is_free_domain(rainb0w_config["DOMAINS"]["MAIN_DOMAIN"]):
-        progress_indicator(4, 4, "Cloudflare API Key")
+        progress_indicator(5, 5, "Cloudflare API Key")
         rainb0w_config["CLOUDFLARE"]["API_KEY"] = prompt_cloudflare_api_key()
         rainb0w_config["CLOUDFLARE"]["IS_FREE_TLD"] = False
     else:
         rainb0w_config["CLOUDFLARE"]["IS_FREE_TLD"] = True
-
-    rainb0w_config["DEPLOYMENT"]["XRAY"] = True
 
     if "PROXY" not in rainb0w_config:
         rainb0w_config["PROXY"] = []
@@ -150,6 +134,12 @@ def express_config():
         rainb0w_config["DOMAINS"]["MAIN_DOMAIN"],
         rainb0w_config["DOMAINS"]["CDN_COMPAT_DOMAIN"],
     )
+    rainb0w_config["DEPLOYMENT"]["XRAY"] = True
+
+    # Hysteria configuration
+    hysteria_params = hysteria_gen_params()
+    rainb0w_config["PROXY"].append(hysteria_params)
+    rainb0w_config["DEPLOYMENT"]["HYSTERIA"] = True
 
     # Save the configuration to file because we're going to pass it around next
     save_toml(rainb0w_config, RAINB0W_CONFIG_FILE)
@@ -172,23 +162,6 @@ def custom_config():
 
     selected = pick(options, title, multiselect=True, min_selection_count=1)
     selected = [item[0] for item in selected]  # type: ignore
-
-    while "Hysteria" in selected:
-        print(
-            """
-        You included Hysteria in your selections, user reports suggest
-        this proxy's traffic may be detectable and might result in your server
-        getting blocked! We recommend you avoid deploying Hysteria until
-        the developer community finds the cause and a solution!\n
-        """
-        )
-        confirmation = input("Do you want to continue? [N/y]")
-        if confirmation in ["y", "Y", "Yes", "yes"]:
-            break
-        else:
-            clear_screen()
-            selected = pick(options, title, multiselect=True, min_selection_count=1)
-            selected = [item[0] for item in selected]  # type: ignore
 
     # We need 3 steps regardless of proxy choice,
     #  one for the main domain, one for the CF key and one for username prompt

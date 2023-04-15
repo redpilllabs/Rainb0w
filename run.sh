@@ -26,23 +26,22 @@ else
             echo "Your version of Debian is not supported! Minimum required version is 11"
             exit 0
         else
-            # Debian has a quirk that usually comes with an old Kernel that
-            # does not have the corresponding headers and modules package available
+            # Debian has a quirk that usually comes with an old Kernel without
+            # the corresponding headers and modules package available, therefore
+            # we need to upgrade to the latest kernel available on the repository first
             apt update
             current_kernel=$(uname -r)
-            available_kernels=$(apt-cache search linux-image | grep -oP '[0-9]\.[0-9]+\.[0-9]+-[0-9]+' | sort --version-sort)
-            latest_kernel=$(echo "$available_kernels" | tail -n 1)
+            latest_kernel=$(apt-cache search linux-image | grep -oP '5\.10\.[0-9]+-[0-9]+' | uniq | sort --version-sort | tail -n 1)
             if [[ "$latest_kernel" > "$current_kernel" ]]; then
                 fn_check_and_install_pkg linux-image-$latest_kernel-amd64
                 fn_check_and_install_pkg linux-headers-$latest_kernel-amd64
                 echo -e "${B_GREEN}\n\nThere's a newer kernel available for your OS: $available_kernel${RESET}"
                 echo -e "${B_RED}You're server is now going to reboot to load the new kernel and the extra moduels required${RESET}"
-                echo -e "${B_GREEN}After booting up, run the script again to proceed!${RESET}"
+                echo -e "${B_GREEN}After booting up, run the script again with the following commands to proceed!${RESET}"
+                echo -e "${B_YELLOW}cd Rainb0w"
+                echo -e "./run.sh${RESET}"
                 systemctl reboot
                 exit
-            else
-                fn_check_and_install_pkg linux-image-amd64
-                fn_check_and_install_pkg linux-headers-amd64
             fi
         fi
     fi
@@ -60,10 +59,17 @@ if [ ! -d "$HOME/Rainb0w_Home" ]; then
     clear
 fi
 
+function clear_and_copy_files() {
+    # Cleanup and copy all the template files to let the admin select among them
+    rm -rf $HOME/Rainb0w_Home
+    mkdir $HOME/Rainb0w_Home
+    cp -r ./Docker/* $HOME/Rainb0w_Home/
+}
+
 function installer_menu() {
     echo -ne "
-Express: Only deploys Xray proxies (VLESS, VMESS, Trojan)
-Custom:  Select available proxies to deploy (Xray, Hysteria, MTProto)
+Express: Deploys all proxies (Xray, Hysteria, MTProto)
+Custom:  Select which proxies to deploy (Xray, Hysteria, MTProto, DoT/DoH)
 Restore: Restore a previous installation's configuration and users
 
 Select installation type:
@@ -88,10 +94,7 @@ Choose an option: "
         ;;
     2)
         clear
-        # Cleanup and copy all the template files to let the admin select among them
-        rm -rf $HOME/Rainb0w_Home
-        mkdir $HOME/Rainb0w_Home
-        cp -r ./Docker/* $HOME/Rainb0w_Home/
+        clear_and_copy_files
         python3 $PWD/lib/configurator.py "Custom"
         PYTHON_EXIT_CODE=$?
         if [ $PYTHON_EXIT_CODE -ne 0 ]; then
@@ -102,15 +105,7 @@ Choose an option: "
         ;;
     1)
         clear
-        # Cleanup and copy only the essential templates to deploy Xray since we're going Express
-        rm -rf $HOME/Rainb0w_Home
-        mkdir $HOME/Rainb0w_Home
-        cp -r ./Docker/caddy $HOME/Rainb0w_Home/
-        cp -r ./Docker/blocky $HOME/Rainb0w_Home/
-        cp -r ./Docker/wordpress $HOME/Rainb0w_Home/
-        cp -r ./Docker/xray $HOME/Rainb0w_Home/
-        cp ./Docker/rainb0w_config.toml $HOME/Rainb0w_Home/
-        cp ./Docker/rainb0w_users.toml $HOME/Rainb0w_Home/
+        clear_and_copy_files
         python3 $PWD/lib/configurator.py "Express"
         PYTHON_EXIT_CODE=$?
         if [ $PYTHON_EXIT_CODE -ne 0 ]; then
