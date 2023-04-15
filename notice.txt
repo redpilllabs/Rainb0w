@@ -4,7 +4,9 @@ the following in order to proceed:
 
 1. A domain name added to your Cloudflare account
 
-2. Based on your selected proxies, you will need a few
+2. CDN proxy MUST BE OFF WHILE DEPLOYING! You can turn it on after finishing the setup.
+
+3. Based on your selected proxies, you will need a few
     subdomains with 'A' records pointed to your origin server:
 
     (A). A subdomain to use for protocols that require a direct connection
@@ -21,4 +23,4 @@ the following in order to proceed:
 
     (D). A subdomain for MTProto proxy
 
-3. A Cloudflare API key that has permission to modify DNS zones
+4. A Cloudflare API key that has permission to modify DNS zones
