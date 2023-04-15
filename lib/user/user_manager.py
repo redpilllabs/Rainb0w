@@ -3,22 +3,14 @@ from os import urandom
 from random import randint
 from uuid import uuid4
 
-from proxy.caddy import (
-    caddy_add_naiveproxy_user,
-    caddy_add_share_page,
-    caddy_remove_naiveproxy_user,
-)
+from proxy.caddy import (caddy_add_naiveproxy_user, caddy_add_share_page,
+                         caddy_remove_naiveproxy_user)
 from proxy.hysteria import hysteria_add_user, hysteria_remove_user
 from proxy.mtproto import mtprotopy_gen_share_url
 from proxy.xray import xray_add_user, xray_remove_user
 from rich import print
-from utils.helper import (
-    base64_encode,
-    bytes_to_raw_str,
-    gen_random_string,
-    load_toml,
-    save_toml,
-)
+from utils.helper import (base64_encode, bytes_to_raw_str, gen_random_string,
+                          load_toml, save_toml)
 
 
 def create_share_urls_file(
@@ -191,9 +183,15 @@ SNI:        {domains['MAIN_DOMAIN']}
 Server:         {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}:{proxy_config['port_range_start']}-{proxy_config['port_range_end']}
 Port:           Empty
 Protocol:       UDP
+SNI:            {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}
+ALPN:           h3
 Obfuscation:    {proxy_config['obfs']}
 Auth. Type:     STRING
 Payload:        {user_info['password']}
+Max Upload:     YOUR REAL UPLOAD SPEED
+Max Download:   YOUR REAL DOWNLOAD SPEED
+QUIC Stream:    1677768
+QUIC Conn.:     4194304
 
         ===================
 
@@ -201,13 +199,16 @@ Payload:        {user_info['password']}
 Server:         {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}
 Port:           Any number between the range[{proxy_config['port_range_start']}-{proxy_config['port_range_end']}]
 Protocol:       UDP
+SNI:            {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}
+ALPN:           h3
 Obfuscation:    {proxy_config['obfs']}
 Auth. Type:     STRING
 Payload:        {user_info['password']}
+Max Upload:     YOUR REAL UPLOAD SPEED
+Max Download:   YOUR REAL DOWNLOAD SPEED
+QUIC Stream:    1677768
+QUIC Conn.:     4194304
 
-NOTE: Remember to set the correct values for 'Upload' and 'Download' according to
-your real connection speed! Hysteria adjusts the parameters according to these values
-for optimal connection speeds.
 
     """.lstrip()
             )

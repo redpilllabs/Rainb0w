@@ -5,6 +5,9 @@
     "key": "PATH/TO/KEY.KEY",
     "resolver": "udp://172.18.0.53:53",
     "resolve_preference": "46",
+    "alpn": "h3",
+    "recv_window_conn": 1677768,
+    "recv_window_client": 4194304,
     "obfs": "HYSTERIA_OBFS",
     "auth": {
         "mode": "passwords",
