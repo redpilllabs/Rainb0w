@@ -7,7 +7,7 @@ services:
     networks:
       - caddy
     ports:
-      - "4443:4443/udp"
+      - "8443:8443/udp"
     volumes:
       - caddy_data:/etc/letsencrypt:ro
       - /var/log:/var/log:rw

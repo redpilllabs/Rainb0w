@@ -11,7 +11,7 @@ def hysteria_gen_params() -> dict:
     port_range_end = port_range_start + 1024
     hysteria_params = {
         "type": "HYSTERIA",
-        "dst_port": 4443,  # This port will be available internally only
+        "dst_port": 8443,
         "port_range_start": port_range_start,
         "port_range_end": port_range_end,
         "obfs": gen_random_string(randint(8, 12)),
@@ -24,7 +24,7 @@ def hysteria_insert_params(
 ):
     print("Configuring Hysteria...")
     hysteria_config = load_json(hysteria_config_file)
-    hysteria_config["listen"] = ":4443"
+    hysteria_config["listen"] = ":8443"
     hysteria_config["obfs"] = obfs
     hysteria_config[
         "cert"

@@ -1,5 +1,5 @@
 {
-    "listen": ":4443",
+    "listen": ":8443",
     "protocol": "udp",
     "cert": "PATH/TO/CERT.CERT",
     "key": "PATH/TO/KEY.KEY",
