@@ -142,7 +142,7 @@ def create_share_urls_file(
 
             # Trojan TCP
             file.write(
-                f"trojan://{user_info['password']}@{domains['DIRECT_CONN_DOMAIN']}:443?security=tls&headerType=none&fp=android&type=tcp&sni={domains['DIRECT_CONN_DOMAIN']}#Trojan+TCP\n\n"
+                f"trojan://{user_info['password']}@{domains['DIRECT_CONN_DOMAIN']}:443?security=tls&alpn=h2,http/1.1&headerType=none&fp=android&type=tcp&sni={domains['DIRECT_CONN_DOMAIN']}#Trojan+TCP\n\n"
             )
 
             # Trojan Websocket
