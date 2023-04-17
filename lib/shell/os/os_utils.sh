@@ -21,5 +21,5 @@ function fn_install_python_packages() {
     echo -e "${B_GREEN}>> Checking for requried Python packages${RESET}"
     apt update && apt upgrade -y
     fn_check_and_install_pkg python3-pip
-    pip install --quiet -r $PWD/requirements.txt
+    pip3 install --quiet -r $PWD/requirements.txt
 }

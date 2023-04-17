@@ -5,28 +5,46 @@ import shutil
 import signal
 import sys
 
-from base.config import (BLOCKY_CONFIG_FILE, CADDY_CONFIG_FILE,
-                         HYSTERIA_CONFIG_FILE, MTPROTOPY_CONFIG_FILE,
-                         RAINB0W_BACKUP_DIR, RAINB0W_CONFIG_FILE,
-                         RAINB0W_HOME_DIR, RAINB0W_USERS_FILE,
-                         XRAY_CONFIG_FILE)
+from base.config import (
+    BLOCKY_CONFIG_FILE,
+    CADDY_CONFIG_FILE,
+    HYSTERIA_CONFIG_FILE,
+    MTPROTOPY_CONFIG_FILE,
+    RAINB0W_BACKUP_DIR,
+    RAINB0W_CONFIG_FILE,
+    RAINB0W_HOME_DIR,
+    RAINB0W_USERS_FILE,
+    XRAY_CONFIG_FILE,
+)
 from pick import pick
 from proxy.blocky import config_doh_dot
 from proxy.caddy import caddy_insert_params
 from proxy.hysteria import hysteria_gen_params, hysteria_insert_params
 from proxy.mtproto import mtprotopy_insert_params
-from proxy.xray import (xray_gen_proxy_params, xray_insert_cert_path,
-                        xray_insert_proxy_params)
-from user.user_manager import (add_user_to_proxies, create_new_user,
-                               prompt_username)
-from utils.domain_utils import (is_free_domain, prompt_cdn_domain,
-                                prompt_cloudflare_api_key,
-                                prompt_direct_conn_domain,
-                                prompt_dohdot_domain, prompt_main_domain,
-                                prompt_mtproto_domain)
-from utils.helper import (clear_screen, gen_random_string, load_toml,
-                          print_txt_file, progress_indicator,
-                          prompt_clear_screen, remove_dir, save_toml)
+from proxy.xray import (
+    xray_gen_proxy_params,
+    xray_insert_cert_path,
+    xray_insert_proxy_params,
+)
+from user.user_manager import add_user_to_proxies, create_new_user, prompt_username
+from utils.domain_utils import (
+    is_free_domain,
+    prompt_cdn_domain,
+    prompt_cloudflare_api_key,
+    prompt_direct_conn_domain,
+    prompt_dohdot_domain,
+    prompt_main_domain,
+    prompt_mtproto_domain,
+)
+from utils.helper import (
+    gen_random_string,
+    load_toml,
+    print_txt_file,
+    progress_indicator,
+    prompt_clear_screen,
+    remove_dir,
+    save_toml,
+)
 from utils.wp_utils import wp_insert_params
 
 
@@ -58,6 +76,9 @@ def apply_config(username=None):
 
     if rainb0w_config["DEPLOYMENT"]["DOT_DOH"]:
         config_doh_dot(rainb0w_config["DOMAINS"]["DOT_DOH_DOMAIN"], BLOCKY_CONFIG_FILE)
+
+    # NOTE: NaiveProxy does not need any configuration other than user addition
+    #  which is handled by the 'add_user_to_proxies' function
 
     # WordPress
     wp_insert_params(
@@ -116,7 +137,8 @@ def express_config():
 
     progress_indicator(4, 5, "MTProto SNI/Subdomain")
     rainb0w_config["DOMAINS"]["MTPROTO_DOMAIN"] = prompt_mtproto_domain(
-            rainb0w_config["DOMAINS"]["MAIN_DOMAIN"])
+        rainb0w_config["DOMAINS"]["MAIN_DOMAIN"]
+    )
     rainb0w_config["DEPLOYMENT"]["MTPROTOPY"] = True
 
     if not is_free_domain(rainb0w_config["DOMAINS"]["MAIN_DOMAIN"]):
@@ -141,6 +163,9 @@ def express_config():
     rainb0w_config["PROXY"].append(hysteria_params)
     rainb0w_config["DEPLOYMENT"]["HYSTERIA"] = True
 
+    # Add NaiveProxy to the mix
+    rainb0w_config["DEPLOYMENT"]["NAIVE"] = True
+
     # Save the configuration to file because we're going to pass it around next
     save_toml(rainb0w_config, RAINB0W_CONFIG_FILE)
 
@@ -158,7 +183,7 @@ def custom_config():
     prompt_clear_screen()
 
     title = "Select the proxies you'd like to deploy [Press 'Space' to mark]:"
-    options = ["Xray/v2ray", "MTProto", "Hysteria", "DNS-over-HTTPS/TLS"]
+    options = ["Xray/v2ray", "MTProto", "Hysteria", "NaiveProxy", "DNS-over-HTTPS/TLS"]
 
     selected = pick(options, title, multiselect=True, min_selection_count=1)
     selected = [item[0] for item in selected]  # type: ignore
@@ -176,6 +201,9 @@ def custom_config():
     progress_indicator(curr_step, total_steps, "Main Domain")
     rainb0w_config["DOMAINS"]["MAIN_DOMAIN"] = prompt_main_domain()
     curr_step += 1
+
+    if "NaiveProxy" in selected:
+        rainb0w_config["DEPLOYMENT"]["NAIVE"] = True
 
     if "Xray/v2ray" in selected:
         progress_indicator(curr_step, total_steps, "Direct Subdomain")

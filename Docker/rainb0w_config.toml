@@ -17,6 +17,7 @@ DOT_DOH = false
 XRAY = false
 MTPROTOPY = false
 HYSTERIA = false
+NAIVE = false
 
 [CLOUDFLARE]
 # Boolean value indicating if the domain is ending in [.cf .tk .ml .gq .ga] TLDs

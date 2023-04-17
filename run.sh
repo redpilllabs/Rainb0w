@@ -68,8 +68,8 @@ function clear_and_copy_files() {
 
 function installer_menu() {
     echo -ne "
-Express: Deploys all proxies (Xray, Hysteria, MTProto)
-Custom:  Select which proxies to deploy (Xray, Hysteria, MTProto, DoT/DoH)
+Express: Deploys all common proxies (Xray, Hysteria, MTProto, Naive)
+Custom:  Select which proxies to deploy (Xray, Hysteria, MTProto, Naive, DoT/DoH)
 Restore: Restore a previous installation's configuration and users
 
 Select installation type:
@@ -99,6 +99,7 @@ Choose an option: "
         PYTHON_EXIT_CODE=$?
         if [ $PYTHON_EXIT_CODE -ne 0 ]; then
             echo "Python configurator did not finish successfully!"
+            rm -rf $HOME/Rainb0w_Home
             exit
         fi
         source $PWD/lib/shell/deploy.sh "Custom"
@@ -110,6 +111,7 @@ Choose an option: "
         PYTHON_EXIT_CODE=$?
         if [ $PYTHON_EXIT_CODE -ne 0 ]; then
             echo "Python configurator did not finish successfully!"
+            rm -rf $HOME/Rainb0w_Home
             exit
         fi
         source $PWD/lib/shell/deploy.sh "Express"
@@ -130,7 +132,7 @@ function main() {
         # We have an existing installation, so let's present the dashboard to change settings
         python3 $PWD/lib/dashboard.py
         PYTHON_EXIT_CODE=$?
-        if [ $PYTHON_EXIT_CODE -ne 0 ]; then
+        if [ $PYTHON_EXIT_CODE -eq 1 ]; then
             source $PWD/lib/shell/docker/restart_all_containers.sh
             exit
         else

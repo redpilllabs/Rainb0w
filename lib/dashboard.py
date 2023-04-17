@@ -121,7 +121,6 @@ def user_info_menu(user: str):
 
 
 def users_management_menu():
-
     global NEED_SERVICE_RESTART
 
     title = "Select any option:"
@@ -202,7 +201,7 @@ Do you confirm?
     if option == "OKAY":
         run_system_cmd([f"{os.getcwd()}/lib/shell/uninstall.sh"])
         prompt_clear_screen()
-        exit(1)
+        exit(0)
     else:
         dashboard()
 
