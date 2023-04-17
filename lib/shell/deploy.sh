@@ -37,7 +37,7 @@ if [[ " ${CONTAINERS[@]} " =~ "hysteria" ]]; then
     data=$(python3 $PWD/lib/post-deploy/get_hysteria_port_range.py "$HOME/Rainb0w_Home/rainb0w_config.toml")
     range_start=$(echo $data | awk -F'[ :]' '{print $4}')
     range_end=$(echo $data | awk -F'[ :]' '{print $8}')
-    source $PWD/lib/shell/os/open_hysteria_ports.sh $range_start $range_end
+    source $PWD/lib/shell/access_control/open_hysteria_port_range.sh $range_start $range_end
 fi
 
 # Build a Docker image for Caddy and check if the image was successfully built
