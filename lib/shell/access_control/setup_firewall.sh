@@ -96,8 +96,8 @@ else
 fi
 
 echo -e "${B_GREEN}>> Drop OUTGOING connections to Iran and China ${RESET}"
-iptables -I FORWARD -i $INTERFACE -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
-ip6tables -I FORWARD -i $INTERFACE -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
+iptables -I FORWARD -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
+ip6tables -I FORWARD -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
 iptables -A OUTPUT -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
 ip6tables -A OUTPUT -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
 
