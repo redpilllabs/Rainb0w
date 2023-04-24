@@ -36,17 +36,6 @@ if [ $PYTHON_EXIT_CODE -ne 0 ]; then
     source $PWD/lib/shell/access_control/open_hysteria_port_range.sh $range_start $range_end
 fi
 
-# Build a Docker image for Caddy and check if the image was successfully built
-if [ ! "$(docker images -q caddy)" ]; then
-    docker buildx build --tag caddy $HOME/Rainb0w_Home/caddy/
-    if [ ! "$(docker images -q caddy)" ]; then
-        echo -e "${B_RED}There was an issue when building a Docker image for 'Caddy', check the logs!${RESET}"
-        echo -e "${B_YELLOW}After resolving the issue, run the installer again.${RESET}"
-        rm -rf $HOME/Rainb0w_Home
-        exit
-    fi
-fi
-
 MEMORY_SIZE=$(free -m | awk '/Mem:/ { print $2 }')
 if [ $MEMORY_SIZE -gt 512 ]; then
     # Build a Docker image for WordPress and check if the image was successfully built
