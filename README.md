@@ -47,7 +47,7 @@
 - یک سرور مجازی لینوکس با مشخصات حداقلی زیر
 
   - OS: Debian 11 or Ubuntu 20.04, 22.04
-  - Memory: 1GB
+  - Memory: 512MB (1GB required to run WordPress)
   - Storage: 10GB NVME or SSD
   - Virtualization: KVM
 
@@ -58,7 +58,6 @@ apt install git
 cd ~
 git clone https://github.com/0xNeu/Rainb0w.git
 cd Rainb0w
-chmod +x *.sh
 ./run.sh
 ```
 
