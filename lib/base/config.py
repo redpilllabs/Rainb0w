@@ -1,8 +1,5 @@
 import os
 
-# General
-VERSION = "3.0"
-
 # Path
 TLS_CERTS_DIR = (
     "/etc/letsencrypt/caddy/certificates/acme-v02.api.letsencrypt.org-directory"
