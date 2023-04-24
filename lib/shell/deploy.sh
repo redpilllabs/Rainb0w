@@ -55,6 +55,7 @@ fi
 
 # Start off with Caddy since we need TLS certs
 fn_restart_docker_container "caddy"
+echo -e "${B_BLUE}Waiting a few seconds to let Caddy obtains TLS certs...${RESET}"
 sleep 10
 
 # Disable DNS stub listener to free up the port 53 for blocky
