@@ -84,6 +84,10 @@ else
     #  to '/var/log/kern.log' tagged with the prefix below
     iptables -A INPUT -m geoip ! --src-cc IR,CF -m limit --limit 5/min -j LOG --log-prefix '** SUSPECT ** '
     ip6tables -A INPUT -m geoip ! --src-cc IR,CF -m limit --limit 5/min -j LOG --log-prefix '** SUSPECT ** '
+    # Log any connection attempts originating from Iran
+    #  to '/var/log/kern.log' tagged with the prefix below
+    iptables -A INPUT -m geoip --src-cc IR -m limit --limit 5/min -j LOG --log-prefix '** IRAN ** '
+    ip6tables -A INPUT -m geoip --src-cc IR -m limit --limit 5/min -j LOG --log-prefix '** IRAN ** '
     iptables -A INPUT -m geoip --src-cc IR,CF -m comment --comment "Drop everything except Iran and Cloudflare" -j ACCEPT
     ip6tables -A INPUT -m geoip --src-cc IR,CF -m comment --comment "Drop everything except Iran and Cloudflare" -j ACCEPT
     iptables -I FORWARD -i $INTERFACE -m geoip ! --src-cc IR,CF -m conntrack --ctstate NEW -m comment --comment "Drop everything except Iran and Cloudflare" -j DROP
