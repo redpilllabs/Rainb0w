@@ -64,19 +64,6 @@ else
     CONTAINERS=$(echo "$CONTAINERS" | sed 's/wordpress//g')
 fi
 
-if [[ " ${CONTAINERS[@]} " =~ "mtprotopy" ]]; then
-    # Build a Docker image for MTProtoPy and check if the image was successfully buil
-    if [ ! "$(docker images -q mtprotopy)" ]; then
-        docker buildx build --tag mtprotopy $HOME/Rainb0w_Home/mtprotopy/
-        if [ ! "$(docker images -q mtprotopy)" ]; then
-            echo -e "${B_RED}There was an issue when building a Docker image for 'MTProtoPy', check the logs!${RESET}"
-            echo -e "${B_YELLOW}After resolving the issue, run the installer again.${RESET}"
-            rm -rf $HOME/Rainb0w_Home
-            exit
-        fi
-    fi
-fi
-
 # Disable DNS stub listener to free up the port 53 for blocky
 source $PWD/lib/shell/os/disable_dns_stub_listener.sh
 python3 $PWD/lib/shell/helper/get_proxy_status.py "dot_doh"

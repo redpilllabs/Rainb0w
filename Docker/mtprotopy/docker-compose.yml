@@ -1,8 +1,8 @@
 version: "3.9"
 services:
   mtprotopy:
+    image: redpilllabs/mtprotopy:latest
     container_name: mtprotopy
-    image: mtprotopy
     restart: always
     networks:
       - caddy
@@ -12,11 +12,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./etc/config.toml:/config/config.toml:ro
       - $HOME/Rainb0w_Home/rainb0w_users.toml:/config/users.toml:rw
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "1"
-        max-size: "10m"
 
 networks:
   caddy:
