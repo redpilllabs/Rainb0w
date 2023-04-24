@@ -53,6 +53,10 @@ else
     CONTAINERS=$(echo "$CONTAINERS" | sed 's/wordpress//g')
 fi
 
+# Start off with Caddy since we need TLS certs
+fn_restart_docker_container "caddy"
+sleep 10
+
 # Disable DNS stub listener to free up the port 53 for blocky
 source $PWD/lib/shell/os/disable_dns_stub_listener.sh
 python3 $PWD/lib/shell/helper/get_proxy_status.py "dot_doh"
@@ -63,10 +67,6 @@ if [ $PYTHON_EXIT_CODE -ne 0 ]; then
 fi
 # Start blocky since we need DNS
 fn_restart_docker_container "blocky"
-
-# And then fire up Caddy since we need TLS certs
-fn_restart_docker_container "caddy"
-sleep 10
 
 python3 $PWD/lib/shell/helper/get_proxy_status.py "xray"
 PYTHON_EXIT_CODE=$?
