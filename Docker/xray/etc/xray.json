@@ -62,11 +62,7 @@
                     "rejectUnknownSni": true,
                     "certificates": [],
                     "minVersion": "1.3",
-                    "cipherSuites": "TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384",
-                    "alpn": [
-                        "h2",
-                        "http/1.1"
-                    ]
+                    "cipherSuites": "TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384"
                 }
             },
             "sniffing": {
