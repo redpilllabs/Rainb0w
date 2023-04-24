@@ -20,7 +20,7 @@ main_domain = rainb0w_config["DOMAINS"]["MAIN_DOMAIN"]
 
 if rainb0w_users:
     for user in rainb0w_users:
-        if user["name"] == sys.argv[3]:
+        if user["name"] == sys.argv[1]:
             print(
                 f"""\n
 Get your proxy share links from the protected page below:
