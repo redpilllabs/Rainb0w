@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="3.0"
+VERSION="3.1"
 
 # Platform
 DISTRO="$(awk -F= '/^NAME/{print $2}' /etc/os-release)"

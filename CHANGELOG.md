@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 3.1
+
+- Move Docker images to Docker Hub and disable build to save time
+- Remove Express installer (most users prefer having a choice)
+- Code refactor and cleanup
+
 ## Version 3.0
 
 - Add Hysteria proxy
