@@ -26,7 +26,7 @@ if rainb0w_users:
 Get your proxy share links from the protected page below:
 
 URL:       [bold blue]https://{main_domain}/{user['share_url_file']}[/bold blue]
-Username: [bold green]{sys.argv[3]}[/bold green]
+Username: [bold green]{sys.argv[1]}[/bold green]
 Password: [bold green]{user['share_url_password']}[/bold green]
 
 
