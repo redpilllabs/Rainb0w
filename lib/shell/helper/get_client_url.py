@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 
 import toml
 from rich import print
 
-config_file_handle = open(sys.argv[1], "r")
-users_file_handle = open(sys.argv[2], "r")
+config_file_handle = open(
+    f"{os.path.expanduser('~')}/Rainb0w_Home/rainb0w_config.toml", "r"
+)
+users_file_handle = open(
+    f"{os.path.expanduser('~')}/Rainb0w_Home/rainb0w_users.toml", "r"
+)
 
 rainb0w_config = toml.load(config_file_handle)
 rainb0w_users = toml.load(users_file_handle)

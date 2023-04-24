@@ -35,10 +35,10 @@ else
             if [[ "$latest_kernel" > "$current_kernel" ]]; then
                 fn_check_and_install_pkg linux-image-$latest_kernel-amd64
                 fn_check_and_install_pkg linux-headers-$latest_kernel-amd64
-                echo -e "${B_GREEN}\n\nThere's a newer kernel available for your OS: $available_kernel${RESET}"
-                echo -e "${B_RED}You're server is now going to reboot to load the new kernel and the extra moduels required${RESET}"
+                echo -e "${B_GREEN}\n\nA newer kernel '$latest_kernel' is installed on your Debian.${RESET}"
+                echo -e "${B_RED}You're server is now going to reboot to load the new kernel and the extra modules required${RESET}"
                 echo -e "${B_GREEN}After booting up, run the script again with the following commands to proceed!${RESET}"
-                echo -e "${B_YELLOW}cd Rainb0w"
+                echo -e "${B_YELLOW}cd Rainb0w-Lite"
                 echo -e "./run.sh${RESET}"
                 systemctl reboot
                 exit
@@ -68,21 +68,19 @@ function clear_and_copy_files() {
 
 function installer_menu() {
     echo -ne "
-Express: Deploys all common proxies (Xray, Hysteria, MTProto, Naive)
-Custom:  Select which proxies to deploy (Xray, Hysteria, MTProto, Naive, DoT/DoH)
+Install: Select which proxies to deploy (Xray, Hysteria, MTProto, Naive, DoT/DoH)
 Restore: Restore a previous installation's configuration and users
 
 Select installation type:
 
-${GREEN}1)${RESET} Express
-${GREEN}2)${RESET} Custom
-${GREEN}3)${RESET} Restore
+${GREEN}1)${RESET} Install
+${GREEN}2)${RESET} Restore
 ${RED}0)${RESET} Exit
 
 Choose an option: "
     read -r ans
     case $ans in
-    3)
+    2)
         clear
         python3 $PWD/lib/configurator.py "Restore"
         PYTHON_EXIT_CODE=$?
@@ -92,29 +90,17 @@ Choose an option: "
         fi
         source $PWD/lib/shell/deploy.sh "Restore"
         ;;
-    2)
-        clear
-        clear_and_copy_files
-        python3 $PWD/lib/configurator.py "Custom"
-        PYTHON_EXIT_CODE=$?
-        if [ $PYTHON_EXIT_CODE -ne 0 ]; then
-            echo "Python configurator did not finish successfully!"
-            rm -rf $HOME/Rainb0w_Home
-            exit
-        fi
-        source $PWD/lib/shell/deploy.sh "Custom"
-        ;;
     1)
         clear
         clear_and_copy_files
-        python3 $PWD/lib/configurator.py "Express"
+        python3 $PWD/lib/configurator.py "Install"
         PYTHON_EXIT_CODE=$?
         if [ $PYTHON_EXIT_CODE -ne 0 ]; then
             echo "Python configurator did not finish successfully!"
             rm -rf $HOME/Rainb0w_Home
             exit
         fi
-        source $PWD/lib/shell/deploy.sh "Express"
+        source $PWD/lib/shell/deploy.sh "Install"
         ;;
     0)
         exit

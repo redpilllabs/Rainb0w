@@ -12,11 +12,12 @@ source $PWD/lib/shell/os/install_docker.sh
 source $PWD/lib/shell/docker/init_vol_net.sh
 source $PWD/lib/shell/os/install_xt_geoip.sh
 
-CONTAINERS=($(ls -d "$HOME/Rainb0w_Home/"*/ | sed 's;^'"$HOME/Rainb0w_Home/"'\(.*\)/;\1;' | sed '/^caddy$/d'))
+# Apply Kernel's network stack optimizations
+source $PWD/lib/shell/performance/tune_kernel_net.sh
 
 # Activate necessary protections
 is_free_domain_tld=$(
-    python3 $PWD/lib/post-deploy/get_domain_type.py "$HOME/Rainb0w_Home/rainb0w_config.toml"
+    python3 $PWD/lib/shell/helper/get_domain_type.py
 )
 if [ "$is_free_domain_tld" == "True" ]; then
     source $PWD/lib/shell/access_control/setup_firewall.sh "free_tld"
@@ -25,16 +26,11 @@ elif [ "$is_free_domain_tld" == "False" ]; then
     source $PWD/lib/shell/access_control/setup_firewall.sh "paid_tld"
 fi
 
-# Apply Kernel's network stack optimizations in Express mode
-if [ ! $# -eq 0 ]; then
-    if [ "$1" == 'Express' ]; then
-        source $PWD/lib/shell/performance/tune_kernel_net.sh
-    fi
-fi
-
-if [[ " ${CONTAINERS[@]} " =~ "hysteria" ]]; then
+python3 $PWD/lib/shell/helper/get_proxy_status.py "hysteria"
+PYTHON_EXIT_CODE=$?
+if [ $PYTHON_EXIT_CODE -ne 0 ]; then
     # Get Hysteria port range from the rainb0w_config.toml and allow them in iptables
-    data=$(python3 $PWD/lib/post-deploy/get_hysteria_port_range.py "$HOME/Rainb0w_Home/rainb0w_config.toml")
+    data=$(python3 $PWD/lib/shell/helper/get_hysteria_port_range.py)
     range_start=$(echo $data | awk -F'[ :]' '{print $4}')
     range_end=$(echo $data | awk -F'[ :]' '{print $8}')
     source $PWD/lib/shell/access_control/open_hysteria_port_range.sh $range_start $range_end
@@ -81,32 +77,57 @@ if [[ " ${CONTAINERS[@]} " =~ "mtprotopy" ]]; then
     fi
 fi
 
-# Disable DNS stub listener to free up the port 53
+# Disable DNS stub listener to free up the port 53 for blocky
 source $PWD/lib/shell/os/disable_dns_stub_listener.sh
+python3 $PWD/lib/shell/helper/get_proxy_status.py "dot_doh"
+PYTHON_EXIT_CODE=$?
+if [ $PYTHON_EXIT_CODE -ne 0 ]; then
+    source $PWD/lib/shell/access_control/allow_port.sh "DoT" 853 "tcp"
+    source $PWD/lib/shell/access_control/allow_port.sh "DoQ" 853 "udp"
+fi
+# Start blocky since we need DNS
+fn_restart_docker_container "blocky"
 
-# Start proxy containers one by one but start off with Caddy to get TLS certs
+# And then fire up Caddy since we need TLS certs
 fn_restart_docker_container "caddy"
-for proxy in ${CONTAINERS[@]}; do
-    fn_restart_docker_container $proxy
-done
+sleep 10
 
-echo -e "\nWordPress admin area credentials:"
-WP_ADMIN=$(grep -w 'WORDPRESS_ADMIN_USER' $HOME/Rainb0w_Home/wordpress/wp.env | cut -d= -f2)
-WP_ADMIN=${WP_ADMIN//\'/}
-WP_PASSWORD=$(grep -w 'WORDPRESS_ADMIN_PASSWORD' $HOME/Rainb0w_Home/wordpress/wp.env | cut -d= -f2)
-WP_PASSWORD=${WP_PASSWORD//\'/}
-echo -e "WP Admin URL:  ${B_BLUE}https://YOUR_MAIN_DOMAIN/wp-admin ${RESET}"
-echo -e "WP Username:   ${B_GREEN}$WP_ADMIN${RESET}"
-echo -e "WP Password:   ${B_GREEN}$WP_PASSWORD${RESET}"
+python3 $PWD/lib/shell/helper/get_proxy_status.py "xray"
+PYTHON_EXIT_CODE=$?
+if [ $PYTHON_EXIT_CODE -ne 0 ]; then
+    fn_restart_docker_container "xray"
+fi
+
+python3 $PWD/lib/shell/helper/get_proxy_status.py "hysteria"
+PYTHON_EXIT_CODE=$?
+if [ $PYTHON_EXIT_CODE -ne 0 ]; then
+    fn_restart_docker_container "hysteria"
+fi
+
+python3 $PWD/lib/shell/helper/get_proxy_status.py "mtprotopy"
+PYTHON_EXIT_CODE=$?
+if [ $PYTHON_EXIT_CODE -ne 0 ]; then
+    fn_restart_docker_container "mtprotopy"
+fi
+
+if [ $MEMORY_SIZE -gt 512 ]; then
+    fn_restart_docker_container "wordpress"
+    echo -e "\nWordPress admin area credentials:"
+    WP_ADMIN=$(grep -w 'WORDPRESS_ADMIN_USER' $HOME/Rainb0w_Home/wordpress/wp.env | cut -d= -f2)
+    WP_ADMIN=${WP_ADMIN//\'/}
+    WP_PASSWORD=$(grep -w 'WORDPRESS_ADMIN_PASSWORD' $HOME/Rainb0w_Home/wordpress/wp.env | cut -d= -f2)
+    WP_PASSWORD=${WP_PASSWORD//\'/}
+    echo -e "WP Admin URL:  ${B_BLUE}https://YOUR_MAIN_DOMAIN/wp-admin ${RESET}"
+    echo -e "WP Username:   ${B_GREEN}$WP_ADMIN${RESET}"
+    echo -e "WP Password:   ${B_GREEN}$WP_PASSWORD${RESET}"
+fi
 
 echo -e "\n\nYour proxies are ready now!\n"
 
 if [ ! $# -eq 0 ]; then
-    if [ "$1" == 'Express' ]; then
-        python3 $PWD/lib/post-deploy/get_client_url.py "$HOME/Rainb0w_Home/rainb0w_config.toml" "$HOME/Rainb0w_Home/rainb0w_users.toml" "Rainb0w"
-    elif [ "$1" == 'Custom' ]; then
-        username=$(python3 $PWD/lib/post-deploy/get_first_username.py "$HOME/Rainb0w_Home/rainb0w_users.toml")
-        python3 $PWD/lib/post-deploy/get_client_url.py "$HOME/Rainb0w_Home/rainb0w_config.toml" "$HOME/Rainb0w_Home/rainb0w_users.toml" $username
+    if [ "$1" == 'Install' ]; then
+        username=$(python3 $PWD/lib/shell/helper/get_first_username.py)
+        python3 $PWD/lib/shell/helper/get_client_url.py $username
     elif [ "$1" == 'Restore' ]; then
         echo -e "User share urls are the same as in your configuration, you can view them in the dashboard"
     else

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
-import sys
+import os
 
 import toml
 
 # Load the TOML file
-config_file_handle = open(sys.argv[1], "r")
+config_file_handle = open(
+    f"{os.path.expanduser('~')}/Rainb0w_Home/rainb0w_config.toml", "r"
+)
 rainb0w_config = toml.load(config_file_handle)
 
 hysteria_params = next(

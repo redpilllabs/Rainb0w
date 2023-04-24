@@ -12,7 +12,7 @@ DOT_DOH_DOMAIN = ""
 MTPROTO_DOMAIN = ""
 
 
-[DEPLOYMENT]
+[STATUS]
 DOT_DOH = false
 XRAY = false
 MTPROTOPY = false

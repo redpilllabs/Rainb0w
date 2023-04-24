@@ -3,12 +3,13 @@ from os import urandom
 from random import randint
 from uuid import uuid4
 
+from rich import print
+
 from proxy.caddy import caddy_add_share_page
 from proxy.hysteria import hysteria_add_user, hysteria_remove_user
 from proxy.mtproto import mtprotopy_gen_share_url
 from proxy.naiveproxy import naiveproxy_add_user, naiveproxy_remove_user
 from proxy.xray import xray_add_user, xray_remove_user
-from rich import print
 from utils.helper import (
     base64_encode,
     bytes_to_raw_str,
@@ -29,10 +30,10 @@ def create_share_urls_file(
 
     rainb0w_config = load_toml(rainb0w_config_file)
     domains = rainb0w_config["DOMAINS"]
-    deployed = rainb0w_config["DEPLOYMENT"]
+    status = rainb0w_config["STATUS"]
     proxies = rainb0w_config["PROXY"]
     with open(f"{CLIENTS_SHARE_URLS_DIR}/{user_info['share_url_file']}", "w") as file:
-        if deployed["XRAY"]:
+        if status["XRAY"]:
             file.write("\n\n" + "*" * 40)
             file.write("\n              Xray/v2ray\n")
             file.write("*" * 40 + "\n\n")
@@ -161,7 +162,7 @@ def create_share_urls_file(
                 f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?mode=gun&security=tls&alpn=h2,http/1.1&fp=android&type=grpc&serviceName={proxy_config['svc_name']}&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+gRPC\n\n"
             )
 
-        if deployed["HYSTERIA"]:
+        if status["HYSTERIA"]:
             proxy_config = next(
                 item for item in rainb0w_config["PROXY"] if item["type"] == "HYSTERIA"
             )
@@ -204,7 +205,7 @@ QUIC Conn.:     4194304
     """.lstrip()
             )
 
-        if deployed["MTPROTOPY"]:
+        if status["MTPROTOPY"]:
             file.write("\n\n" + "*" * 40)
             file.write("\n              MTProto\n")
             file.write("*" * 40 + "\n\n")
@@ -216,7 +217,7 @@ QUIC Conn.:     4194304
             file.write(f"MTProto Share URL:     {mtproto_urls['tg_faketls_url']}\n")
             file.write(f"HTTPS Share URL:       {mtproto_urls['https_faketls_url']}")
 
-        if deployed["DOT_DOH"]:
+        if status["DOT_DOH"]:
             file.write("\n\n" + "*" * 40)
             file.write("\n              DNS-over-HTTPS/TLS\n")
             file.write("*" * 40 + "\n\n")
@@ -232,7 +233,7 @@ you should not set these as the DNS resolver BEFORE your client app, such as
 your device! But only set them inside the client application."""
             )
 
-        if deployed["NAIVE"]:
+        if status["NAIVE"]:
             file.write("\n\n" + "*" * 40)
             file.write("\n              Naive Proxy\n")
             file.write("*" * 40 + "\n\n")
@@ -303,13 +304,13 @@ def add_user_to_proxies(
     )
 
     # Add user to NaiveProxy
-    if rainb0w_config["DEPLOYMENT"]["NAIVE"]:
+    if rainb0w_config["STATUS"]["NAIVE"]:
         naiveproxy_add_user(user_info, caddy_config_file)
 
-    if rainb0w_config["DEPLOYMENT"]["XRAY"]:
+    if rainb0w_config["STATUS"]["XRAY"]:
         xray_add_user(user_info, xray_config_file)
 
-    if rainb0w_config["DEPLOYMENT"]["HYSTERIA"]:
+    if rainb0w_config["STATUS"]["HYSTERIA"]:
         hysteria_add_user(user_info, hysteria_config_file)
 
     rainb0w_users = get_users(rainb0w_users_file)
@@ -331,11 +332,11 @@ def remove_user(
         for user in rainb0w_users:
             if user["name"] == username:
                 print(f"Removing the user '{username}'...")
-                if rainb0w_config["DEPLOYMENT"]["XRAY"]:
+                if rainb0w_config["STATUS"]["XRAY"]:
                     xray_remove_user(user, xray_config_file)
-                if rainb0w_config["DEPLOYMENT"]["HYSTERIA"]:
+                if rainb0w_config["STATUS"]["HYSTERIA"]:
                     hysteria_remove_user(user, hysteria_config_file)
-                if rainb0w_config["DEPLOYMENT"]["NAIVE"]:
+                if rainb0w_config["STATUS"]["NAIVE"]:
                     naiveproxy_remove_user(user, caddy_config_file)
                 rainb0w_users.remove(user)
 

@@ -52,13 +52,13 @@ def apply_config(username=None):
     rainb0w_config = load_toml(RAINB0W_CONFIG_FILE)
     rainb0w_users = load_toml(RAINB0W_USERS_FILE)
 
-    if rainb0w_config["DEPLOYMENT"]["XRAY"]:
+    if rainb0w_config["STATUS"]["XRAY"]:
         xray_insert_proxy_params(rainb0w_config["PROXY"], XRAY_CONFIG_FILE)
         xray_insert_cert_path(
             rainb0w_config["DOMAINS"]["DIRECT_CONN_DOMAIN"], XRAY_CONFIG_FILE
         )
 
-    if rainb0w_config["DEPLOYMENT"]["HYSTERIA"]:
+    if rainb0w_config["STATUS"]["HYSTERIA"]:
         hysteria_config = next(
             (item for item in rainb0w_config["PROXY"] if item["type"] == "HYSTERIA")
         )
@@ -68,13 +68,13 @@ def apply_config(username=None):
             HYSTERIA_CONFIG_FILE,
         )
 
-    if rainb0w_config["DEPLOYMENT"]["MTPROTOPY"]:
+    if rainb0w_config["STATUS"]["MTPROTOPY"]:
         mtprotopy_insert_params(
             rainb0w_config["DOMAINS"]["MTPROTO_DOMAIN"],
             MTPROTOPY_CONFIG_FILE,
         )
 
-    if rainb0w_config["DEPLOYMENT"]["DOT_DOH"]:
+    if rainb0w_config["STATUS"]["DOT_DOH"]:
         config_doh_dot(rainb0w_config["DOMAINS"]["DOT_DOH_DOMAIN"], BLOCKY_CONFIG_FILE)
 
     # NOTE: NaiveProxy does not need any configuration other than user addition
@@ -93,7 +93,7 @@ def apply_config(username=None):
     # Configure Caddy
     caddy_insert_params(rainb0w_config, CADDY_CONFIG_FILE)
 
-    # If this is a new Express/Custom deployment, we need to create a default user
+    # If this is a new Express/Custom STATUS, we need to create a default user
     # if it's a 'Restore' we will restore the existing users one by one
     if username:
         add_user_to_proxies(
@@ -119,60 +119,7 @@ def apply_config(username=None):
     exit(0)
 
 
-def express_config():
-    rainb0w_config = load_toml(RAINB0W_CONFIG_FILE)
-
-    # Display notice
-    print_txt_file(f"{os.getcwd()}/notice.txt")
-    prompt_clear_screen()
-
-    progress_indicator(1, 5, "Main Domain")
-    rainb0w_config["DOMAINS"]["MAIN_DOMAIN"] = prompt_main_domain()
-
-    progress_indicator(2, 5, "Direct Subdomain")
-    rainb0w_config["DOMAINS"]["DIRECT_CONN_DOMAIN"] = prompt_direct_conn_domain()
-
-    progress_indicator(3, 5, "CDN Subdomain")
-    rainb0w_config["DOMAINS"]["CDN_COMPAT_DOMAIN"] = prompt_cdn_domain()
-
-    progress_indicator(4, 5, "MTProto SNI/Subdomain")
-    rainb0w_config["DOMAINS"]["MTPROTO_DOMAIN"] = prompt_mtproto_domain(
-        rainb0w_config["DOMAINS"]["MAIN_DOMAIN"]
-    )
-    rainb0w_config["DEPLOYMENT"]["MTPROTOPY"] = True
-
-    if not is_free_domain(rainb0w_config["DOMAINS"]["MAIN_DOMAIN"]):
-        progress_indicator(5, 5, "Cloudflare API Key")
-        rainb0w_config["CLOUDFLARE"]["API_KEY"] = prompt_cloudflare_api_key()
-        rainb0w_config["CLOUDFLARE"]["IS_FREE_TLD"] = False
-    else:
-        rainb0w_config["CLOUDFLARE"]["IS_FREE_TLD"] = True
-
-    if "PROXY" not in rainb0w_config:
-        rainb0w_config["PROXY"] = []
-
-    # Xray configuration
-    rainb0w_config["PROXY"] = xray_gen_proxy_params(
-        rainb0w_config["DOMAINS"]["MAIN_DOMAIN"],
-        rainb0w_config["DOMAINS"]["CDN_COMPAT_DOMAIN"],
-    )
-    rainb0w_config["DEPLOYMENT"]["XRAY"] = True
-
-    # Hysteria configuration
-    hysteria_params = hysteria_gen_params()
-    rainb0w_config["PROXY"].append(hysteria_params)
-    rainb0w_config["DEPLOYMENT"]["HYSTERIA"] = True
-
-    # Add NaiveProxy to the mix
-    rainb0w_config["DEPLOYMENT"]["NAIVE"] = True
-
-    # Save the configuration to file because we're going to pass it around next
-    save_toml(rainb0w_config, RAINB0W_CONFIG_FILE)
-
-    apply_config(username="Rainb0w")
-
-
-def custom_config():
+def configure():
     rainb0w_config = load_toml(RAINB0W_CONFIG_FILE)
 
     if "PROXY" not in rainb0w_config:
@@ -203,7 +150,7 @@ def custom_config():
     curr_step += 1
 
     if "NaiveProxy" in selected:
-        rainb0w_config["DEPLOYMENT"]["NAIVE"] = True
+        rainb0w_config["STATUS"]["NAIVE"] = True
 
     if "Xray/v2ray" in selected:
         progress_indicator(curr_step, total_steps, "Direct Subdomain")
@@ -214,7 +161,7 @@ def custom_config():
         curr_step += 1
 
         # Xray configuration
-        rainb0w_config["DEPLOYMENT"]["XRAY"] = True
+        rainb0w_config["STATUS"]["XRAY"] = True
         rainb0w_config["PROXY"] = xray_gen_proxy_params(
             rainb0w_config["DOMAINS"]["MAIN_DOMAIN"],
             rainb0w_config["DOMAINS"]["CDN_COMPAT_DOMAIN"],
@@ -231,7 +178,7 @@ def custom_config():
             curr_step += 1
 
         # Hysteria configuration
-        rainb0w_config["DEPLOYMENT"]["HYSTERIA"] = True
+        rainb0w_config["STATUS"]["HYSTERIA"] = True
         hysteria_params = hysteria_gen_params()
         if rainb0w_config["PROXY"]:
             rainb0w_config["PROXY"].append(hysteria_params)
@@ -244,7 +191,7 @@ def custom_config():
         progress_indicator(curr_step, total_steps, "DoH/DoT Subdomain")
         rainb0w_config["DOMAINS"]["DOT_DOH_DOMAIN"] = prompt_dohdot_domain()
         curr_step += 1
-        rainb0w_config["DEPLOYMENT"]["DOT_DOH"] = True
+        rainb0w_config["STATUS"]["DOT_DOH"] = True
         # Even if DoT/DoH is not selected, we still deploy blocky
         # since it is required for some functionalities such as
         # ad, porn, and ccTLDs (.ir) blocking
@@ -255,7 +202,7 @@ def custom_config():
             rainb0w_config["DOMAINS"]["MAIN_DOMAIN"]
         )
         curr_step += 1
-        rainb0w_config["DEPLOYMENT"]["MTPROTOPY"] = True
+        rainb0w_config["STATUS"]["MTPROTOPY"] = True
     else:
         remove_dir(f"{RAINB0W_HOME_DIR}/mtprotopy")
 
@@ -301,10 +248,8 @@ def restore_config():
 
 def main():
     if len(sys.argv) > 1:
-        if sys.argv[1] == "Express":
-            express_config()
-        elif sys.argv[1] == "Custom":
-            custom_config()
+        if sys.argv[1] == "Install":
+            configure()
         elif sys.argv[1] == "Restore":
             restore_config()
         else:
