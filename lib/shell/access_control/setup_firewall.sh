@@ -96,10 +96,10 @@ else
 fi
 
 echo -e "${B_GREEN}>> Drop OUTGOING connections to Iran and China ${RESET}"
-iptables -I FORWARD -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
-ip6tables -I FORWARD -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
-iptables -A OUTPUT -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
-ip6tables -A OUTPUT -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -j REJECT
+iptables -I FORWARD -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -m comment --comment "Drop Outgoing to IR,CN" -j REJECT
+ip6tables -I FORWARD -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -m comment --comment "Drop Outgoing to IR,CN" -j REJECT
+iptables -A OUTPUT -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -m comment --comment "Drop Outgoing to IR,CN" -j REJECT
+ip6tables -A OUTPUT -m geoip --dst-cc IR,CN -m conntrack --ctstate NEW -m comment --comment "Drop Outgoing to IR,CN" -j REJECT
 
 echo -e "${B_GREEN}>> Allow HTTP and HTTPS/QUIC ${RESET}"
 iptables -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW -m comment --comment "Allow HTTP" -j ACCEPT
@@ -116,8 +116,8 @@ iptables -A INPUT -p udp --dport 853 -m conntrack --ctstate NEW -m comment --com
 ip6tables -A INPUT -p udp --dport 853 -m conntrack --ctstate NEW -m comment --comment "Allow DoQ" -j ACCEPT
 
 echo -e "${B_GREEN}>> Drop invalid packets ${RESET}"
-iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
-ip6tables -A INPUT -m conntrack --ctstate INVALID -j DROP
+iptables -A INPUT -m conntrack --ctstate INVALID -m comment --comment "Drop Invalid Packets" -j DROP
+ip6tables -A INPUT -m conntrack --ctstate INVALID -m comment --comment "Drop Invalid Packets" -j DROP
 
 echo -e "${B_GREEN}>> Setting chain's default policies${RESET}"
 iptables -P INPUT DROP
