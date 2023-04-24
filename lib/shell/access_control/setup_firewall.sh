@@ -63,9 +63,10 @@ echo -e "${B_GREEN}>> Allow ping ${RESET}"
 iptables -A INPUT -p icmp --icmp-type 8 -m conntrack --ctstate NEW -m comment --comment "Allow ping" -j ACCEPT
 ip6tables -A INPUT -p icmpv6 -m comment --comment "Allow ping" -j ACCEPT
 
-echo -e "${B_GREEN}>> Allow incoming SSH ${RESET}"
-iptables -A INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m comment --comment "Allow SSH" -j ACCEPT
-ip6tables -A INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m comment --comment "Allow SSH" -j ACCEPT
+echo -e "${B_GREEN}>> Allow SSH ${RESET}"
+SSH_PORT=$(netstat -tlnp | grep sshd | awk '{print $4}' | awk -F ':' '{print $2}')
+iptables -A INPUT -p tcp --dport $SSH_PORT -m conntrack --ctstate NEW -m comment --comment "Allow SSH" -j ACCEPT
+ip6tables -A INPUT -p tcp --dport $SSH_PORT -m conntrack --ctstate NEW -m comment --comment "Allow SSH" -j ACCEPT
 
 if [ "$1" == "free_tld" ]; then
     # Drop connections to/from China
