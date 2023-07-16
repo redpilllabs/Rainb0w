@@ -17,7 +17,7 @@ if [ "$(fn_check_for_pkg xtables-addons-common)" = true ] &&
 
     # Get the latest aggregated CIDR database
     echo -e "${B_GREEN}>> Getting the latest aggregated database ${RESET}"
-    curl -s "https://raw.githubusercontent.com/0xNeu/GFIGeoIP/main/Aggregated_Data/agg_cidrs.csv" >/tmp/agg_cidrs.csv
+    curl -s "https://raw.githubusercontent.com/redpilllabs/GFIGeoIP/main/Aggregated_Data/agg_cidrs.csv" >/tmp/agg_cidrs.csv
 
     # Check if it's the first run
     if [ -f "/usr/libexec/rainb0w/agg_cidr.csv" ]; then
