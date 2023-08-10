@@ -69,7 +69,7 @@ function clear_and_copy_files() {
 function installer_menu() {
     echo -ne "
 Rainb0w Proxy Installer v${VERSION}
-Author: Neu
+Red Pill Labs
 
 Install: Select which proxies to deploy (Xray, Hysteria, MTProto, Naive, DoT/DoH)
 Restore: Restore a previous installation's configuration and users
