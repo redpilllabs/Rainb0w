@@ -55,7 +55,14 @@ fi
 
 # Install pre-requisites
 if [ ! -d "$HOME/Rainb0w_Home" ]; then
-    fn_install_python_packages
+    # Install required packages
+    fn_install_required_packages
+    # Install xtables geoip
+    source $PWD/lib/shell/os/install_xt_geoip.sh
+    # Install Docker
+    source $PWD/lib/shell/os/install_docker.sh
+    # Reboot if needed
+    source $PWD/lib/shell/os/check_reboot_required.sh
     clear
 fi
 

@@ -9,10 +9,8 @@ if [ "$IS_PKG_INSTALLED" = false ] || [ ! -d "/usr/libexec/rainb0w" ]; then
     fn_check_and_install_pkg xtables-addons-common
     fn_check_and_install_pkg libtext-csv-xs-perl
     fn_check_and_install_pkg libmoosex-types-netaddr-ip-perl
-    fn_check_and_install_pkg pkg-config
     fn_check_and_install_pkg iptables-persistent
     fn_check_and_install_pkg cron
-    fn_check_and_install_pkg curl
 
     # Build the IP database
     source $PWD/lib/shell/os/rebuild_xt_geoip_db.sh

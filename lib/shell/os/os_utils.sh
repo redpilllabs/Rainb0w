@@ -17,10 +17,21 @@ function fn_check_and_install_pkg() {
     fi
 }
 
-function fn_install_python_packages() {
-    echo -e "${B_GREEN}>> Checking for requried Python packages${RESET}"
-    apt update && apt upgrade -y
-    fn_check_and_install_pkg python3-pip
+function fn_install_required_packages() {
+    echo -e "${B_GREEN}>> Checking for and installing requried packages${RESET}"
+    source $PWD/lib/shell/os/upgrade_os.sh
     fn_check_and_install_pkg net-tools
+    fn_check_and_install_pkg build-essential
+    fn_check_and_install_pkg autoconf
+    fn_check_and_install_pkg pkg-config
+    fn_check_and_install_pkg dkms
+    fn_check_and_install_pkg curl
+    fn_check_and_install_pkg unzip
+    fn_check_and_install_pkg python3-pip
+    fn_check_and_install_pkg qrencode
+    fn_check_and_install_pkg openssl
+    fn_check_and_install_pkg bc
+    fn_check_and_install_pkg logrotate
+    fn_check_and_install_pkg iptables-persistent
     pip3 install --quiet -r $PWD/requirements.txt
 }
