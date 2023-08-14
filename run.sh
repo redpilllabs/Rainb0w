@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export DEBIAN_FRONTEND=noninteractive
+
 # Allow execution permission
 find $PWD -name "*.sh" -exec chmod +x {} \;
 
