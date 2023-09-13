@@ -42,6 +42,5 @@ obfs:
     password: OBFS_PASSWORD
 
 auth:
-  type: password
-  password: RANDOM_PASSWORD
+  type: userpass
   userpass:

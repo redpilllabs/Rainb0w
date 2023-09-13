@@ -34,7 +34,6 @@ def hysteria_insert_params(
     ] = f"{TLS_CERTS_DIR}/{get_cert_dir(direct_conn_domain)}/{get_cert_dir(direct_conn_domain)}.key"
 
     hysteria_config["masquerade"]["proxy"]["url"] = f"https://{main_domain}"
-    hysteria_config["auth"]["password"] = gen_random_string(16) # Random unused password just to satisfy config, actual user pass entries are inserted later on
 
     save_yaml(hysteria_config, hysteria_config_file)
 
