@@ -18,7 +18,7 @@ if [ $PYTHON_EXIT_CODE -ne 0 ]; then
     fn_restart_docker_container "hysteria"
 fi
 
-python3 $PWD/lib/shell/helper/get_proxy_status.py "mtproto"
+python3 $PWD/lib/shell/helper/get_proxy_status.py "mtprotopy"
 PYTHON_EXIT_CODE=$?
 if [ $PYTHON_EXIT_CODE -ne 0 ]; then
     fn_restart_docker_container "mtprotopy"
