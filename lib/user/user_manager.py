@@ -171,35 +171,32 @@ def create_share_urls_file(
             file.write("*" * 40 + "\n\n")
             file.write(
                 f"""
-    For port-hopping connection, configure Matsuri as the following:
-Server:         {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}:{proxy_config['port_range_start']}-{proxy_config['port_range_end']}
-Port:           Empty
-Protocol:       UDP
-SNI:            {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}
-ALPN:           h3
-Obfuscation:    {proxy_config['obfs']}
-Auth. Type:     STRING
-Payload:        {user_info['password']}
-Max Upload:     YOUR REAL UPLOAD SPEED
-Max Download:   YOUR REAL DOWNLOAD SPEED
-QUIC Stream:    1677768
-QUIC Conn.:     4194304
+
+    Share link: hysteria2://{user_info['name']}:{user_info['password']}@{domains['DIRECT_CONN_DOMAIN']}:8443/?obfs=salamander&obfs-password={proxy_config['obfs']}&sni={domains['DIRECT_CONN_DOMAIN']}#{user_info['name']}%20Hysteria
+
+    In case your client does not support share URIs, manually configure it as the following:
+
+    For port-hopping connection, configure client as the following:
+Protocol version:   2
+Server:             {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}
+Port:               {proxy_config['port_range_start']}-{proxy_config['port_range_end']}
+Obfuscation:        {proxy_config['obfs']}
+Authentication:     {user_info["name"]}:{user_info["password"]}
+SNI:                {rainb0w_config['DOMAINS']['MAIN_DOMAIN']}
+Allow Insecure:     Enabled
+Disable Path MTU Discovery: Enabled
 
         ===================
 
-    For single-port connection, configure Matsuri as the following:
-Server:         {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}
-Port:           Any number between the range[{proxy_config['port_range_start']}-{proxy_config['port_range_end']}]
-Protocol:       UDP
-SNI:            {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}
-ALPN:           h3
-Obfuscation:    {proxy_config['obfs']}
-Auth. Type:     STRING
-Payload:        {user_info['password']}
-Max Upload:     YOUR REAL UPLOAD SPEED
-Max Download:   YOUR REAL DOWNLOAD SPEED
-QUIC Stream:    1677768
-QUIC Conn.:     4194304
+    For single-port connection, configure client as the following:
+Protocol version:   2
+Server:             {rainb0w_config['DOMAINS']['DIRECT_CONN_DOMAIN']}
+Port:               8443
+Obfuscation:        {proxy_config['obfs']}
+Authentication:     {user_info["name"]}:{user_info["password"]}
+SNI:                {rainb0w_config['DOMAINS']['MAIN_DOMAIN']}
+Allow Insecure:     Enabled
+Disable Path MTU Discovery: Enabled
 
 
     """.lstrip()
@@ -364,8 +361,8 @@ def print_client_info(username: str, rainb0w_config_file: str, rainb0w_users_fil
 
 def prompt_username():
     username = input("\nEnter a username for your first user: ")
-    while not username:
-        print("\nInvalid username!")
+    while not username or not username.isascii() or not username.islower():
+        print("\nInvalid username! Enter only ASCII characters and numbers in lowercase.")
         username = input("Enter a username for your first user: ")
 
     return username

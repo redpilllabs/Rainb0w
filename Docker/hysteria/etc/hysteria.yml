@@ -1,0 +1,47 @@
+listen: :8443
+
+tls:
+  cert: /etc/ssl/certs/selfsigned.crt
+  key: /etc/ssl/private/selfsigned.key
+
+masquerade:
+  type: proxy
+  proxy:
+    url: https://YOUR_PROXY_SNI
+    rewriteHost: true
+
+quic:
+  disablePathMTUDiscovery: true
+
+bandwidth:
+  up: 100 mbps
+  down: 100 mbps
+
+ignoreClientBandwidth: true
+
+resolver:
+  type: udp
+  udp:
+    addr: 172.18.0.53:53
+    timeout: 5s
+
+acl:
+  inline:
+    - reject(geoip:cn)
+    - reject(geoip:ir)
+    - reject(all, tcp/25)
+    - reject(10.0.0.0/8)
+    - reject(172.16.0.0/12)
+    - reject(192.168.0.0/16)
+    - reject(fc00::/7)
+    - direct(all)
+
+obfs:
+  type: salamander
+  salamander:
+    password: OBFS_PASSWORD
+
+auth:
+  type: password
+  password: RANDOM_PASSWORD
+  userpass:

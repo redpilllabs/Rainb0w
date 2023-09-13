@@ -2,7 +2,7 @@ from random import randint
 
 from base.config import TLS_CERTS_DIR
 from utils.domain_utils import get_cert_dir
-from utils.helper import gen_random_string, load_json, save_json
+from utils.helper import gen_random_string, load_json, load_yaml, save_json, save_yaml
 
 
 def hysteria_gen_params() -> dict:
@@ -20,33 +20,39 @@ def hysteria_gen_params() -> dict:
 
 
 def hysteria_insert_params(
-    obfs: str, direct_conn_domain: str, hysteria_config_file: str
+    obfs: str, direct_conn_domain: str, main_domain: str, hysteria_config_file: str
 ):
     print("Configuring Hysteria...")
-    hysteria_config = load_json(hysteria_config_file)
-    hysteria_config["listen"] = ":8443"
-    hysteria_config["obfs"] = obfs
-    hysteria_config[
+    hysteria_config = load_yaml(hysteria_config_file)
+
+    hysteria_config['obfs'] = {'type': 'salamander', 'salamander': {'password': obfs}}
+    hysteria_config["tls"][
         "cert"
     ] = f"{TLS_CERTS_DIR}/{get_cert_dir(direct_conn_domain)}/{get_cert_dir(direct_conn_domain)}.crt"
-    hysteria_config[
+    hysteria_config["tls"][
         "key"
     ] = f"{TLS_CERTS_DIR}/{get_cert_dir(direct_conn_domain)}/{get_cert_dir(direct_conn_domain)}.key"
 
-    save_json(hysteria_config, hysteria_config_file)
+    hysteria_config["masquerade"]["proxy"]["url"] = f"https://{main_domain}"
+    hysteria_config["auth"]["password"] = gen_random_string(16) # Random unused password just to satisfy config, actual user pass entries are inserted later on
+
+    save_yaml(hysteria_config, hysteria_config_file)
 
 
 def hysteria_add_user(user_info: dict, hysteria_config_file: str):
-    hysteria_config = load_json(hysteria_config_file)
-    hysteria_config["auth"]["config"].append(user_info["password"])
+    hysteria_config = load_yaml(hysteria_config_file)
+    if hysteria_config['auth']['userpass']:
+        hysteria_config['auth']['userpass'][user_info["name"]] = user_info["password"]
+    else:
+        hysteria_config['auth']['userpass'] = {user_info["name"]: user_info["password"]}
 
-    save_json(hysteria_config, hysteria_config_file)
+    save_yaml(hysteria_config, hysteria_config_file)
 
 
 def hysteria_remove_user(user_info: dict, hysteria_config_file: str):
-    hysteria_config = load_json(hysteria_config_file)
-    for item in hysteria_config["auth"]["config"]:
-        if item == user_info["password"]:
-            hysteria_config["auth"]["config"].remove(item)
+    hysteria_config = load_yaml(hysteria_config_file)
+    user_found = hysteria_config["auth"]['userpass'].get(user_info["name"])
+    if user_found:
+        del hysteria_config["auth"]['userpass'][user_info["name"]]
 
-    save_json(hysteria_config, hysteria_config_file)
+    save_yaml(hysteria_config, hysteria_config_file)

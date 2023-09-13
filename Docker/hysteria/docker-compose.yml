@@ -12,10 +12,10 @@ services:
       - caddy_data:/etc/letsencrypt:ro
       - /var/log:/var/log:rw
       - /etc/localtime:/etc/localtime:ro
-      - ./etc/hysteria.json:/etc/hysteria.json
+      - ./etc/hysteria.yml:/etc/hysteria/config.yml
     environment:
       - LOGGING_LEVEL=warn
-    command: [ "server", "--config", "/etc/hysteria.json" ]
+    command: [ "server", "-c", "/etc/hysteria/config.yml" ]
 
 volumes:
   caddy_data:

@@ -5,6 +5,8 @@ import shutil
 import signal
 import sys
 
+from pick import pick
+
 from base.config import (
     BLOCKY_CONFIG_FILE,
     CADDY_CONFIG_FILE,
@@ -16,7 +18,6 @@ from base.config import (
     RAINB0W_USERS_FILE,
     XRAY_CONFIG_FILE,
 )
-from pick import pick
 from proxy.blocky import config_doh_dot
 from proxy.caddy import caddy_insert_params
 from proxy.hysteria import hysteria_gen_params, hysteria_insert_params
@@ -65,6 +66,7 @@ def apply_config(username=None):
         hysteria_insert_params(
             hysteria_config["obfs"],
             rainb0w_config["DOMAINS"]["DIRECT_CONN_DOMAIN"],
+            rainb0w_config["DOMAINS"]["MAIN_DOMAIN"],
             HYSTERIA_CONFIG_FILE,
         )
 
