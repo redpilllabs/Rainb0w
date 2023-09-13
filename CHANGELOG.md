@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 3.2
+
+- Add Hysteria2 support
+- Improve username prompt message
+- Dismiss system dialogs to make the installer non-interactive
+- Fix MTProto Docker container restarts
+
 ## Version 3.1
 
 - Move Docker images to Docker Hub and disable build to save time
