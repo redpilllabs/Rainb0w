@@ -1,7 +1,7 @@
 FROM wordpress:latest
 
 RUN apt-get update \
-    && apt-get install -y mariadb-client netcat \
+    && apt-get install -y mariadb-client netcat-openbsd \
     && docker-php-ext-install mysqli pdo pdo_mysql \
     && apt-get install -y --no-install-recommends \
     curl \
