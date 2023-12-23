@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+  hysteria:
+    image: tobyxdd/hysteria:latest
+    container_name: hysteria
+    restart: always
+    networks:
+      - caddy
+    ports:
+      - "8443:8443/udp"
+    volumes:
+      - caddy_data:/etc/letsencrypt:ro
+      - /var/log:/var/log:rw
+      - /etc/localtime:/etc/localtime:ro
+      - ./etc/hysteria.yml:/etc/hysteria/config.yml
+    environment:
+      - LOGGING_LEVEL=warn
+    command: [ "server", "-c", "/etc/hysteria/config.yml" ]
+
+volumes:
+  caddy_data:
+    external: true
+
+networks:
+  caddy:
+    external: true

@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    volumes:
+      - db:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    env_file:
+      - db.env
+    networks:
+      - caddy
+
+  wordpress:
+    depends_on:
+      - mariadb
+    image: wordpress
+    container_name: wordpress
+    restart: always
+    networks:
+      - caddy
+    expose:
+      - 80
+    volumes:
+      - blog:/var/www/html
+      - apache2:/etc/apache2
+      - /etc/localtime:/etc/localtime:ro
+      - ./wp:/var/www/wp/
+    env_file:
+      - wp.env
+    entrypoint: [ "bash", "/var/www/html/entrypoint.sh" ]
+
+volumes:
+  db:
+  blog:
+  apache2:
+
+
+networks:
+  caddy:
+    external: true
