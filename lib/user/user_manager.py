@@ -151,7 +151,7 @@ def create_share_urls_file(
                 (item for item in proxies if item["type"] == "TROJAN_WS")
             )
             file.write(
-                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?security=tls&alpn=http/1.1&host={proxy_config['host']}&fp=android&type=ws&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+Websocket\n\n"
+                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?security=tls&alpn=http/1.1&host={proxy_config['host']}&path={proxy_config['path']}&fp=android&type=ws&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+Websocket\n\n"
             )
 
             # Trojan gRPC
@@ -362,7 +362,9 @@ def print_client_info(username: str, rainb0w_config_file: str, rainb0w_users_fil
 def prompt_username():
     username = input("\nEnter a username for your first user: ")
     while not username or not username.isascii() or not username.islower():
-        print("\nInvalid username! Enter only ASCII characters and numbers in lowercase.")
+        print(
+            "\nInvalid username! Enter only ASCII characters and numbers in lowercase."
+        )
         username = input("Enter a username for your first user: ")
 
     return username
