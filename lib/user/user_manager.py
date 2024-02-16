@@ -183,7 +183,7 @@ Port:               {proxy_config['port_range_start']}-{proxy_config['port_range
 Obfuscation:        {proxy_config['obfs']}
 Authentication:     {user_info["name"]}:{user_info["password"]}
 SNI:                {rainb0w_config['DOMAINS']['MAIN_DOMAIN']}
-Allow Insecure:     Enabled
+Allow Insecure:     Disabled
 Disable Path MTU Discovery: Enabled
 
         ===================
@@ -195,7 +195,7 @@ Port:               8443
 Obfuscation:        {proxy_config['obfs']}
 Authentication:     {user_info["name"]}:{user_info["password"]}
 SNI:                {rainb0w_config['DOMAINS']['MAIN_DOMAIN']}
-Allow Insecure:     Enabled
+Allow Insecure:     Disabled
 Disable Path MTU Discovery: Enabled
 
 
