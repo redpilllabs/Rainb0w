@@ -143,7 +143,7 @@ def create_share_urls_file(
 
             # Trojan TCP
             file.write(
-                f"trojan://{user_info['password']}@{domains['DIRECT_CONN_DOMAIN']}:443?security=tls&alpn=h2,http/1.1&headerType=none&fp=android&type=tcp&sni={domains['DIRECT_CONN_DOMAIN']}#Trojan+TCP\n\n"
+                f"trojan://{user_info['password']}@{domains['DIRECT_CONN_DOMAIN']}:443?security=tls&alpn=h2,http/1.1&headerType=none&fp=chrome&type=tcp&sni={domains['DIRECT_CONN_DOMAIN']}#Trojan+TCP\n\n"
             )
 
             # Trojan Websocket
@@ -151,7 +151,7 @@ def create_share_urls_file(
                 (item for item in proxies if item["type"] == "TROJAN_WS")
             )
             file.write(
-                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?security=tls&alpn=http/1.1&host={proxy_config['host']}&path={proxy_config['path']}&fp=android&type=ws&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+Websocket\n\n"
+                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?security=tls&alpn=http/1.1&host={proxy_config['host']}&path={proxy_config['path']}&fp=chrome&type=ws&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+Websocket\n\n"
             )
 
             # Trojan gRPC
@@ -159,7 +159,7 @@ def create_share_urls_file(
                 (item for item in proxies if item["type"] == "TROJAN_GRPC")
             )
             file.write(
-                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?mode=gun&security=tls&alpn=h2,http/1.1&fp=android&type=grpc&serviceName={proxy_config['svc_name']}&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+gRPC\n\n"
+                f"trojan://{user_info['password']}@{domains['CDN_COMPAT_DOMAIN']}:443?mode=gun&security=tls&alpn=h2,http/1.1&fp=chrome&type=grpc&serviceName={proxy_config['svc_name']}&sni={domains['CDN_COMPAT_DOMAIN']}#Trojan+gRPC\n\n"
             )
 
         if status["HYSTERIA"]:
