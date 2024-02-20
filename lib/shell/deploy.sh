@@ -107,4 +107,4 @@ if [ ! $# -eq 0 ]; then
 fi
 
 echo -e "\nYou can add/remove users or find more options in the dashboard,
-in order to display the dashboard run the 'menu.sh' again."
+in order to display the dashboard run the file 'run.sh' again."
