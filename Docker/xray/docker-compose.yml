@@ -3,6 +3,7 @@ services:
     image: teddysun/xray:latest
     container_name: xray
     restart: always
+    privileged: true
     networks:
       - caddy
     volumes:
