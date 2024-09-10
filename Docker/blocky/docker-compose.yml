@@ -17,12 +17,11 @@ services:
       - "853:853/udp"
     expose:
       - "4343"
-    environment:
-      - TZ=UTC
     volumes:
       - caddy_data:/etc/letsencrypt:ro
       - /var/log:/logs
       - ./etc/config.yml:/app/config.yml
+      - /etc/localtime:/etc/localtime:ro
 
 volumes:
   caddy_data:
