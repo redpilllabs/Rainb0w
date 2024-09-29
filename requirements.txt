@@ -4,3 +4,5 @@ rich
 python-dotenv
 psutil
 bcrypt
+requests
+PyYAML

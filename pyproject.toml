@@ -1,0 +1,24 @@
+[project]
+name = "rainb0w"
+version = "3.3"
+description = "Sing-Box proxy installer"
+authors = [
+    { name = "Kyōchikutō | キョウチクトウ" }
+]
+dependencies = [
+    "PyYAML",
+    "bcrypt",
+    "pick",
+    "psutil",
+    "python-dotenv",
+    "requests",
+    "rich",
+    "toml",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[tool.rye]
+managed = true
+virtual = true
+dev-dependencies = []
