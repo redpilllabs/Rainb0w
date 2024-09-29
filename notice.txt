@@ -1,26 +1,20 @@
-This script will deploy Docker containers of TLS-based proxies
-such as [VLESS, VMESS, Trojan, Hysteria, MTProto] hence it requires
-the following in order to proceed:
+This script will deploy VLESS and Hysteria2 proxies using Sing-Box 
+and it requires the following in order to proceed:
 
-1. A domain name added to your Cloudflare account
+1. A Cloudflare account
 
-2. CDN proxy MUST BE OFF WHILE DEPLOYING! You can turn it on after finishing the setup.
+2. A Cloudflare API key that has permission to modify DNS zones (Refer to repo wiki for tutorials)
 
-3. Based on your selected proxies, you will need a few
-    subdomains with 'A' records pointed to your origin server:
+3. A domain name added to your Cloudflare account with 2 subdomains with 'A' records pointed to your origin server:
 
     (A). A subdomain to use for protocols that require a direct connection
-        to your server such as [VLESS(TCP), VMESS(HTTP), Hysteria]
+        to your server such as [Hysteria]
 
     (B). A subdomain to use for protocols that are compatible with CDNs
-        such as [Websocket, gRPC], this way you can turn on CDN routing
-        for these protocols when your IP is blocked!
+        such as [Websocket, HTTPUpgrade, gRPC], using this setup you can turn on CDN routing
+        for these protocols when your IP is blocked without affecting your other proxies and
+        without requiring any change on the client side.
 
-    (C). A subdomain for DNS-over-HTTPS/TLS server, this will help
-        encrypt your DNS requests and also block certain ccTLDs
-        such as [.ir] and [.cn] therefore further protecting your server
-        from detection and probing
+        NOTE: CDN proxy MUST BE OFF while deploying! You can turn it on after finishing the setup.
 
-    (D). A subdomain for MTProto proxy
 
-4. A Cloudflare API key that has permission to modify DNS zones

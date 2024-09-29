@@ -5,9 +5,9 @@ export DEBIAN_FRONTEND=noninteractive
 # Allow execution permission
 find $PWD -name "*.sh" -exec chmod +x {} \;
 
-source $PWD/lib/shell/base/colors.sh
-source $PWD/lib/shell/base/config.sh
-source $PWD/lib/shell/os/os_utils.sh
+source $PWD/src/shell/base/colors.sh
+source $PWD/src/shell/base/config.sh
+source $PWD/src/shell/os/os_utils.sh
 
 trap '' INT
 
@@ -19,10 +19,12 @@ if ! [[ "$DISTRO" =~ "Ubuntu" || "$DISTRO" =~ "Debian" ]]; then
 else
     # Version check
     if [[ "$DISTRO" =~ "Ubuntu" ]]; then
-        if [ ! "$DISTRO_VERSION" == "20.04" ] && [ ! "$DISTRO_VERSION" == "22.04" ]; then
-            echo "Your version of Ubuntu is not supported! Only 20.04 and 22.04 versions are supported."
-            exit 0
-        fi
+        case "$DISTRO_VERSION" in
+            "20.04"|"22.04"|"24.04") ;;
+            *) echo "Your version of Ubuntu is not supported Only 20.04, 22.04, and 24.04 versions are supported."
+                exit 0
+                ;;
+        esac
     elif [[ "$DISTRO" =~ "Debian GNU/Linux" ]]; then
         if [ ! "$DISTRO_VERSION" == "11" ]; then
             echo "Your version of Debian is not supported! Minimum required version is 11"
@@ -60,13 +62,16 @@ if [ ! -d "$HOME/Rainb0w_Home" ]; then
     # Install required packages
     fn_install_required_packages
     # Install xtables geoip
-    source $PWD/lib/shell/os/install_xt_geoip.sh
+    source $PWD/src/shell/os/install_xt_geoip.sh
     # Install Docker
-    source $PWD/lib/shell/os/install_docker.sh
+    source $PWD/src/shell/os/install_docker.sh
     # Reboot if needed
-    source $PWD/lib/shell/os/check_reboot_required.sh
+    source $PWD/src/shell/os/check_reboot_required.sh
     clear
 fi
+
+# Setup and activate a Python venv
+fn_activate_venv
 
 function clear_and_copy_files() {
     # Cleanup and copy all the template files to let the admin select among them
@@ -80,7 +85,7 @@ function installer_menu() {
 Rainb0w Proxy Installer v${VERSION}
 Red Pill Labs
 
-Install: Select which proxies to deploy (Xray, Hysteria, MTProto, Naive, DoT/DoH)
+Install: Setup new proxies
 Restore: Restore a previous installation's configuration and users
 
 Select installation type:
@@ -94,25 +99,25 @@ Choose an option: "
     case $ans in
     2)
         clear
-        python3 $PWD/lib/configurator.py "Restore"
+        python3 $PWD/src/configurator.py "Restore"
         PYTHON_EXIT_CODE=$?
         if [ $PYTHON_EXIT_CODE -ne 0 ]; then
             echo "Python configurator did not finish successfully!"
             exit
         fi
-        source $PWD/lib/shell/deploy.sh "Restore"
+        source $PWD/src/shell/deploy.sh "Restore"
         ;;
     1)
         clear
         clear_and_copy_files
-        python3 $PWD/lib/configurator.py "Install"
+        python3 $PWD/src/configurator.py "Install"
         PYTHON_EXIT_CODE=$?
         if [ $PYTHON_EXIT_CODE -ne 0 ]; then
             echo "Python configurator did not finish successfully!"
             rm -rf $HOME/Rainb0w_Home
             exit
         fi
-        source $PWD/lib/shell/deploy.sh "Install"
+        source $PWD/src/shell/deploy.sh "Install"
         ;;
     0)
         exit
@@ -128,10 +133,10 @@ Choose an option: "
 function main() {
     if [ -d "$HOME/Rainb0w_Home" ]; then
         # We have an existing installation, so let's present the dashboard to change settings
-        python3 $PWD/lib/dashboard.py
+        python3 $PWD/src/dashboard.py
         PYTHON_EXIT_CODE=$?
         if [ $PYTHON_EXIT_CODE -eq 1 ]; then
-            source $PWD/lib/shell/docker/restart_all_containers.sh
+            source $PWD/src/shell/docker/restart_all_containers.sh
             exit
         else
             exit

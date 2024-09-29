@@ -18,7 +18,6 @@ services:
       - /var/log:/var/log
       - /etc/localtime:/etc/localtime:ro
       - ./html:/var/www/html
-      - ./clients:/var/www/clients
       - ./etc/caddy.json:/etc/caddy/caddy.json
     command: caddy run --config /etc/caddy/caddy.json
 

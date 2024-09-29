@@ -1,0 +1,163 @@
+{
+    "log": {
+        "disabled": false,
+        "level": "warn",
+        "timestamp": true
+    },
+    "dns": {
+        "servers": [
+            {
+                "tag": "local-dns",
+                "address": "local"
+            },
+            {
+                "tag": "block-dns",
+                "address": "rcode://refused"
+            },
+            {
+                "tag": "adguard-dns",
+                "address": "94.140.14.14",
+                "detour": "direct"
+            }
+        ],
+        "rules": [
+            {
+                "type": "logical",
+                "mode": "or",
+                "rules": [
+                    {
+                        "domain_suffix": [
+                            ".ir"
+                        ]
+                    },
+                    {
+                        "geosite": [
+                            "ir"
+                        ]
+                    }
+                ],
+                "server": "block-dns"
+            }
+        ],
+        "final": "adguard-dns",
+        "strategy": "prefer_ipv4"
+    },
+    "inbounds": [
+        {
+            "tag": "HYSTERIA",
+            "type": "hysteria2",
+            "listen": "::",
+            "listen_port": 8443,
+            "obfs": {
+                "type": "salamander",
+                "password": ""
+            },
+            "users": [],
+            "tls": {
+                "enabled": true,
+                "alpn": [
+                    "h3"
+                ],
+                "min_version": "1.3",
+                "certificate_path": "",
+                "key_path": ""
+            },
+            "ignore_client_bandwidth": true,
+            "masquerade": "https://YOUR_MAIN_DOMAIN"
+        },
+        {
+            "tag": "VLESS_WS",
+            "type": "vless",
+            "listen": "::",
+            "listen_port": 9443,
+            "tcp_multi_path": true,
+            "users": [],
+            "transport": {
+                "type": "ws",
+                "path": "",
+                "headers": {
+                    "Host": ""
+                }
+            }
+        },
+        {
+            "tag": "VLESS_HTTPUPGRADE",
+            "type": "vless",
+            "listen": "::",
+            "listen_port": 9444,
+            "tcp_multi_path": true,
+            "users": [],
+            "transport": {
+                "type": "httpupgrade",
+                "host": "",
+                "path": "",
+                "headers": {}
+            }
+        },
+        {
+            "tag": "VLESS_GRPC",
+            "type": "vless",
+            "listen": "::",
+            "listen_port": 9445,
+            "tcp_multi_path": true,
+            "users": [],
+            "transport": {
+                "type": "grpc",
+                "service_name": ""
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "type": "direct",
+            "tag": "direct"
+        },
+        {
+            "type": "block",
+            "tag": "block"
+        }
+    ],
+    "route": {
+        "geoip": {
+            "path": "/usr/local/share/sing-box/geoip.db",
+            "download_url": "https://github.com/redpilllabs/GFIGeoIP/releases/latest/download/geoip.db",
+            "download_detour": "direct"
+        },
+        "geosite": {
+            "path": "/usr/local/share/sing-box/geosite.db",
+            "download_url": "https://github.com/redpilllabs/GFIGeoIP/releases/latest/download/geosite.db",
+            "download_detour": "direct"
+        },
+        "rules": [
+            {
+                "geosite": [
+                    "category-ads-all"
+                ],
+                "outbound": "block"
+            },
+            {
+                "type": "logical",
+                "mode": "or",
+                "rules": [
+                    {
+                        "domain_suffix": [
+                            ".ir"
+                        ]
+                    },
+                    {
+                        "geosite": [
+                            "ir"
+                        ]
+                    },
+                    {
+                        "geoip": [
+                            "ir"
+                        ]
+                    }
+                ],
+                "invert": false,
+                "outbound": "block"
+            }
+        ]
+    }
+}

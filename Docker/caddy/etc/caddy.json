@@ -24,80 +24,14 @@
                             ],
                             "handle": [
                                 {
-                                    "handler": "proxy",
-                                    "proxy_protocol": "v2",
-                                    "upstreams": [
-                                        {
-                                            "dial": [
-                                                "unix//dev/shm/Xray-TCP.socket"
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "tls": {
-                                        "sni": []
-                                    }
-                                }
-                            ],
-                            "handle": [
-                                {
                                     "handler": "tls"
                                 },
                                 {
                                     "handler": "proxy",
-                                    "proxy_protocol": "v1",
                                     "upstreams": [
                                         {
                                             "dial": [
                                                 "unix//dev/shm/h2c.socket"
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "tls": {
-                                        "sni": []
-                                    }
-                                }
-                            ],
-                            "handle": [
-                                {
-                                    "handler": "proxy",
-                                    "upstreams": [
-                                        {
-                                            "dial": [
-                                                "blocky:4343"
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "tls": {
-                                        "sni": []
-                                    }
-                                }
-                            ],
-                            "handle": [
-                                {
-                                    "handler": "proxy",
-                                    "proxy_protocol": "v2",
-                                    "upstreams": [
-                                        {
-                                            "dial": [
-                                                "mtprotopy:5443"
                                             ]
                                         }
                                     ]
@@ -166,74 +100,6 @@
                                 {
                                     "handler": "subroute",
                                     "routes": [
-                                        {
-                                            "match": [
-                                                {
-                                                    "path": []
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "flush_interval": -1,
-                                                    "handler": "reverse_proxy",
-                                                    "headers": {
-                                                        "request": {
-                                                            "set": {
-                                                                "X-Real-Ip": [
-                                                                    "{http.request.remote.host}"
-                                                                ]
-                                                            }
-                                                        }
-                                                    },
-                                                    "transport": {
-                                                        "protocol": "http",
-                                                        "versions": [
-                                                            "h2c",
-                                                            "2"
-                                                        ]
-                                                    },
-                                                    "upstreams": [
-                                                        {
-                                                            "dial": "unix//dev/shm/Xray-Trojan-H2.socket"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "match": [
-                                                {
-                                                    "path": []
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "flush_interval": -1,
-                                                    "handler": "reverse_proxy",
-                                                    "headers": {
-                                                        "request": {
-                                                            "set": {
-                                                                "X-Real-Ip": [
-                                                                    "{http.request.remote.host}"
-                                                                ]
-                                                            }
-                                                        }
-                                                    },
-                                                    "transport": {
-                                                        "protocol": "http",
-                                                        "versions": [
-                                                            "h2c",
-                                                            "2"
-                                                        ]
-                                                    },
-                                                    "upstreams": [
-                                                        {
-                                                            "dial": "unix//dev/shm/Xray-VMESS-H2.socket"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
                                         {
                                             "handle": [
                                                 {
@@ -364,7 +230,7 @@
                                                     },
                                                     "upstreams": [
                                                         {
-                                                            "dial": "unix//dev/shm/Xray-VLESS-WSS.socket"
+                                                            "dial": "sing-box:9443"
                                                         }
                                                     ]
                                                 }
@@ -399,42 +265,7 @@
                                                     },
                                                     "upstreams": [
                                                         {
-                                                            "dial": "unix//dev/shm/Xray-VMESS-WSS.socket"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "match": [
-                                                {
-                                                    "header": {
-                                                        "Connection": [
-                                                            "*Upgrade*"
-                                                        ],
-                                                        "Upgrade": [
-                                                            "websocket"
-                                                        ]
-                                                    },
-                                                    "path": []
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "flush_interval": -1,
-                                                    "handler": "reverse_proxy",
-                                                    "headers": {
-                                                        "request": {
-                                                            "set": {
-                                                                "X-Real-Ip": [
-                                                                    "{http.request.remote.host}"
-                                                                ]
-                                                            }
-                                                        }
-                                                    },
-                                                    "upstreams": [
-                                                        {
-                                                            "dial": "unix//dev/shm/Xray-Trojan-WSS.socket"
+                                                            "dial": "sing-box:9444"
                                                         }
                                                     ]
                                                 }
@@ -469,77 +300,7 @@
                                                     },
                                                     "upstreams": [
                                                         {
-                                                            "dial": "unix//dev/shm/Xray-VLESS-gRPC.socket"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "match": [
-                                                {
-                                                    "path": [],
-                                                    "protocol": "grpc"
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "flush_interval": -1,
-                                                    "handler": "reverse_proxy",
-                                                    "headers": {
-                                                        "request": {
-                                                            "set": {
-                                                                "X-Real-Ip": [
-                                                                    "{http.request.remote.host}"
-                                                                ]
-                                                            }
-                                                        }
-                                                    },
-                                                    "transport": {
-                                                        "protocol": "http",
-                                                        "versions": [
-                                                            "h2c",
-                                                            "2"
-                                                        ]
-                                                    },
-                                                    "upstreams": [
-                                                        {
-                                                            "dial": "unix//dev/shm/Xray-VMESS-gRPC.socket"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "match": [
-                                                {
-                                                    "path": [],
-                                                    "protocol": "grpc"
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "flush_interval": -1,
-                                                    "handler": "reverse_proxy",
-                                                    "headers": {
-                                                        "request": {
-                                                            "set": {
-                                                                "X-Real-Ip": [
-                                                                    "{http.request.remote.host}"
-                                                                ]
-                                                            }
-                                                        }
-                                                    },
-                                                    "transport": {
-                                                        "protocol": "http",
-                                                        "versions": [
-                                                            "h2c",
-                                                            "2"
-                                                        ]
-                                                    },
-                                                    "upstreams": [
-                                                        {
-                                                            "dial": "unix//dev/shm/Xray-Trojan-gRPC.socket"
+                                                            "dial": "sing-box:9445"
                                                         }
                                                     ]
                                                 }
