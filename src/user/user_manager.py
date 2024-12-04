@@ -120,7 +120,8 @@ def remove_user(
                         for user in inbound["users"]:
                             if user["name"] == username:
                                 inbound["users"].remove(user)
-                rainb0w_users.remove(user)
+
+        rainb0w_users = [user for user in rainb0w_users if user["name"] != username]
 
         save_json(singbox_config, singbox_config_file)
         save_users(rainb0w_users, rainb0w_users_file)
