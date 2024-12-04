@@ -72,6 +72,7 @@ fi
 
 # Setup and activate a Python venv
 fn_activate_venv
+clear
 
 function clear_and_copy_files() {
     # Cleanup and copy all the template files to let the admin select among them
